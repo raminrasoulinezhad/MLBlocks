@@ -1,0 +1,32 @@
+#-----------------------------------------------------------
+# Vivado v2017.2_sdx (64-bit)
+# SW Build 1972098 on Wed Aug 23 11:34:38 MDT 2017
+# IP Build 1971916 on Wed Aug 23 13:11:02 MDT 2017
+# Start of session at: Mon Oct  8 19:11:38 2018
+# Process ID: 31295
+# Current directory: /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model
+# Command line: vivado
+# Log file: /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/vivado.log
+# Journal file: /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/vivado.jou
+#-----------------------------------------------------------
+start_gui
+create_project test {/home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/test} -part xc7vx485tffg1157-1
+add_files -norecurse {{/home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/DSP.v}}
+update_compile_order -fileset sources_1
+launch_runs synth_1 -jobs 8
+wait_on_run synth_1
+reset_run synth_1
+launch_runs synth_1 -jobs 8
+wait_on_run synth_1
+reset_run synth_1
+launch_runs synth_1 -jobs 8
+wait_on_run synth_1
+reset_run synth_1
+launch_runs synth_1 -jobs 8
+wait_on_run synth_1
+reset_run synth_1
+launch_runs synth_1 -jobs 8
+wait_on_run synth_1
+reset_run synth_1
+launch_runs synth_1 -jobs 8
+wait_on_run synth_1

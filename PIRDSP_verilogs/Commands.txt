@@ -1,0 +1,18 @@
+vivado -mode tcl
+
+// start_gui
+open_project /home/ramin/FCCM/Verilogmodel_2019_1_2/test/test.xpr
+update_compile_order -fileset sources_1
+set_property top Dual_B_Register_block_proposed [current_fileset]
+update_compile_order -fileset sources_1
+reset_run synth_1 
+launch_runs synth_1 -jobs 4
+
+
+reports:
+
+cat /home/ramin/FCCM/Verilogmodel_2019_1_2/test/test.runs/synth_1/Dual_B_Register_block_proposed_utilization_synth.rpt
+cat /home/ramin/FCCM/Verilogmodel_2019_1_2/test/test.runs/synth_1/Dual_B_Register_block_proposed.vds
+
+
+

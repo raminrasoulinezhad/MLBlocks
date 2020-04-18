@@ -1,0 +1,50 @@
+#-----------------------------------------------------------
+# Vivado v2017.2_sdx (64-bit)
+# SW Build 1972098 on Wed Aug 23 11:34:38 MDT 2017
+# IP Build 1971916 on Wed Aug 23 13:11:02 MDT 2017
+# Start of session at: Mon Oct  8 19:11:38 2018
+# Process ID: 31295
+# Current directory: /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model
+# Command line: vivado
+# Log file: /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/vivado.log
+# Journal file: /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/vivado.jou
+#-----------------------------------------------------------
+INFO: [Common 17-1460] Use of init.tcl in /opt/Xilinx/SDx/2017.2/Vivado/scripts/init.tcl is deprecated. Please use Vivado_init.tcl 
+Sourcing tcl script '/opt/Xilinx/SDx/2017.2/Vivado/scripts/init.tcl'
+16 Beta devices matching pattern found, 0 enabled.
+Loaded SDSoC Platform Tcl Library
+start_gui
+create_project test {/home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/test} -part xc7vx485tffg1157-1
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx/SDx/2017.2/Vivado/data/ip'.
+add_files -norecurse {{/home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/DSP.v}}
+update_compile_order -fileset sources_1
+launch_runs synth_1 -jobs 8
+CRITICAL WARNING: [HDL 9-806] Syntax error near "input". [/home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/DSP.v:60]
+[Mon Oct  8 19:14:31 2018] Launched synth_1...
+Run output will be captured here: /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/test/test.runs/synth_1/runme.log
+reset_run synth_1
+launch_runs synth_1 -jobs 8
+[Mon Oct  8 19:27:06 2018] Launched synth_1...
+Run output will be captured here: /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/test/test.runs/synth_1/runme.log
+reset_run synth_1
+launch_runs synth_1 -jobs 8
+[Mon Oct  8 19:28:08 2018] Launched synth_1...
+Run output will be captured here: /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/test/test.runs/synth_1/runme.log
+reset_run synth_1
+launch_runs synth_1 -jobs 8
+[Mon Oct  8 19:29:05 2018] Launched synth_1...
+Run output will be captured here: /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/test/test.runs/synth_1/runme.log
+reset_run synth_1
+launch_runs synth_1 -jobs 8
+CRITICAL WARNING: [HDL 9-806] Syntax error near "input". [/home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/DSP.v:21]
+[Mon Oct  8 20:22:03 2018] Launched synth_1...
+Run output will be captured here: /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/test/test.runs/synth_1/runme.log
+reset_run synth_1
+launch_runs synth_1 -jobs 8
+[Mon Oct  8 20:23:06 2018] Launched synth_1...
+Run output will be captured here: /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/test/test.runs/synth_1/runme.log
+ERROR: [Vivado 12-106] *** Exception: java.lang.ClassCastException: sun.awt.image.BufImgSurfaceData cannot be cast to sun.java2d.xr.XRSurfaceData (See /home/ramintp/MEGA/USYD/2018_R2/temp/Standard Cell/Verilog model/vivado_pid31295.debug)
+exit
+INFO: [Common 17-206] Exiting Vivado at Mon Oct  8 22:32:15 2018...

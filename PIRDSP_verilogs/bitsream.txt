@@ -1,0 +1,131 @@
+/*******************
+* 	Name  	(is ignored by simulation model)
+* 	Width  
+* 	Value 	(binary)
+*******************/
+A_reg -->  A_INPUT
+1
+0
+A_reg -->  AMULTSEL
+1
+0
+A_reg -->  AREG[1:0]
+2
+00
+A_reg -->  ACASCREG[1:0] 
+2
+00
+A_reg -->  IS_RSTA_INVERTED 
+1
+0
+B_reg -->  B_INPUT 
+1
+0
+B_reg -->  BMULTSEL
+1
+0
+B_reg -->  BREG[1:0] 
+2
+00
+B_reg -->  BCASCREG[1:0]
+2
+00
+B_reg -->  IS_RSTB_INVERTED
+1
+0
+C_reg -->  IS_RSTC_INVERTED
+1
+0
+C_reg -->  CREG
+1
+0
+D_reg --> PREADDINSEL
+1
+0
+D_reg --> ADREG
+1
+0
+D_reg --> DREG
+1
+0
+D_reg --> IS_RSTD_INVERTED
+1
+0
+XYZW --> RND[47:0]
+48
+000000000000000000000000000000000000000000000000
+CarryIn --> CARRYINREG
+1
+0
+CarryIn --> MREG
+1
+0
+CarryIn --> IS_CARRYIN_INVERTED
+1
+0
+CarryIn --> IS_RSTALLCARRYIN_INVERTED
+1
+0
+OpM --> OPMODEREG
+1
+0
+OpM --> ALUMODEREG
+1
+0
+OpM --> CARRYINSELREG
+1
+0
+OpM --> IS_ALUMODE_INVERTED[3:0]
+4
+0000
+OpM --> IS_OPMODE_INVERTED[8:0]
+9
+000000000
+OpM --> IS_RSTALUMODE_INVERTED
+1
+0
+OpM --> IS_RSTCTRL_INVERTED
+1
+0
+InModeM --> INMODEREG 
+1
+0
+InModeM --> IS_INMODE_INVERTED[4:0]
+5
+00000
+InModeM --> IS_RSTINMODE_INVERTED
+1
+0
+MulOutM --> IS_RSTM_INVERTED
+1
+0
+ALU --> USE_SIMD[1:0]
+2
+00
+PatDetect --> PATTERN[47:0]
+48
+000000000000000000000000000000000000000000001010
+PatDetect --> SEL_PATTERN 
+1
+0
+PatDetect --> SEL_MASK[1:0]
+2
+00
+PatDetect --> PREG
+1
+0
+PatDetect --> MASK[47:0]
+48
+111111111111111111111111111111111111111111100000
+XOR --> XORSIMD
+1
+1
+OutM --> AUTORESET_PATDET[1:0] 
+2
+00
+OutM --> AUTORESET_PRIORITY
+1
+0
+OutM --> IS_RSTP_INVERTED
+1
+0
