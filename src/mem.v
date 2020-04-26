@@ -117,15 +117,11 @@ module ram_uram #(DATA_WIDTH=72, ADDR_WIDTH=12) (
 
 endmodule
 
-
-
-/*
 (*ram_style="block"*)
-module ram_bram #(DATA_WIDTH=18, ADDR_WIDTH=10) (
+module ram_bram #(DATA_WIDTH=18, ADDR_WIDTH=10, RAM_TYPE="DP") (
 		input clk,
 		input rst,
 		// port A 
-		input en_a,
 		input read_write_a,
 		input [DATA_WIDTH-1: 0] din_a,
 		output reg [DATA_WIDTH-1: 0] dout_a,
@@ -133,7 +129,6 @@ module ram_bram #(DATA_WIDTH=18, ADDR_WIDTH=10) (
 		input [ADDR_WIDTH-1: 0] addr_a,
 		input wen_a,
 		// port B 
-		input en_b,
 		input read_write_b,
 		input [DATA_WIDTH-1: 0] din_b,
 		output reg [DATA_WIDTH-1: 0] dout_b,
@@ -149,10 +144,10 @@ module ram_bram #(DATA_WIDTH=18, ADDR_WIDTH=10) (
 
 	// port A: write
 	always @(posedge clk) begin : portA
-		if (dout_a_rst == 1'b1) begin
+		if ((dout_a_rst == 1'b1)&&(RAM_TYPE!="SDP")) begin
 			dout_a <= 0;
-		end else if (en_a == 1'b1) begin
-			if (read_write_a == 1'b0) begin
+		end else begin
+			if ((read_write_a == 1'b0)&&(RAM_TYPE!="SDP")) begin
 				// read
 				dout_a <= ram[addr_a];
 			end else begin 
@@ -169,8 +164,8 @@ module ram_bram #(DATA_WIDTH=18, ADDR_WIDTH=10) (
 	always @(posedge clk) begin : portB
 		if (dout_b_rst == 1'b1) begin
 			dout_b <= 0;
-		end else if (en_b == 1'b1) begin
-			if (read_write_b == 1'b0) begin
+		end else begin
+			if ((read_write_b == 1'b0)||(RAM_TYPE=="SDP")) begin
 				// read
 				dout_b <= ram[addr_b];
 			end else begin 
@@ -184,4 +179,121 @@ module ram_bram #(DATA_WIDTH=18, ADDR_WIDTH=10) (
 	end
 
 endmodule
-*/
+
+
+
+module bram_sdp_FIFO #(DATA_WIDTH=36) (
+		input clk,
+		input rst,
+
+		input [DATA_WIDTH-1: 0] din,
+		input din_en,
+
+		output [DATA_WIDTH-1: 0] dout,
+		input dout_en
+	);
+
+	
+	localparam TOTAL_SIZE = 512;
+	localparam COUNTER_SIZE = $clog2(TOTAL_SIZE);
+	localparam ADDR_WIDTH = COUNTER_SIZE;
+
+
+	reg [COUNTER_SIZE-1:0] counter_s;
+	
+	always @(posedge clk) begin
+		if (rst == 1'b1)begin
+			counter_s <= 0;
+		end else if (din_en == 1'b1) begin
+			counter_s <= counter_s + 1;
+		end
+	end 
+
+	reg [COUNTER_SIZE-1:0] counter_e;
+
+	always @(posedge clk) begin
+		if (rst == 1'b1)begin
+			counter_e <= 0;
+		end else if (din_en == 1'b1) begin
+			counter_e <= counter_e + 1;
+		end
+	end 
+
+
+	ram_bram #(DATA_WIDTH, ADDR_WIDTH, "SDP") ram_bram_inst (
+		.clk(clk),
+		.rst(rst),
+		// port A 
+		.read_write_a(1'b1),
+		.din_a(din),
+		.dout_a(),
+		.dout_a_rst(),
+		.addr_a(counter_s),
+		.wen_a(din_en),
+		// port B 
+		.read_write_b(1'b0),
+		.din_b(),
+		.dout_b(dout),
+		.dout_b_rst(rst),
+		.addr_b(counter_e),
+		.wen_b(1'b0)
+	);
+
+
+endmodule 
+
+
+
+
+module bram_sdp_FIFO_three_cascaded #(DATA_WIDTH=36) (
+		input clk,
+		input rst,
+
+		input [DATA_WIDTH-1: 0] din,
+		input din_en_0,
+		input din_en_1,
+		input din_en_2,
+
+		output [DATA_WIDTH-1: 0] dout,
+		input dout_en_0,
+		input dout_en_1,
+		input dout_en_2
+	);
+	
+	wire temp_0_to_1;
+	wire temp_1_to_2;
+
+	bram_sdp_FIFO #(DATA_WIDTH) bram_sdp_FIFO_inst_0 (
+		.clk(clk),
+		.rst(rst),
+
+		.din(din),
+		.din_en(din_en_0),
+
+		.dout(temp_0_to_1),
+		.dout_en(dout_en_0)
+	);
+
+	bram_sdp_FIFO #(DATA_WIDTH) bram_sdp_FIFO_inst_1 (
+		.clk(clk),
+		.rst(rst),
+
+		.din(temp_0_to_1),
+		.din_en(din_en_1),
+
+		.dout(temp_1_to_2),
+		.dout_en(dout_en_1)
+	);
+
+	bram_sdp_FIFO #(DATA_WIDTH) bram_sdp_FIFO_inst_2 (
+		.clk(clk),
+		.rst(rst),
+
+		.din(temp_1_to_2),
+		.din_en(din_en_2),
+
+		.dout(dout),
+		.dout_en(dout_en_2)
+	);
+
+endmodule 

@@ -1,4 +1,4 @@
-module pe_datapath (
+module pe (
 		clk, 
 		reset,
 
@@ -7,12 +7,10 @@ module pe_datapath (
 		a,
 		a_en,
 		a_out,
-		a_en_out,
 
 		b,
 		b_en,
 		b_out,
-		b_en_out,
 
 		res_in_h,
 		res_in_v,
@@ -41,7 +39,7 @@ module pe_datapath (
 	localparam ACC_TYPE = (SHIFTER_TYPE == "2Wx2V_by_WxV") ? ("FEEDBACK") : ("FEEDFORWARD");	// "FEEDBACK", "FEEDFORWARD"
 	localparam ACC_WIDTH = RES_W;
 
-	parameter CNTR_MEM_D = (SHIFTER_TYPE == "2Wx2V_by_WxV") ? 4 : 1;
+	localparam CNTR_MEM_D = (SHIFTER_TYPE == "2Wx2V_by_WxV") ? 4 : 1;
 
 	///////// IOs
 	input clk;
@@ -52,12 +50,10 @@ module pe_datapath (
 	input [A_W-1:0] a;
 	input a_en;
 	output [A_W-1:0] a_out;
-	output a_en_out;
 
 	input [B_W-1:0] b;
 	input b_en;
 	output [B_W-1:0] b_out;
-	output b_en_out;
 	
 	input [RES_W-1:0] res_in_h;
 	input [RES_W-1:0] res_in_v;
@@ -101,8 +97,7 @@ module pe_datapath (
 		.mult_out(mult_in_a),
 
 		.a_mux(a_mux),
-		.a_out(a_out),
-		.a_en_out(a_en_out)
+		.a_out(a_out)
 	);
 
 	defparam stream_mem_inst.B_W = B_W;
@@ -117,8 +112,7 @@ module pe_datapath (
 		.mult_out(mult_in_b),
 		.b_addr(b_addr),
 
-		.b_out(b_out),
-		.b_en_out(b_en_out)
+		.b_out(b_out)
 	);
 
 	defparam mult_flex_inst.A_W = A_W;

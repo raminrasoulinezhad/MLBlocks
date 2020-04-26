@@ -8,8 +8,7 @@ module stream_mem (
 		mult_out,
 		b_addr,
 
-		b_out,
-		b_en_out
+		b_out
 	);
 
 	///////// Parameters
@@ -29,7 +28,6 @@ module stream_mem (
 	input [B_D_LOG2-1:0] b_addr;
 
 	output [B_W-1:0] b_out;
-	output b_en_out;
 
 	///////// internal signals
 	reg [B_W-1:0] mem [B_D-1:0];
@@ -49,7 +47,6 @@ module stream_mem (
 	end
 
 	assign b_out = mem[B_D-1];
-	assign b_en_out = b_en;
 
 	assign mult_out = mem[b_addr];
 

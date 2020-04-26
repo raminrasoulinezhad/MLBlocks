@@ -8,8 +8,7 @@ module stream_flex (
 		mult_out,
 
 		a_mux,
-		a_out,
-		a_en_out
+		a_out
 	);
 
 	///////// Parameters
@@ -26,7 +25,6 @@ module stream_flex (
 
 	input a_mux;
 	output [A_W-1:0] a_out;
-	output a_en_out;
 
 	///////// internal signals
 	reg [A_W-1:0] a_reg_0;
@@ -36,7 +34,7 @@ module stream_flex (
 		if (reset) begin 
 			a_reg_0 <= 0;
 			a_reg_1 <= 0;
-		end else begin
+		end else if (a_en) begin
 			a_reg_0 <= a;
 			a_reg_1 <= a_reg_0;
 		end 
@@ -45,7 +43,5 @@ module stream_flex (
 	assign mult_out = a_reg_0;
 
 	assign a_out = (a_mux)? a_reg_1 : a;
-	
-	assign a_en_out = a_en;
 
 endmodule 
