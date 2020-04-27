@@ -1,4 +1,4 @@
-module MLBlobk (
+module MLBlock (
 		clk, 
 		reset,
 

@@ -1,4 +1,4 @@
-module MLBlobk_sample (
+module MLBlock_sample (
 		clk, 
 		reset,
 
@@ -61,15 +61,15 @@ module MLBlobk_sample (
 	input config_in;
 	output config_out;
 
-	defparam MLBlobk_inst.PE_W = PE_W;
-	defparam MLBlobk_inst.PE_H = PE_H;
+	defparam MLBlock_inst.PE_W = PE_W;
+	defparam MLBlock_inst.PE_H = PE_H;
 
-	defparam MLBlobk_inst.A_W = A_W;
-	defparam MLBlobk_inst.B_W = B_W;
-	defparam MLBlobk_inst.B_D = B_D;
-	defparam MLBlobk_inst.RES_W = RES_W;
-	defparam MLBlobk_inst.SHIFTER_TYPE = SHIFTER_TYPE;
-	MLBlobk MLBlobk_inst(
+	defparam MLBlock_inst.A_W = A_W;
+	defparam MLBlock_inst.B_W = B_W;
+	defparam MLBlock_inst.B_D = B_D;
+	defparam MLBlock_inst.RES_W = RES_W;
+	defparam MLBlock_inst.SHIFTER_TYPE = SHIFTER_TYPE;
+	MLBlock MLBlock_inst(
 		.clk(clk), 
 		.reset(reset),
 
