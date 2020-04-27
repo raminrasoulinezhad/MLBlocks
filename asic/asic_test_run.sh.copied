@@ -1,4 +1,5 @@
 #!/usr/bin/sh
+exit
 
 mkdir -p fixed_asic
 mkdir -p fixed_asic/files
