@@ -1,33 +1,56 @@
 `timescale 1 ns / 100 ps  
 module ALU_SIMD_Width_parameterized_HighLevelDescribed_auto(
 
-		input [Width-1:0] W,
-		input [Width-1:0] Z,
-		input [Width-1:0] Y,
-		input [Width-1:0] X,
+		W,
+		Z,
+		Y,
+		X,
 
-		input [1:0] op,
-		input Z_controller,
-		input S_controller,
-		input W_X_Y_controller,
-		input [1:0] CIN_W_X_Y_CIN,
-		input CIN_Z_W_X_Y_CIN,
+		op,
+		Z_controller,
+		S_controller,
+		W_X_Y_controller,
+		CIN_W_X_Y_CIN,
+		CIN_Z_W_X_Y_CIN,
 
-		output [Width-1:0] S,
+		S,
 
-		output [1:0] COUT_W_X_Y_CIN,
-		output COUT_Z_W_X_Y_CIN,
+		COUT_W_X_Y_CIN,
+		COUT_Z_W_X_Y_CIN,
 
-		input [1:0] result_SIMD_carry_in,
-		output [1:0] result_SIMD_carry_out
+		result_SIMD_carry_in,
+		result_SIMD_carry_out
 	);
 
 //parameters
 parameter Width = 8;
 
+// IO
+input [Width-1:0] W;
+input [Width-1:0] Z;
+input [Width-1:0] Y;
+input [Width-1:0] X;
+
+input [1:0] op;
+input Z_controller;
+input S_controller;
+input W_X_Y_controller;
+input [1:0] CIN_W_X_Y_CIN;
+input CIN_Z_W_X_Y_CIN;
+
+output [Width-1:0] S;
+
+output [1:0] COUT_W_X_Y_CIN;
+output COUT_Z_W_X_Y_CIN;
+
+input [1:0] result_SIMD_carry_in;
+output [1:0] result_SIMD_carry_out;
+
+
 // controllable not
 wire [Width-1:0] Z_Z_bar;
 assign Z_Z_bar 	= Z ^ {Width{Z_controller}};
+
 
 // logical part
 wire [Width-1:0] out_and;
@@ -36,6 +59,7 @@ wire [Width-1:0] out_xor;
 assign out_and 	= X & Z_Z_bar;
 assign out_or   = X | Z_Z_bar;
 assign out_xor 	= X ^ Z_Z_bar ^ Y;
+
 
 //computations
 wire [Width-1:0] temp_W_X_Y;

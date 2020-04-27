@@ -4,4 +4,8 @@ analyzer/*
 !analyzer/*.py
 !analyzer/*.md
 
-
+asic/*
+!asic/*.tcl
+!asic/*.sh
+!asic/*.m
+!asic/Makefile
