@@ -28,7 +28,7 @@ module MLBlobk (
 	parameter PE_W = 3;
 	parameter PE_H = 4;
 
-	parameter PR_CAS = (PE_W > PE_H) ? PE_W : PE_H;
+	localparam PR_CAS = (PE_W > PE_H) ? PE_W : PE_H;
 
 	parameter A_W = 8;
 	
