@@ -1,21 +1,18 @@
-# Please source vivado first:
+# Please source vivado / rc:
+# Vivado:
 #	source /opt/Xilinx/Vivado/2018.2/settings64.sh
-# the source rc
-# 	cd setup/setup_working_dir_130nm/
+# rc source:
+# 	cd ~/setup/setup_working_dir_130nm/
 #	source .cshrc_hcmos9a_v1 
+.PHONY: asic_MLBlock_sample  asic_MLBlobk  asic_dsp
 
-.PHONY: clean asic_test asic_dsp
+asic_MLBlock_sample:
+	rc -f ./asic_MLBlock_sample.tcl
 
-clean:
-	rm -rf ./asic_test
-
-asic_test:
-	rm -rf ./asic_test
-	rc -f ./asic_test.tcl
-	#bash ./asic_test_run.sh
+asic_MLBlock:
+	rc -f ./asic_MLBlock.tcl
 
 asic_dsp:
-	rm -rf ./asic_dsp
 	rc -f ./asic_dsp.tcl
 
 
