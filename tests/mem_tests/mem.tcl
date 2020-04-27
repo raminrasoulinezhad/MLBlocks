@@ -15,7 +15,7 @@ set_property generic "DATA_WIDTH=[lindex $argv 2] ADDR_WIDTH=[lindex $argv 3] RA
 reset_run synth
 reset_run impl
 
-launch_runs synth -jobs 4
-wait_on_run synth
+launch_runs [lindex $argv 7] -jobs 4
+wait_on_run [lindex $argv 7]
 
 exit 

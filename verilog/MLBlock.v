@@ -5,6 +5,7 @@ module MLBlobk (
 		hp_en,
 
 		a, 
+		a_out,
 		a_en,
 
 		b,
@@ -45,6 +46,7 @@ module MLBlobk (
 	input hp_en;
 
 	input [PE_H*A_W-1:0] a;
+	output [PE_H*A_W-1:0] a_out;
 	input a_en;
 
 	input [PE_W*B_W-1:0] b;
@@ -161,6 +163,8 @@ module MLBlobk (
 					end else begin
 						assign config_in_temp[i+1][0] = config_in_temp[i][j+1];
 					end 
+					
+					assign a_out[(i+1)*A_W-1:i*A_W] = a_temp[i][j+1];
 				end 
 				
 			end 

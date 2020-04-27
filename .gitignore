@@ -1,0 +1,7 @@
+vivado/*
+
+analyzer/*
+!analyzer/*.py
+!analyzer/*.md
+
+

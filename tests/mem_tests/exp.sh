@@ -20,5 +20,6 @@ addr_deep_s="${addr_deep_z:${#addr_deep}:${#addr_deep_z}}${addr_deep}"
 addr_s="./workspace/${top}_${type}_${addr_deep_s}x${d_w_s}"
 
 part="xczu28dr-ffvg1517-2-e"
+task=synth
 
-make  mem  p_dir=${addr_s} top=${top}  d_w=${d_w}  addr_w=${addr_w}  type=${type}  part=${part}
+make  mem  p_dir=${addr_s} top=${top}  d_w=${d_w}  addr_w=${addr_w}  type=${type}  part=${part} task=${task}

@@ -1,0 +1,17 @@
+mem_tests/*
+!mem_tests/*.tcl
+!mem_tests/*.sh
+!mem_tests/*.xdc 
+!mem_tests/Makefile 
+
+floorplan_test/*
+
+yosys_tests/*
+!yosys_tests/*.v
+!yosys_tests/*.ys
+!yosys_tests/*.lib
+!yosys_tests/Makefile
+
+
+
+

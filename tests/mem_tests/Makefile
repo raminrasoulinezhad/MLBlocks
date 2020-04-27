@@ -1,6 +1,6 @@
 mem:
 	rm -rf $(p_dir)
-	vivado -mode batch -source mem.tcl -tclargs $(p_dir) $(top) $(d_w) $(addr_w) $(type) zero.mem $(part)
+	vivado -mode batch -source mem.tcl -tclargs $(p_dir) $(top) $(d_w) $(addr_w) $(type) zero.mem $(part) $(task)
 	rm -rf vivado*
 
 clean:

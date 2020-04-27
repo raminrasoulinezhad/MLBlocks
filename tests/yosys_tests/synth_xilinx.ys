@@ -1,0 +1,7 @@
+echo on
+
+# Synth for Xilinx
+synth_xilinx -flatten
+
+# Print status
+stat
