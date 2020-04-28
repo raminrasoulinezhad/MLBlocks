@@ -31,13 +31,18 @@ module MLBlock (
 	localparam PR_CAS = (PE_W > PE_H) ? PE_W : PE_H;
 
 	parameter A_W = 8;
+	parameter A_D = 4;
+	localparam A_D_HALF = A_D / 2;
 	
 	parameter B_W = 8;
 	parameter B_D = 4;
 
 	parameter RES_W = 32;
 
-	parameter SHIFTER_TYPE = "2Wx2V_by_WxV";	// "2Wx2V_by_WxV", "BYPASS"
+	parameter SHIFTER_TYPE = "2Wx2V_by_WxV";	// "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx" 
+	// "BYPASS"				: 8x8 						: MODE_WIDTH = 0
+	// "2Wx2V_by_WxV"		: 8x8, 8x16, 8x24, 16x16	: MODE_WIDTH = 2
+	// "2Wx2V_by_WxV_apx" 	: 8x8, 8x16, 16x16(apx)		: MODE_WIDTH = 2
 
 	///////// IOs
 	input clk;
@@ -64,13 +69,21 @@ module MLBlock (
 	output config_out;
 
 	///////// Configurations
+	reg [A_D_HALF-1:0] conf_a_mux;
+	reg conf_res_in_select;
 	reg conf_res_cas_in_zero;
 	reg conf_res_cas_h_v;
 	reg conf_b_cas;
 
+	integer l;
 	always @ (posedge clk) begin
 		if (config_en) begin 
-			conf_res_cas_in_zero <= config_in;
+			conf_a_mux[0] <= config_in;
+			for (l = 1; l < A_D_HALF; l = l + 1)begin
+				conf_a_mux[l] <= conf_a_mux[l-1];
+			end 
+			conf_res_in_select <= conf_a_mux[A_D_HALF-1];
+			conf_res_cas_in_zero <= conf_res_in_select;
 			conf_res_cas_h_v <= conf_res_cas_in_zero;
 			conf_b_cas <= conf_res_cas_h_v;
 		end
@@ -114,6 +127,7 @@ module MLBlock (
 			for (j = 0; j < PE_W; j = j + 1) begin 
 
 				defparam pe_inst.A_W = A_W;
+				defparam pe_inst.A_D = A_D;
 				defparam pe_inst.B_W = B_W;
 				defparam pe_inst.B_D = B_D;
 				defparam pe_inst.RES_W = RES_W;
@@ -126,14 +140,17 @@ module MLBlock (
 
 					.a(a_temp[i][j]),
 					.a_en(a_en),
+					.a_mux(conf_a_mux),
 					.a_out(a_temp[i][j+1]),
 
 					.b(b_temp[i+1][j]),
 					.b_en(b_en),
 					.b_out(b_temp[i][j]),
 
+					.res_in_select(conf_res_in_select),
 					.res_in_h(res_in_h_temp[i][j]),
 					.res_in_v(res_in_v_temp[i][j]),
+
 					.res_out_h(res_in_h_temp[i][j+1]),
 					.res_out_v(res_in_v_temp[i+1][j]),
 

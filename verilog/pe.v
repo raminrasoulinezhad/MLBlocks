@@ -6,12 +6,14 @@ module pe (
 
 		a,
 		a_en,
+		a_mux,
 		a_out,
 
 		b,
 		b_en,
 		b_out,
 
+		res_in_select,
 		res_in_h,
 		res_in_v,
 
@@ -25,6 +27,8 @@ module pe (
 
 	///////// Parameters
 	parameter A_W = 8;
+	parameter A_D = 4;
+	localparam A_D_HALF = A_D / 2;
 	
 	parameter B_W = 8;
 	parameter B_D = 4;
@@ -53,12 +57,14 @@ module pe (
 	
 	input [A_W-1:0] a;
 	input a_en;
+	input [A_D_HALF-1:0] a_mux;
 	output [A_W-1:0] a_out;
 
 	input [B_W-1:0] b;
 	input b_en;
 	output [B_W-1:0] b_out;
 	
+	input res_in_select;
 	input [RES_W-1:0] res_in_h;
 	input [RES_W-1:0] res_in_v;
 
@@ -70,8 +76,7 @@ module pe (
 	output config_out;
 
 	///////// internal signals
-	wire a_mux;
-	wire res_in_select;
+	
 
 	wire [B_D_LOG2-1:0] b_addr;
 
@@ -91,6 +96,7 @@ module pe (
 	
 
 	defparam stream_flex_inst.A_W = A_W;
+	defparam stream_flex_inst.A_D = A_D;
 	stream_flex stream_flex_inst(
 		.clk(clk), 
 		.reset(reset),
@@ -173,9 +179,6 @@ module pe (
 	state_machine state_machine_inst(
 		.clk(clk), 
 		.reset(reset),
-
-		.a_mux(a_mux),
-		.res_in_select(res_in_select),
 		
 		.hp_en(hp_en),
 

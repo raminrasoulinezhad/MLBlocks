@@ -1,12 +1,20 @@
-						Area
+# Primary Results
 
-DSP,					7958
-
-MLBlock 4x3 H&L			14066
-MLBlock 4x3 L			10023
-
-MLBlock 3x3 H&L			10524
-MLBlock 3x3 L			7455
-
-MLBlock 2x3 H&L			7057
-MLBlock 2x3 L			5017
+| Size  | Experiment    | Computations                  | Area      | Area (old) |
+| :---- | :---------    | :---------------------------- | :-------- | :--------- |
+| 4x3   | HP (AD=6)     | 8x8,8x16,16x8,24x8,8x24,16x16 | 14961     | 14066      |
+| 4x3   | HP (AD=4)     | 8x8,8x16,16x8,16x16           | 14398     |            |
+| 4x3   | HP_apx (AD=4) | 8x8,8x16,16x8,16x16apx        | 10710     |            |
+| 4x3   | BYPASS (AD=2) |                               | -         | 10023      |
+|       |               |                               |           |            |
+| 3x3   | HP (AD=6)     | 8x8,8x16,16x8,24x8,8x24,16x16 | 11210     | 10524      |
+| 3x3   | HP (AD=4)     | 8x8,8x16,16x8,16x16           | 10782     |            |
+| 3x3   | HP_apx (AD=4) | 8x8,8x16,16x8,16x16apx        | 8028      |            |
+| 3x3   | BYPASS (AD=2) |                               | -         | 7455       |
+|       |               |                               |           |            |
+| 2x3   | HP (AD=6)     | 8x8,8x16,16x8,24x8,8x24,16x16 |           | 7057       |
+| 2x3   | HP (AD=4)     | 8x8,8x16,16x8,16x16           |           |            |
+| 2x3   | HP_apx (AD=4) | 8x8,8x16,16x8,16x16apx        |           |            |
+| 2x3   | BYPASS (AD=2) |                               |           | 5017       |
+|       |               |                               |           |            |
+| DSP48 |               | Dual8x8,27x18                 | 7958      | 7958       |

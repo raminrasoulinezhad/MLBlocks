@@ -1,9 +1,6 @@
 module state_machine(
 		clk,
 		reset, 
-
-		a_mux,
-		res_in_select,
 		
 		hp_en, 
 
@@ -36,9 +33,6 @@ module state_machine(
 	input clk;
 	input reset;
 
-	output a_mux;
-	output res_in_select;
-
 	input hp_en;
 
 	output a_s;
@@ -54,8 +48,6 @@ module state_machine(
 
 
 	///////// Configurations
-	reg conf_a_mux;
-	reg conf_res_in_select;
 	reg [CNTR_MEM_D_LOG2-1 : 0] conf_cntr_counter_limit;
 	// a_s, b_s, b_addr_inc, shifter_mode, acc_mode,
 	reg [CNTR_MEM_SIZE-1 : 0] conf_cntr_mem;
@@ -66,16 +58,13 @@ module state_machine(
 	integer i, j, k, l;
 	always @ (posedge clk) begin
 		if (config_en) begin 
-			
-			conf_a_mux <= config_in;
-			conf_res_in_select <= conf_a_mux;
-			
-			conf_cntr_counter_limit[0] <= conf_res_in_select;
+						
+			conf_cntr_counter_limit[0] <= config_in;
 			for (i = 1; i < CNTR_MEM_D_LOG2; i = i + 1)begin
 				conf_cntr_counter_limit[i] <= conf_cntr_counter_limit[i-1];
 			end 
 			
-			conf_cntr_mem[0] <= (SHIFTER_TYPE != "BYPASS") ? conf_cntr_counter_limit[CNTR_MEM_D_LOG2-1] : conf_res_in_select;
+			conf_cntr_mem[0] <= (SHIFTER_TYPE != "BYPASS") ? conf_cntr_counter_limit[CNTR_MEM_D_LOG2-1] : config_in;
 			for (j = 1; j < CNTR_MEM_SIZE; j = j + 1) begin
 				conf_cntr_mem[j] <= conf_cntr_mem[j-1];
 			end 
@@ -96,10 +85,6 @@ module state_machine(
 
 	///////// internal signals
 	wire [B_D_LOG2-1 : 0] b_addr_inc;
-
-	// a_mux, res_in_select
-	assign a_mux = conf_a_mux;
-	assign res_in_select = conf_res_in_select;
 
 	// cntr_counter
 	reg [B_D_LOG2-1 : 0] b_addr_base;
