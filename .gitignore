@@ -8,5 +8,5 @@ asic/*
 !asic/*.tcl
 !asic/*.sh
 !asic/*.sh.copied
-!asic/*.m
+!asic/*.me
 !asic/Makefile
