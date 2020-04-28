@@ -32,8 +32,12 @@ module pe (
 
 	parameter RES_W = 32;
 
-	parameter SHIFTER_TYPE = "2Wx2V_by_WxV";	// "2Wx2V_by_WxV", "BYPASS"
-	localparam SHIFTER_MODE_WIDTH = 2;			// it is determined by SHIFTER_TYPE. for "2Wx2V_by_WxV" is 2. for "BYPASS" does not matter.
+	parameter SHIFTER_TYPE = "2Wx2V_by_WxV";	// "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx" 
+	// "BYPASS"				: 8x8 						: MODE_WIDTH = 0
+	// "2Wx2V_by_WxV"		: 8x8, 8x16, 8x24, 16x16	: MODE_WIDTH = 2
+	// "2Wx2V_by_WxV_apx" 	: 8x8, 8x16, 16x16(apx)		: MODE_WIDTH = 2
+	localparam SHIFTER_MODE_WIDTH = 2;			// it is determined according SHIFTER_TYPE. for "2Wx2V_by_WxV" is 2. for "BYPASS" does not matter.
+	
 	localparam SHIFTER_OUT_WIDTH = RES_W;
 
 	localparam ACC_TYPE = (SHIFTER_TYPE == "2Wx2V_by_WxV") ? ("FEEDBACK") : ("FEEDFORWARD");	// "FEEDBACK", "FEEDFORWARD"
