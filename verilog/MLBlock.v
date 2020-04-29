@@ -13,6 +13,7 @@ module MLBlock (
 		b_cas_out,
 		b_en,
 
+		acc_en,
 		res_out,
 
 		res_cas_in,
@@ -44,6 +45,9 @@ module MLBlock (
 	// "2Wx2V_by_WxV"		: 8x8, 8x16, 8x24, 16x16	: MODE_WIDTH = 2
 	// "2Wx2V_by_WxV_apx" 	: 8x8, 8x16, 16x16(apx)		: MODE_WIDTH = 2
 
+	parameter ACC_D = 1;
+	localparam ACC_D_CNTL = (ACC_D > 1)? (ACC_D-1): 1;
+
 	///////// IOs
 	input clk;
 	input reset;
@@ -59,6 +63,7 @@ module MLBlock (
 	output [PE_W*B_W-1:0] b_cas_out;
 	input b_en;
 
+	input acc_en;
 	output [PR_CAS*RES_W-1:0] res_out;
 
 	input [PR_CAS*RES_W-1:0] res_cas_in;
@@ -74,8 +79,9 @@ module MLBlock (
 	reg conf_res_cas_in_zero;
 	reg conf_res_cas_h_v;
 	reg conf_b_cas;
+	reg [ACC_D_CNTL-1:0] conf_acc_depth;
 
-	integer l;
+	integer l, m;
 	always @ (posedge clk) begin
 		if (config_en) begin 
 			conf_a_mux[0] <= config_in;
@@ -86,10 +92,14 @@ module MLBlock (
 			conf_res_cas_in_zero <= conf_res_in_select;
 			conf_res_cas_h_v <= conf_res_cas_in_zero;
 			conf_b_cas <= conf_res_cas_h_v;
+			conf_acc_depth[0] <= conf_b_cas;
+			for (m = 1; m < ACC_D_CNTL; m = m + 1)begin
+				conf_acc_depth[m] <= conf_acc_depth[m-1];
+			end 
 		end
 	end 
 	wire config_in_pes;
-	assign config_in_pes = conf_b_cas;
+	assign config_in_pes = (ACC_D > 1) ? conf_acc_depth[ACC_D_CNTL-1] : conf_b_cas;
 
 	///////// internal signals
 	wire [RES_W-1:0] res_cas_in_temp [PR_CAS-1:0];
@@ -132,6 +142,7 @@ module MLBlock (
 				defparam pe_inst.B_D = B_D;
 				defparam pe_inst.RES_W = RES_W;
 				defparam pe_inst.SHIFTER_TYPE = SHIFTER_TYPE;
+				defparam pe_inst.ACC_D = ACC_D;
 				pe pe_inst(
 					.clk(clk), 
 					.reset(reset),
@@ -146,6 +157,9 @@ module MLBlock (
 					.b(b_temp[i+1][j]),
 					.b_en(b_en),
 					.b_out(b_temp[i][j]),
+
+					.acc_en(acc_en),
+					.acc_depth(conf_acc_depth),
 
 					.res_in_select(conf_res_in_select),
 					.res_in_h(res_in_h_temp[i][j]),

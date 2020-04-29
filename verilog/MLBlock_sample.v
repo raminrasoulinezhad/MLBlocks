@@ -12,6 +12,7 @@ module MLBlock_sample (
 		b_cas_out,
 		b_en,
 
+		acc_en,
 		res_out,
 
 		res_cas_in,
@@ -30,10 +31,10 @@ module MLBlock_sample (
 	parameter PR_CAS = (PE_W > PE_H) ? PE_W : PE_H;
 
 	parameter A_W = 8;
-	parameter A_D = 6;
+	parameter A_D = 6; //6
 	
 	parameter B_W = 8;
-	parameter B_D = 4;
+	parameter B_D = 4; //4
 
 	parameter RES_W = 32;
 
@@ -41,6 +42,7 @@ module MLBlock_sample (
 	// "BYPASS"				: 8x8 						: MODE_WIDTH = 0
 	// "2Wx2V_by_WxV"		: 8x8, 8x16, 8x24, 16x16	: MODE_WIDTH = 2
 	// "2Wx2V_by_WxV_apx" 	: 8x8, 8x16, 16x16(apx)		: MODE_WIDTH = 2
+	parameter ACC_D = 2; //2
 
 	///////// IOs
 	input clk;
@@ -56,6 +58,7 @@ module MLBlock_sample (
 	output [PE_W*B_W-1:0] b_cas_out;
 	input b_en;
 
+	input acc_en;
 	output [PR_CAS*RES_W-1:0] res_out;
 
 	input [PR_CAS*RES_W-1:0] res_cas_in;
@@ -74,6 +77,7 @@ module MLBlock_sample (
 	defparam MLBlock_inst.B_D = B_D;
 	defparam MLBlock_inst.RES_W = RES_W;
 	defparam MLBlock_inst.SHIFTER_TYPE = SHIFTER_TYPE;
+	defparam MLBlock_inst.ACC_D = ACC_D;
 	MLBlock MLBlock_inst(
 		.clk(clk), 
 		.reset(reset),
@@ -89,6 +93,7 @@ module MLBlock_sample (
 		.b_cas_out(b_cas_out),
 		.b_en(b_en),
 
+		.acc_en(acc_en),
 		.res_out(res_out),
 
 		.res_cas_in(res_cas_in),

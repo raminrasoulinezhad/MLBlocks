@@ -7,6 +7,6 @@ analyzer/*
 asic/*
 !asic/*.tcl
 !asic/*.sh
-!asic/*.sh.copied
 !asic/*.md
+!asic/*.py
 !asic/Makefile

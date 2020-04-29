@@ -13,6 +13,9 @@ module pe (
 		b_en,
 		b_out,
 
+		acc_en,
+		acc_depth,
+
 		res_in_select,
 		res_in_h,
 		res_in_v,
@@ -46,8 +49,10 @@ module pe (
 
 	localparam ACC_TYPE = (SHIFTER_TYPE == "2Wx2V_by_WxV") ? ("FEEDBACK") : ("FEEDFORWARD");	// "FEEDBACK", "FEEDFORWARD"
 	localparam ACC_WIDTH = RES_W;
+	parameter ACC_D = 1;
+	localparam ACC_D_CNTL = (ACC_D > 1)? (ACC_D-1): 1;
 
-	localparam CNTR_MEM_D = (SHIFTER_TYPE == "2Wx2V_by_WxV") ? 4 : 1;
+	localparam CNTR_MEM_D = (SHIFTER_TYPE == "BYPASS") ? 1 : 4;
 
 	///////// IOs
 	input clk;
@@ -64,6 +69,9 @@ module pe (
 	input b_en;
 	output [B_W-1:0] b_out;
 	
+	input acc_en;
+	input [ACC_D_CNTL-1:0] acc_depth;
+
 	input res_in_select;
 	input [RES_W-1:0] res_in_h;
 	input [RES_W-1:0] res_in_v;
@@ -155,13 +163,16 @@ module pe (
 	
 	defparam accumulator_inst.TYPE = ACC_TYPE;
 	defparam accumulator_inst.WIDTH = ACC_WIDTH;
+	defparam accumulator_inst.DEPTH = ACC_D;
 	accumulator accumulator_inst(
 		.clk(clk), 
 		.reset(reset),
 
+		.acc_en(acc_en),
 		.acc_mode(acc_mode),
+		.acc_depth(acc_depth),
+		
 		.res_in_select(res_in_select),
-
 		.res_in_h(res_in_h),
 		.res_in_v(res_in_v),
 

@@ -4,7 +4,7 @@
 # rc source:
 # 	cd ~/setup/setup_working_dir_130nm/
 #	source .cshrc_hcmos9a_v1 
-.PHONY: asic_MLBlock_sample  asic_MLBlobk  asic_dsp
+.PHONY:  asic_MLBlock_sample  asic_MLBlobk  asic_dsp  asic_accumulator clean
 
 asic_MLBlock_sample:
 	rc -f ./asic_MLBlock_sample.tcl
@@ -15,4 +15,14 @@ asic_MLBlock:
 asic_dsp:
 	rc -f ./asic_dsp.tcl
 
+# sub modules 
+asic_accumulator:
+	rc -f ./asic_accumulator.tcl
 
+clean:
+	rm -rf rc.* *initialtest* fv
+
+asic_all:
+	rm -rf rc.* MLBlock_sample_dir 
+	bash ./asic_MLBlock_sample_run.sh
+	
