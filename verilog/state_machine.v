@@ -18,7 +18,8 @@ module state_machine(
 	
 	///////// Parameters
 	parameter SHIFTER_TYPE = "2Wx2V_by_WxV";
-	parameter SHIFTER_MODE_WIDTH = 2;		
+	parameter SHIFTER_MODE_WIDTH = 2;
+	localparam SHIFTER_MODE_WIDTH_TEMP = (SHIFTER_MODE_WIDTH == 0)? 1 : SHIFTER_MODE_WIDTH;		
 
 	parameter B_D = 4;
 	localparam B_D_LOG2 = $clog2(B_D);
@@ -40,7 +41,7 @@ module state_machine(
 	output b_s;
 
 	output [B_D_LOG2-1 : 0] b_addr;
-	output [SHIFTER_MODE_WIDTH-1 : 0] shifter_mode; 
+	output [SHIFTER_MODE_WIDTH_TEMP-1 : 0] shifter_mode; 
 	output acc_mode;
 
 	input config_en;
@@ -113,12 +114,23 @@ module state_machine(
 				assign conf_cntr_mem_2d[i_gen] = conf_cntr_mem[CNTR_MEM_W*(i_gen+1)-1 : CNTR_MEM_W*i_gen];
 			end 
 
-			assign {a_s, b_s, b_addr_inc, shifter_mode, acc_mode} = conf_cntr_mem_2d[cntr_counter];
+			if (SHIFTER_MODE_WIDTH == 0) begin 
+				assign {a_s, b_s, b_addr_inc, acc_mode} = conf_cntr_mem_2d[cntr_counter];
+				assign shifter_mode = 0;
+			end else begin 
+				assign {a_s, b_s, b_addr_inc, shifter_mode, acc_mode} = conf_cntr_mem_2d[cntr_counter];
+			end 
 		end 
 
 		else begin 
-			assign {a_s, b_s, b_addr_inc, shifter_mode, acc_mode} = conf_cntr_mem;
+			if (SHIFTER_MODE_WIDTH == 0) begin 
+				assign {a_s, b_s, b_addr_inc, acc_mode} = conf_cntr_mem;
+				assign shifter_mode = 0;
+			end else begin 
+				assign {a_s, b_s, b_addr_inc, shifter_mode, acc_mode} = conf_cntr_mem;
+			end 
 		end 
+		
 	endgenerate
 
 	assign b_addr = b_addr_base + b_addr_inc;

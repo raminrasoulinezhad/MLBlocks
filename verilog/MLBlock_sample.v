@@ -38,7 +38,7 @@ module MLBlock_sample (
 
 	parameter RES_W = 32;
 
-	parameter SHIFTER_TYPE = "2Wx2V_by_WxV";	// "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
+	parameter SHIFTER_TYPE = "BYPASS";	// "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
 	parameter ACC_D = 2; //2
 
 	///////// IOs

@@ -43,24 +43,21 @@ module pe (
 	
 	function integer func_mode_width_selector; 
 		input [40*8:0] str;
-
-		// "BYPASS"					: 8x8 						: MODE_WIDTH = 0	--> it is set to 2 (not used, removed)
+		// "BYPASS"					: 8x8 						: MODE_WIDTH = 0
 		// "2Wx2V_by_WxV"			: 8x8, 8x16, 8x24, 16x16	: MODE_WIDTH = 2
-		// "2Wx2V_by_WxV_apx" 		: 8x8, 8x16, 16x16(apx)		: MODE_WIDTH = 2	// 1
+		// "2Wx2V_by_WxV_apx" 		: 8x8, 8x16, 16x16(apx)		: MODE_WIDTH = 1	
 		// "2Wx2V_by_WxV_apx_adv" 	: 8x8, 8x16, 16x16(apx_adv)	: MODE_WIDTH = 2
-		
 		if (str == "BYPASS") begin
-			func_mode_width_selector = 2;
+			func_mode_width_selector = 0;	// 2
 		end else if (str == "2Wx2V_by_WxV") begin 
 			func_mode_width_selector = 2;
 		end else if (str == "2Wx2V_by_WxV_apx") begin 
-			func_mode_width_selector = 2;	//1
+			func_mode_width_selector = 1;	// 2 
 		end else if (str == "2Wx2V_by_WxV_apx_adv") begin 
 			func_mode_width_selector = 2;
 		end else begin 
 			func_mode_width_selector = -1;
 		end 
-
 	endfunction
 
 	localparam SHIFTER_MODE_WIDTH = func_mode_width_selector(SHIFTER_TYPE);
