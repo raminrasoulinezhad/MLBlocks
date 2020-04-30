@@ -17,13 +17,14 @@ module state_machine(
 	);
 	
 	///////// Parameters
-	parameter SHIFTER_TYPE = "2Wx2V_by_WxV";	// "2Wx2V_by_WxV", "BYPASS"
+	parameter SHIFTER_TYPE = "2Wx2V_by_WxV";
 	parameter SHIFTER_MODE_WIDTH = 2;		
 
 	parameter B_D = 4;
 	localparam B_D_LOG2 = $clog2(B_D);
 
-	parameter CNTR_MEM_D = 4;
+	localparam CNTR_MEM_D = (SHIFTER_TYPE == "BYPASS") ? 1 : 4;
+
 	localparam CNTR_MEM_D_LOG2 = $clog2(CNTR_MEM_D);
 	localparam CNTR_MEM_W = 1 + 1 + B_D_LOG2 + SHIFTER_MODE_WIDTH + 1;
 	localparam CNTR_MEM_SIZE = CNTR_MEM_W * CNTR_MEM_D;

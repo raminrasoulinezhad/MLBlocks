@@ -40,10 +40,7 @@ module MLBlock (
 
 	parameter RES_W = 32;
 
-	parameter SHIFTER_TYPE = "2Wx2V_by_WxV";	// "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx" 
-	// "BYPASS"				: 8x8 						: MODE_WIDTH = 0
-	// "2Wx2V_by_WxV"		: 8x8, 8x16, 8x24, 16x16	: MODE_WIDTH = 2
-	// "2Wx2V_by_WxV_apx" 	: 8x8, 8x16, 16x16(apx)		: MODE_WIDTH = 2
+	parameter SHIFTER_TYPE = "2Wx2V_by_WxV";	// "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
 
 	parameter ACC_D = 1;
 	localparam ACC_D_CNTL = (ACC_D > 1)? (ACC_D-1): 1;

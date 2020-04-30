@@ -18,10 +18,15 @@ asic_dsp:
 # sub modules 
 asic_accumulator:
 	rc -f ./asic_accumulator.tcl
+	
+asic_shifter:
+	rc -f ./asic_shifter.tcl
 
+# clean
 clean:
 	rm -rf rc.* *initialtest* fv
 
+# experiments
 asic_all:
 	rm -rf rc.* MLBlock_sample_dir 
 	bash ./asic_MLBlock_sample_run.sh

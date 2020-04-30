@@ -13,12 +13,8 @@ module shifter (
 	
 	parameter OUT_WIDTH = 32;
 
-	parameter MODE_WIDTH = 2;
-
-	parameter TYPE = "2Wx2V_by_WxV";	// "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx" 
-	// "BYPASS"				: 8x8 						: MODE_WIDTH = 0
-	// "2Wx2V_by_WxV"		: 8x8, 8x16, 8x24, 16x16	: MODE_WIDTH = 2
-	// "2Wx2V_by_WxV_apx" 	: 8x8, 8x16, 16x16(apx)		: MODE_WIDTH = 2
+	parameter TYPE = "2Wx2V_by_WxV";	
+	parameter MODE_WIDTH = 2;	
 
 	localparam IN_WIDTH = A_W + B_W;
 	localparam MIN_W = (A_W > B_W) ? B_W : A_W; 

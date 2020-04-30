@@ -39,20 +39,38 @@ module pe (
 
 	parameter RES_W = 32;
 
-	parameter SHIFTER_TYPE = "2Wx2V_by_WxV";	// "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx" 
-	// "BYPASS"				: 8x8 						: MODE_WIDTH = 0
-	// "2Wx2V_by_WxV"		: 8x8, 8x16, 8x24, 16x16	: MODE_WIDTH = 2
-	// "2Wx2V_by_WxV_apx" 	: 8x8, 8x16, 16x16(apx)		: MODE_WIDTH = 2
-	localparam SHIFTER_MODE_WIDTH = 2;			// it is determined according SHIFTER_TYPE. for "2Wx2V_by_WxV" is 2. for "BYPASS" does not matter.
+	parameter SHIFTER_TYPE = "2Wx2V_by_WxV"; // "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv" 
+	
+	function integer func_mode_width_selector; 
+		input [40*8:0] str;
+
+		// "BYPASS"					: 8x8 						: MODE_WIDTH = 0	--> it is set to 2 (not used, removed)
+		// "2Wx2V_by_WxV"			: 8x8, 8x16, 8x24, 16x16	: MODE_WIDTH = 2
+		// "2Wx2V_by_WxV_apx" 		: 8x8, 8x16, 16x16(apx)		: MODE_WIDTH = 2	// 1
+		// "2Wx2V_by_WxV_apx_adv" 	: 8x8, 8x16, 16x16(apx_adv)	: MODE_WIDTH = 2
+		
+		if (str == "BYPASS") begin
+			func_mode_width_selector = 2;
+		end else if (str == "2Wx2V_by_WxV") begin 
+			func_mode_width_selector = 2;
+		end else if (str == "2Wx2V_by_WxV_apx") begin 
+			func_mode_width_selector = 2;	//1
+		end else if (str == "2Wx2V_by_WxV_apx_adv") begin 
+			func_mode_width_selector = 2;
+		end else begin 
+			func_mode_width_selector = -1;
+		end 
+
+	endfunction
+
+	localparam SHIFTER_MODE_WIDTH = func_mode_width_selector(SHIFTER_TYPE);
 	
 	localparam SHIFTER_OUT_WIDTH = RES_W;
 
-	localparam ACC_TYPE = (SHIFTER_TYPE == "2Wx2V_by_WxV") ? ("FEEDBACK") : ("FEEDFORWARD");	// "FEEDBACK", "FEEDFORWARD"
+	localparam ACC_TYPE = (SHIFTER_TYPE == "BYPASS") ? ("FEEDFORWARD") : ("FEEDBACK");	// "FEEDBACK", "FEEDFORWARD"
 	localparam ACC_WIDTH = RES_W;
 	parameter ACC_D = 1;
 	localparam ACC_D_CNTL = (ACC_D > 1)? (ACC_D-1): 1;
-
-	localparam CNTR_MEM_D = (SHIFTER_TYPE == "BYPASS") ? 1 : 4;
 
 	///////// IOs
 	input clk;
@@ -149,9 +167,9 @@ module pe (
 
 	defparam shifter_inst.A_W = A_W;
 	defparam shifter_inst.B_W = B_W;
-	defparam shifter_inst.MODE_WIDTH = SHIFTER_MODE_WIDTH;
 	defparam shifter_inst.OUT_WIDTH = SHIFTER_OUT_WIDTH;
 	defparam shifter_inst.TYPE = SHIFTER_TYPE;
+	defparam shifter_inst.MODE_WIDTH = SHIFTER_MODE_WIDTH;
 	shifter shifter_inst(
 		.in(mult_res),
 		.in_s(shifter_sign),
@@ -186,7 +204,6 @@ module pe (
 	defparam state_machine_inst.SHIFTER_TYPE = SHIFTER_TYPE;
 	defparam state_machine_inst.SHIFTER_MODE_WIDTH = SHIFTER_MODE_WIDTH;
 	defparam state_machine_inst.B_D = B_D;
-	defparam state_machine_inst.CNTR_MEM_D = CNTR_MEM_D;
 	state_machine state_machine_inst(
 		.clk(clk), 
 		.reset(reset),

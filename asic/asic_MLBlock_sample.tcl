@@ -30,13 +30,13 @@
 #			i.g. CORX9ALPULL_nom_1.20V_25C.lib
 #####################################################################################################################
 
-set_attribute hdl_search_path {./files}
+set_attribute hdl_search_path {../verilog/}
 
 set_attribute lib_search_path {/mnt/edatools/PDKs/STMicro28nm/cmos28fdsoi_29/C28SOI_SC_12_CORE_LR/5.1-03/libs/}
 set_attribute library [list C28SOI_SC_12_CORE_LR_tt28_1.20V_25C.lib]
 set_attribute information_level 6 
 
-set myFiles [list ../verilog/MLBlock_sample.v   ../verilog/accumulator.v ../verilog/mult_flex.v ../verilog/state_machine.v ../verilog/stream_mem.v ../verilog/pe.v ../verilog/MLBlock.v ../verilog/shifter.v ../verilog/stream_flex.v];
+set myFiles [list MLBlock_sample.v accumulator.v mult_flex.v state_machine.v stream_mem.v pe.v MLBlock.v shifter.v stream_flex.v];
 # name of top level module
 set basename MLBlock_sample;
 set myClk clk                    ;# clock name
