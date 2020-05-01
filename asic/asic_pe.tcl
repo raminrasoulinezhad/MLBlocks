@@ -36,9 +36,9 @@ set_attribute lib_search_path {/mnt/edatools/PDKs/STMicro28nm/cmos28fdsoi_29/C28
 set_attribute library [list C28SOI_SC_12_CORE_LR_tt28_1.20V_25C.lib]
 set_attribute information_level 6 
 
-set myFiles [list shifter.v];
+set myFiles [list accumulator.v mult_flex.v state_machine.v stream_mem.v pe.v shifter.v stream_flex.v];
 # name of top level module
-set basename shifter;
+set basename pe;
 set myClk clk                    ;# clock name
 set myPeriod_ps 1000             ;# Clock period in ps
 set myInDelay_ns 0.0             ;# delay from clock to inputs valid

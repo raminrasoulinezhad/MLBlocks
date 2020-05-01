@@ -22,6 +22,9 @@ asic_accumulator:
 asic_shifter:
 	rc -f ./asic_shifter.tcl
 
+asic_pe:
+	rc -f ./asic_pe.tcl
+
 # clean
 clean:
 	rm -rf rc.* *initialtest* fv

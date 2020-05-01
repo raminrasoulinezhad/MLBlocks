@@ -72,6 +72,7 @@ synthesize -to_mapped
 # Write out the reports
 report timing > ${basename}_${runname}_timing.rep
 report gates  > ${basename}_${runname}_cell.rep
+report area > ${basename}_${runname}_area.rep
 report power  > ${basename}_${runname}_power.rep
 
 # Write out the structural Verilog and sdc files
