@@ -40,7 +40,7 @@ set myFiles [list MLBlock_sample.v accumulator.v mult_flex.v state_machine.v str
 # name of top level module
 set basename MLBlock_sample;
 set myClk clk                    ;# clock name
-set myPeriod_ps 1000             ;# Clock period in ps
+set myPeriod_ps 1333             ;# Clock period in ps
 set myInDelay_ns 0.0             ;# delay from clock to inputs valid
 set myOutDelay_ns 0.0            ;# delay from clock to output valid
 set runname initialtest          ;# name appended to output files
@@ -72,6 +72,7 @@ synthesize -to_mapped
 # Write out the reports
 report timing > ${basename}_${runname}_timing.rep
 report gates  > ${basename}_${runname}_cell.rep
+report area > ${basename}_${runname}_area.rep
 report power  > ${basename}_${runname}_power.rep
 
 # Write out the structural Verilog and sdc files

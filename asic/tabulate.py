@@ -149,7 +149,7 @@ if __name__ == "__main__":
 	date_time = now.strftime("_%Y_%m_%d_%H_%M_%S")
 
 	f = open("tabulate"+date_time+".txt", "w")
-	clk_def_ps = 1000
+	clk_def_ps = 1333
 	DSP48E2_area = 7958
 
 	#main_dir_fpga = "./"+arith+"_fpga/"
