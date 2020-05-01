@@ -46,11 +46,18 @@ module accumulator (
 	wire [WIDTH-1:0] res_in;
 
 	reg signed [WIDTH-1:0] acc [DEPTH-1:0];
+	wire signed [WIDTH-1:0] acc_in;
 	reg signed [WIDTH-1:0] acc_temp [DEPTH-1:0];
 
 	assign res_in = (res_in_select == 1'b1) ? res_in_v : res_in_h;
 
 	generate  
+
+		if (TYPE == "FEEDBACK") begin 
+			assign acc_in = (acc_mode == 1'b0) ? res_in : acc[0];
+		end else begin 
+			assign acc_in = res_in;
+		end 
 
 		integer i;
 		always @(posedge clk)begin
@@ -59,16 +66,7 @@ module accumulator (
 					acc[i] <= 0;
 				end 
 			end else if (acc_en) begin
-
-				if (TYPE == "FEEDBACK") begin 
-					if (acc_mode == 1'b0) begin
-						acc[0] <= res_in + shifter_res;
-					end else begin
-						acc[0] <= acc[0] + shifter_res;
-					end 
-				end else if (TYPE == "FEEDFORWARD") begin 
-					acc[0] <= res_in + shifter_res;
-				end 
+				acc[0] <= acc_in + shifter_res;
 
 				for (i = 1; i < DEPTH; i = i + 1) begin 
 					acc[i] <= acc_temp[i-1];
