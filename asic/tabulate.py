@@ -1,8 +1,27 @@
+# sample: 
+# python3 tabulate.py --dir=MLBlock_sample_dir_1000  --clk=1000  --dsp_area=7958
+# python3 tabulate.py --dir=MLBlock_sample_dir_750   --clk=750   --dsp_area=7208
+
 import re
 import numpy as np
 import os
 import glob
 from datetime import datetime
+import argparse
+
+def get_args():
+	parser = argparse.ArgumentParser(description='')
+	parser.add_argument('--dir', type=str, default="./MLBlock_sample_dir", help='directory to explore')
+	parser.add_argument('--clk', type=int, default=1000, help='clock value for synthesis (ps)')
+	parser.add_argument('--dsp_area', type=int, default=7958, help='measured area for a DSP48E2')
+
+	args = parser.parse_args()
+	return args
+	
+	dir = "./MLBlock_sample_dir/"
+	clk = 1333
+	dsp_area = 7958
+
 
 def report_synth_resource(file_name):
 
@@ -144,31 +163,24 @@ def extract_asic_clk_file_name(exp_dir):
 
 
 if __name__ == "__main__":
-	
+
+	args = get_args()
+
 	now = datetime.now() # current date and time
 	date_time = now.strftime("_%Y_%m_%d_%H_%M_%S")
 
-	f = open("tabulate"+date_time+".txt", "w")
-	clk_def_ps = 1333
-	DSP48E2_area = 7958
+	
+	clk_def_ps = args.clk
+	DSP48E2_area = args.dsp_area
 
-	#main_dir_fpga = "./"+arith+"_fpga/"
-	main_dir_asic = "./MLBlock_sample_dir/"
-
-	#f.write("#       %20s\t%5s\t%5s\t%5s\t%5s\t\t%5s\t%5s\n" % ("Experiment name", "LUT", "Reg", "DSP", "freq", "area", "freq"))
+	main_dir_asic = args.dir + "/"
+	f = open("tabulate_" + args.dir + date_time + ".txt", "w")
+	
 	f.write("#       %-30s\t\t%5s\t%5s\n" % ("Experiment name", "area", "freq"))
 	for exp_dir in np.sort(os.listdir(main_dir_asic)):
 		if exp_dir in ["answers", "files"]:
 			continue 
 		else: 
-			# extract resource utilization from synthesis 
-			#file_name = main_dir + exp_dir + "/project_1.runs/synth/" + top + "_utilization_synth.rpt"
-
-			#file_name = extract_synth_util_file_name(main_dir_fpga + exp_dir)
-			#LUT, Reg, DSP, URAM, RAMB18, RAMB36 = report_synth_resource(file_name)
-
-			#file_name = extract_impl_timing_routed_file_name(main_dir_fpga + exp_dir)
-			#clk_fpga = report_impl_wns(file_name, 6)
 
 			file_name = extract_asic_area_file_name(exp_dir)
 			area = report_asic_area(main_dir_asic + file_name)
@@ -176,7 +188,6 @@ if __name__ == "__main__":
 			file_name = extract_asic_clk_file_name(exp_dir)
 			clk_asic = report_asic_clk(main_dir_asic + file_name, clk_def_ps)
 
-			#f.write("# arch: %20s\t%5d\t%5d\t%5d\t%5d\t\t%5d\t%5d\n" % (exp_dir, LUT, Reg, DSP, clk_fpga, area, clk_asic))
 			if (DSP48E2_area >=  area):
 				fit = "\tYes" 
 			elif (DSP48E2_area * 1.1 >=  area):
