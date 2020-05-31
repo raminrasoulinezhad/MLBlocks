@@ -116,6 +116,10 @@ class Arch(Space):
 
 		return alg_mac / (conf_mac * conf_iter)
 
+	def print_configs(self):
+		for conf in self.confs:
+			self.confs[conf].print_param_dic()
+
 
 
 		
@@ -165,19 +169,49 @@ alg_BPWConv = Algorithm("BPWConv",
 							"fx":	None 
 						}, my_space)
 
+alg_BMM = Algorithm("BMM", 
+						{	"d":	None, 
+							"b":	[1,2,4,8,16], 
+							"k":	[32,64,128,256,512,1024,2048], 
+							"c":	[32,64,128,256,512,1024,2048], 
+							"y":	None, 
+							"x":	[32,64,128,256,512,1024,2048], 
+							"fy":	None, 
+							"fx":	None 
+						}, my_space)
 
-algs = [alg_BSConv, alg_BDWConv, alg_BPWConv]
+algs = [alg_BSConv, alg_BDWConv, alg_BPWConv, alg_BMM]
 for alg in algs:
 	alg.print_param_dic()
 	print(alg.case_gen(5))
 	print()
 
-arch = Arch("MLBlock", 
+arch_MLBlock = Arch("MLBlock", 
 			{
-				"conf_0" : {
+				"conf_0_0" : {
 					"d":	4,
 					"b":	1,
 					"k":	1,
+					"c":	1,
+					"y":	1,
+					"x":	1,
+					"fy":	1,
+					"fx":	3
+				},
+				"conf_0_1" : {
+					"d":	1,
+					"b":	4,
+					"k":	1,
+					"c":	1,
+					"y":	1,
+					"x":	1,
+					"fy":	1,
+					"fx":	3
+				},
+				"conf_0_2" : {
+					"d":	1,
+					"b":	1,
+					"k":	4,
 					"c":	1,
 					"y":	1,
 					"x":	1,
@@ -197,11 +231,11 @@ arch = Arch("MLBlock",
 			}, 
 			my_space)
 
-for conf in arch.confs:
-	arch.confs[conf].print_param_dic()
+#for conf in arch_MLBlock.confs:
+#	arch_MLBlock.confs[conf].print_param_dic()
+arch_MLBlock.print_configs()
 
-
-print (arch.rate_arch(algs))
+print (arch_MLBlock.rate_arch(algs))
 
 
 
