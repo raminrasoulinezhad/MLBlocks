@@ -65,6 +65,11 @@ class Config(Space):
 		for i in param_dic:
 			self.param_dic[i].pot_vals = param_dic[i]
 		
+	def gen_dic(self):
+		dic = {}
+		for p in self.param_dic:
+			dic[p] = self.param_dic[p].pot_vals
+		return dic
 
 class Arch(Space):
 	def __init__(self, name, conf_dic, space):
@@ -74,6 +79,42 @@ class Arch(Space):
 		for i in conf_dic:
 			self.confs[i] = Config(i, conf_dic[i], space)
 
+	
+
+	def rate_arch(self, algs):
+		rate_algs = {}
+
+		for alg in algs: 
+			rate_total = 0 
+			for index in range(alg.total_cases):
+				alg_case_dic = alg.case_gen(index)
+
+				rate_best = 0
+				for conf in self.confs:
+					conf_dic = self.confs[conf].gen_dic()
+					rate_temp = self.util_rate(alg_case_dic, conf_dic)
+					if rate_temp > rate_best:
+						rate_best = rate_temp
+
+				rate_total += rate_best				
+
+			rate_algs[alg.name] = rate_total/alg.total_cases
+		return rate_algs
+	
+	def util_rate(self, alg_p_dic, conf_p_dic):
+
+		alg_arr = np.array([])
+		conf_arr = np.array([])
+		for p in alg_p_dic:
+			alg_arr = np.append(alg_arr, alg_p_dic[p])
+			conf_arr = np.append(conf_arr, conf_p_dic[p])
+
+		alg_mac = arr2prod(alg_arr)
+		conf_mac = arr2prod(conf_arr)
+
+		conf_iter = arr2prod(np.ceil(alg_arr / conf_arr))
+
+		return alg_mac / (conf_mac * conf_iter)
 
 
 
@@ -130,14 +171,13 @@ for alg in algs:
 	alg.print_param_dic()
 	print(alg.case_gen(5))
 	print()
-	print()
 
 arch = Arch("MLBlock", 
 			{
 				"conf_0" : {
-					"d":	1,
+					"d":	4,
 					"b":	1,
-					"k":	4,
+					"k":	1,
 					"c":	1,
 					"y":	1,
 					"x":	1,
@@ -161,38 +201,23 @@ for conf in arch.confs:
 	arch.confs[conf].print_param_dic()
 
 
-def rate_conf(alg_sample, conf_sample):
-
-	alg_p_dic = alg_sample.param_dic
-	conf_p_dic = conf_sample.param_dic
-
-	alg_arr = []
-	conf_arr = []
-	for p in alg_p_dic:
-		alg_arr.append(alg_p_dic[p])
-		conf_arr.append(conf_p_dic[p])
-
-	alg_mac = arr2prod(alg_sample)
-	conf_mac = arr2prod(conf_sample)
-
-	conf_iter = arr2prod(np.ceil(alg_sample / conf_sample))
-
-	return alg_mac / (conf_mac * conf_iter)
+print (arch.rate_arch(algs))
 
 
 
-def util_rate(alg_sample, conf_sample):
-	alg_mac = arr2prod(alg_sample)
-	conf_mac = arr2prod(conf_sample)
 
-	conf_iter = arr2prod(np.ceil(alg_sample / conf_sample))
-
-	return alg_mac / (conf_mac * conf_iter)
-
-alg  = np.array([1, 200, 5, 5, 5, 1])
-conf = np.array([1, 3,   1, 1, 3, 1])
-rate = util_rate(alg, conf)
-print ("rate: %f" % (rate))
+#def util_rate(alg_sample, conf_sample):
+#	alg_mac = arr2prod(alg_sample)
+#	conf_mac = arr2prod(conf_sample)
+#
+#	conf_iter = arr2prod(np.ceil(alg_sample / conf_sample))
+#
+#	return alg_mac / (conf_mac * conf_iter)
+#
+#alg  = np.array([1, 200, 5, 5, 5, 1])
+#conf = np.array([1, 3,   1, 1, 3, 1])
+#rate = util_rate(alg, conf)
+#print ("rate: %f" % (rate))
 
 
 # main 

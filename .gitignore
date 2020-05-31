@@ -12,3 +12,4 @@ asic/*
 !asic/Makefile
 
 __pycache__/
+*.pyc
