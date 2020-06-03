@@ -1,31 +1,7 @@
 from models import *
-import numpy as np
-import copy
-from utils import * 
-from benchmark import * 
-
-
-
-arch_all = Arch("all", 
-			None, 
-			my_space,
-
-			stationary="W",
-			precisions=	{	"I" : 8,
-							"W" : 8,
-							"O" : 32,
-						},
-			nmac=12,
-			limits= {	"IO_I" : 36,
-						"IO_W" : None,
-						"IO_O" : None,
-						"IO" : 48+30+18+27+48+50,
-						#"IO" : 48+30+18+27+48 # = DSP48_out + DSP48_A + DSP48_B + DSP48_C + DSP48_D
-					}
-			)
-
-
-
+from benchmark_space import * 
+from benchmark_algs import * 
+from benchmark_archs import * 
 
 arch_all.print_confs()
 	
@@ -46,66 +22,7 @@ for counter in range(2):
 	arch_all.reset_confs_score()
 	arch_all.print_confs()
 
-
-
-exit()
-
-
-
-
-arch_MLBlock = Arch("MLBlock", 
-			{
-				"conf_0_0" : {
-					"d":	4,
-					"b":	1,
-					"k":	1,
-					"c":	1,
-					"y":	1,
-					"x":	1,
-					"fy":	1,
-					"fx":	3
-				},
-				"conf_0_1" : {
-					"d":	1,
-					"b":	4,
-					"k":	1,
-					"c":	1,
-					"y":	1,
-					"x":	1,
-					"fy":	1,
-					"fx":	3
-				},
-				"conf_0_2" : {
-					"d":	1,
-					"b":	1,
-					"k":	4,
-					"c":	1,
-					"y":	1,
-					"x":	1,
-					"fy":	1,
-					"fx":	3
-				},
-				"conf_1" : {
-					"d":	1,
-					"b":	1,
-					"k":	3,
-					"c":	4,
-					"y":	1,
-					"x":	1,
-					"fy":	1,
-					"fx":	1
-				},
-			}, 
-			my_space)
-
-arch_MLBlock.print_confs()
-print (arch_MLBlock.rate_arch(algs))
-
-
-
-
-
-
+arch_all.print_confs(type="IW")
 
 # main 
 # setup space and algorithms.

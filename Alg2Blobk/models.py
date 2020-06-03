@@ -34,10 +34,11 @@ class Space():
 		self.param_dic = copy.deepcopy(param_dic)
 		self.size = len(self.param_dic)
 
-	def print_param_dic(self):
+	def print_param_dic(self, type=None):
 		print("Model name: " + str(self.name))
 		for p in self.param_dic:
-			print("param name: " + str(p) + "\ttype: %3s" % str(self.param_dic[p].type) + "\twindow: %6s" % str(self.param_dic[p].window_en) + ", \tvals: " + str(self.param_dic[p].vals))
+			if (type == None) or (type == self.param_dic[p].type):
+				print("param name: " + str(p) + "\ttype: %3s" % str(self.param_dic[p].type) + "\twindow: %6s" % str(self.param_dic[p].window_en) + ", \tvals: " + str(self.param_dic[p].vals))
 		print("")
 
 class Algorithm(Space):
@@ -115,20 +116,28 @@ class Config(Space):
 			print(str(i) + 	str(self.IO_Comp_spaces[i]))
 		print("****")
 
-	def IO(self, sources=["I", "W", "O"]):
+	def IO_report(self, sources=["I", "W", "O"]):
 		temp = 0
-		for i in sources: #self.spaces_lists[0:3]:
+		for i in sources:
 			temp += self.IO_Comp_spaces[i]["size"] * self.precisions[i]
 		return temp
 
 	def OK(self):
 
-		if self.IO(["I", "W", "O"]) > self.limits["IO"]:
+		# check total IOs
+		if (self.limits["IO"] != None) and (self.IO_report(["I", "W", "O"]) > self.limits["IO"]):
 			return False
-		elif self.IO(["I"]) > self.limits["IO_I"]:
+		
+		if (self.limits["IO_I"] != None) and (self.IO_report(["I"]) > self.limits["IO_I"]):
 			return False
-		else:
-			return True
+
+		if (self.limits["IO_W"] != None) and (self.IO_report(["W"]) > self.limits["IO_W"]):
+			return False
+		
+		if (self.limits["IO_O"] != None) and (self.IO_report(["O"]) > self.limits["IO_O"]):
+			return False
+
+		return True
 
 
 	def gen_dic(self):
@@ -230,9 +239,9 @@ class Arch(Space):
 
 		return alg_mac / (conf_mac * conf_iter)
 
-	def print_confs(self):
+	def print_confs(self, type=None):
 		for conf in self.confs:
-			self.confs[conf].print_param_dic()
+			self.confs[conf].print_param_dic(type)
 
 	def reset_confs_score(self):
 		for conf in self.confs:
