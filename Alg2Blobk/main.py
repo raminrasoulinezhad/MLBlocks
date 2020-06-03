@@ -1,170 +1,114 @@
-import numpy as np
 from models import *
-
-def param_gen_const_product(size, const):
-	results = np.array([])
-
-	if size == 1:
-		results = [const]
-	else:
-		for i in range(1, const+1):
-			if (const % i) == 0:
-
-				results_temp = param_gen_const_product(size-1, int(const / i))
-				
-				for j in results_temp:
-					j_extend = np.append(j, i)
-
-					if results.size == 0:
-						results = np.expand_dims(j_extend, axis=0)
-					else:
-						j_extend = np.expand_dims(j_extend, axis=0)
-						results = np.concatenate((results, j_extend), axis=0)
-
-	return results
+import numpy as np
+import copy
+from utils import * 
+from benchmark import * 
 
 
-def param_gen_const_values(size, consts):
-	results = np.array([])
 
-	if size == 1:
-		results = np.reshape(consts, (-1,1))
+arch_all = Arch("all", 
+			None, 
+			my_space,
+
+			stationary="W",
+			precisions=	{	"I" : 8,
+							"W" : 8,
+							"O" : 32,
+						},
+			nmac=12,
+			limits= {	"IO_I" : 36,
+						"IO_W" : None,
+						"IO_O" : None,
+						"IO" : 48+30+18+27+48+50,
+						#"IO" : 48+30+18+27+48 # = DSP48_out + DSP48_A + DSP48_B + DSP48_C + DSP48_D
+					}
+			)
+
+
+
+
+arch_all.print_confs()
+	
+for counter in range(2):
+
+	print (arch_all.rate_arch(algs_light))
+	list_to_remove = []
+	for conf in arch_all.confs:
+		print(arch_all.confs[conf].score)
 		
-	else:
-		results_temp = param_gen_const_values(size-1, consts)
+		if arch_all.confs[conf].score == 0:
+			list_to_remove.append(conf)
 
-		for j in results_temp:
-			for i in range(len(consts)):
-				j_extend = np.append(j, consts[i])
+	print (list_to_remove)
+	for conf in list_to_remove:
+		del arch_all.confs[conf]
 
-				if results.size == 0:
-					results = np.expand_dims(j_extend, axis=0)
-				else:
-					j_extend = np.expand_dims(j_extend, axis=0)
-					results = np.concatenate((results, j_extend), axis=0)
+	arch_all.reset_confs_score()
+	arch_all.print_confs()
 
-	return results
 
-def param_gen_const_products(consts):
-	consts_size = consts.size
 
-	if consts_size == 1:
-
-		results_temp = param_gen_const_product(2, consts[0])
-
-		results_un = np.expand_dims(results_temp[:,0], axis=1)
-		results_seq = np.expand_dims(results_temp[:,1], axis=1)
-	else:
-		results_un = np.array([])
-		results_seq = np.array([])
-
-		results_rec_un, results_rec_seq = param_gen_const_products(consts[1:])
-		results_temp = param_gen_const_product(2, consts[0])
-		results_temp_un = results_temp[:,0]
-		results_temp_seq = results_temp[:,1]
-
-		for i in results_rec_un:
-			for j in results_temp_un:
-				j_extend = np.append(j, i)
-
-				if results_un.size == 0:
-					results_un = np.expand_dims(j_extend, axis=0)
-				else:
-					j_extend = np.expand_dims(j_extend, axis=0)
-					results_un = np.concatenate((results_un, j_extend), axis=0)
-
-		for i in results_rec_seq:
-			for j in results_temp_seq:
-				j_extend = np.append(j, i)
-				
-				if results_seq.size == 0:
-					results_seq = np.expand_dims(j_extend, axis=0)
-				else:
-					j_extend = np.expand_dims(j_extend, axis=0)
-					results_seq = np.concatenate((results_seq, j_extend), axis=0)
-
-	return results_un, results_seq
+exit()
 
 
 
 
+arch_MLBlock = Arch("MLBlock", 
+			{
+				"conf_0_0" : {
+					"d":	4,
+					"b":	1,
+					"k":	1,
+					"c":	1,
+					"y":	1,
+					"x":	1,
+					"fy":	1,
+					"fx":	3
+				},
+				"conf_0_1" : {
+					"d":	1,
+					"b":	4,
+					"k":	1,
+					"c":	1,
+					"y":	1,
+					"x":	1,
+					"fy":	1,
+					"fx":	3
+				},
+				"conf_0_2" : {
+					"d":	1,
+					"b":	1,
+					"k":	4,
+					"c":	1,
+					"y":	1,
+					"x":	1,
+					"fy":	1,
+					"fx":	3
+				},
+				"conf_1" : {
+					"d":	1,
+					"b":	1,
+					"k":	3,
+					"c":	4,
+					"y":	1,
+					"x":	1,
+					"fy":	1,
+					"fx":	1
+				},
+			}, 
+			my_space)
 
-
-#########################################################################################	
-'''
-"O[b][k][x][y] += I[b][c][x+fx][y+fy] * W[k][c][fx][fy]"	# Standard Conv
-"O[b][x][y] += I[b][x][k] * W[k][y]"						# Batch Matrix-Matrix Multiply
-"O[x] += I[x][k] * W[k]"									# Matrix-Vector Multiply
-'''
-algorithm = Algorithm("O[b][k][x][y] += I[b][c][x+fx][y+fy] * W[k][c][fx][fy]")
-print(algorithm.inputs_inds_exp)
-print(algorithm.inputs_inds_exp_num)
-
-# defines
-a_w = 8
-b_w = 8
-c_w = 16
-acc_w = 20
-
-# limitations 
-limit_mac = 54
-limit_mac_seq = [1,2,3,4,6,8,9]
-limit_mac_seq = [1,2,3]
-
-
-param_comp_un  = param_gen_const_product(algorithm.inputs_inds_exp_num, limit_mac)
-param_comp_seq = param_gen_const_values(algorithm.inputs_inds_exp_num, limit_mac_seq)
-
-print("potential comp unrol cases:\t%s" % (str(param_comp_un.shape)))
-print("potential comp seq cases:\t%s" % (str(param_comp_seq.shape)))
-
-
-cases = []
-for p_comp_un in param_comp_un:
-	for p_comp_seq in param_comp_seq:
-		
-		p_io_total = p_comp_un * p_comp_seq
-
-		param_io_un, param_io_seq= param_gen_const_products(p_io_total)
-
-		exit()
-		
-		#print(param_io_un.shape)
-		#print(param_io_seq.shape)
-		#exit()
-
-		#if results.size == 0:
-		#	results = np.expand_dims(j_extend, axis=0)
-		#else:
-		#	j_extend = np.expand_dims(j_extend, axis=0)
-		#	results = np.concatenate((results, j_extend), axis=0)
-
-		#print(p_comp_un)
-		#print(p_comp_seq)
-		#print(p_io_total)
-	#exit()
-
-
-
-#
+arch_MLBlock.print_confs()
+print (arch_MLBlock.rate_arch(algs))
 
 
 
 
-def compression_rate():
-	return 
-
-def quality_check():
-	return 
-
-def feasibility_check():
-	return 
 
 
-#from mip import Model, xsum, BINARY, INTEGER, maximize
-#model = Model('PEDesignSpaceSeach')
-##x = [model.add_var(var_type=INTEGER) for i in I]
-##x = [model.add_var(name="{}_{})".format(name, part), var_type=INTEGER) for name in inputs_inds_exp for part in ["_un", "_seq"]]
-#x = [model.add_var(name="{})".format(name), var_type=INTEGER) for name in inputs_inds_exp]
-#model += xsum(w[i] * x[i] for i in range(len(inputs_inds_exp))) == c
-#model.objective = maximize(xsum(x[i] for i in range(len(inputs_inds_exp))))
+
+# main 
+# setup space and algorithms.
+# for loop for different architectures
+#		measure the feasiblity and cost function for that
+# pich top few ones. 

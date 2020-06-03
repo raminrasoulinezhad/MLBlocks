@@ -2,84 +2,194 @@ import numpy as np
 import copy
 from utils import * 
 
-class Param:
-	def __init__(self, type="IW", window_en=False, pot_vals=None):
+class Param():
+	def __init__(self, type="IW", window_en=False, vals=None):
 		self.type = type 
-		
-		self.IOs_I = self.IOs_W = self.IOs_O = False 
-		if "I" in type:
-			self.IOs_I = True
-		if "W" in type:
-			self.IOs_W = True 
-		if "O" in type:
-			self.IOs_O = True
 
+		self.set_window_en(window_en)
+
+		self.set_vals(vals)
+				
+
+	def set_window_en(self, window_en):
+		# if a parameter is used with an acompany in inputs and has disapears in outputs.
 		if window_en == None:
 			self.window_en = False
 		else:
-			# if a parameter is used with an acompany in inputs and has disapears in outputs.
 			self.window_en = window_en
-
-		if pot_vals == None:
-			self.pot_vals = [1]
+		
+	def set_vals(self, vals):
+		if vals == None:
+			self.vals = [1]
 		else:
-			self.pot_vals = pot_vals
+			self.vals = vals
+		self.update_vals_size()
+	
+	def update_vals_size(self):
+		self.vals_size = len(self.vals)
 
 class Space():		
 	def __init__(self, name, param_dic):
 		self.name = name
 		self.param_dic = copy.deepcopy(param_dic)
-		
+		self.size = len(self.param_dic)
 
 	def print_param_dic(self):
 		print("Model name: " + str(self.name))
 		for p in self.param_dic:
-			print("param name: " + str(p) + "\ttype: %3s" % str(self.param_dic[p].type) + "\twindow: %6s" % str(self.param_dic[p].window_en) + ", \tvals: " + str(self.param_dic[p].pot_vals))
+			print("param name: " + str(p) + "\ttype: %3s" % str(self.param_dic[p].type) + "\twindow: %6s" % str(self.param_dic[p].window_en) + ", \tvals: " + str(self.param_dic[p].vals))
 		print("")
 
-
 class Algorithm(Space):
-	def __init__(self, name, pot_vals_dic, space):
-
+	def __init__(self, name, vals_dic, space):
 		super().__init__(name, space.param_dic)	
 
+		for i in vals_dic:
+			vals = vals_dic[i] if (vals_dic[i] != None) else [1]
+			self.param_dic[i].set_vals(vals)
+
+		self.total_cases = self.calculate_total_cases()
+
+	def calculate_total_cases(self):
 		temp = 1
-		for i in pot_vals_dic:
-			self.param_dic[i].pot_vals = pot_vals_dic[i] if (pot_vals_dic[i] != None) else [1]
-			temp *= len(self.param_dic[i].pot_vals)
-		self.total_cases = temp
+		for p in self.param_dic:
+			temp *= self.param_dic[p].vals_size
+		return temp
 
 	def case_gen(self, index):
 		case = {}
 		for p in self.param_dic:
-			w = len(self.param_dic[p].pot_vals)
-			case[p] = self.param_dic[p].pot_vals[index % w]
+			w = self.param_dic[p].vals_size
+			case[p] = self.param_dic[p].vals[index % w]
 			index = int(np.floor(index / w))
 		return case
 
 
 class Config(Space):
-	def __init__(self, name, param_dic, space):
+	def __init__(self, name, param_dic, space, stationary, precisions, limits):
 		super().__init__(name, space.param_dic)	
 		
 		for i in param_dic:
-			self.param_dic[i].pot_vals = param_dic[i]
+			self.param_dic[i].vals = param_dic[i]
 		
+		self.stationary = stationary 
+		self.precisions = precisions
+		self.limits = limits
+
+		self.spaces_lists = ["I","W","O","IW","WO","IO","IWO"]
+		self.IO_Comp_spaces = {}
+		for i in self.spaces_lists:
+			self.IO_Comp_spaces[i] = {"size" : 1, "dic": {}}
+
+		self.set_IO_Comp_spaces()
+
+		self.score = 0
+
+
+	def set_IO_Comp_spaces(self):
+		for i in self.param_dic:
+
+			#for j in self.spaces_lists:
+			#	if check_presence(j, self.param_dic[i].type):
+			#		self.IO_Comp_spaces[j]["size"] *= self.param_dic[i].vals
+			#		self.IO_Comp_spaces[j]["dic"][i] = self.param_dic[i].vals
+
+			for j in self.spaces_lists[0:3]:
+				if check_presence(j, self.param_dic[i].type):
+					if not self.param_dic[i].window_en:
+						self.IO_Comp_spaces[j]["size"] *= self.param_dic[i].vals
+					self.IO_Comp_spaces[j]["dic"][i] = self.param_dic[i].vals
+
+			for j in self.spaces_lists[3:]:
+				if check_equality(j, self.param_dic[i].type):
+					if not self.param_dic[i].window_en:
+						self.IO_Comp_spaces[j]["size"] *= self.param_dic[i].vals
+					self.IO_Comp_spaces[j]["dic"][i] = self.param_dic[i].vals
+
+		for i in self.IO_Comp_spaces:
+			print(str(i) + 	str(self.IO_Comp_spaces[i]))
+		print("****")
+
+	def print_IO_Comp_spaces(self):
+		for i in self.IO_Comp_spaces:
+			print(str(i) + 	str(self.IO_Comp_spaces[i]))
+		print("****")
+
+	def IO(self, sources=["I", "W", "O"]):
+		temp = 0
+		for i in sources: #self.spaces_lists[0:3]:
+			temp += self.IO_Comp_spaces[i]["size"] * self.precisions[i]
+		return temp
+
+	def OK(self):
+
+		if self.IO(["I", "W", "O"]) > self.limits["IO"]:
+			return False
+		elif self.IO(["I"]) > self.limits["IO_I"]:
+			return False
+		else:
+			return True
+
+
 	def gen_dic(self):
 		dic = {}
 		for p in self.param_dic:
-			dic[p] = self.param_dic[p].pot_vals
+			dic[p] = self.param_dic[p].vals
 		return dic
 
+	def reset_score(self):
+		self.score = 0
+
+
+
 class Arch(Space):
-	def __init__(self, name, conf_dic, space):
+	def __init__(	self, 
+					name, 
+					conf_dic, 
+					space, 
+					stationary="W",						# W, I, O
+					precisions=	{	"I" : 8,
+									"W" : 8,
+									"O" : 32,
+								},
+					nmac=8,
+					limits= {	"IO_I" : 36,
+								"IO_W" : None,
+								"IO_O" : None,
+								"IO" : 48+30+18+27+48 	# = DSP48_out + DSP48_A + DSP48_B + DSP48_C + DSP48_D
+							}
+					):	
+
 		self.name = name 
 
-		self.confs = {}
-		for i in conf_dic:
-			self.confs[i] = Config(i, conf_dic[i], space)
+		self.stationary = stationary	
+		self.precisions = precisions
+		self.nmac = nmac
+		self.limits = limits
 
-	
+		self.confs = {}
+		
+		if conf_dic == None:
+			self.gen_all_config(space)
+		else:
+			for i in conf_dic:
+				self.confs[i] = Config(i, conf_dic[i], space, stationary, precisions, limits)
+
+	def gen_all_config(self, space):
+
+		temp_dic = copy.deepcopy(space.param_dic)
+
+		conf_counter = 0
+		for case in param_gen_const_product(space.size, self.nmac):
+			
+			temp_dic = fill_dic_by_array(temp_dic, case)
+			conf_name = 'conf' + str(conf_counter)
+
+			conf = Config(conf_name , temp_dic, space, self.stationary, self.precisions, self.limits)
+			if conf.OK():
+				self.confs[conf_name] = conf
+				
+			conf_counter += 1
 
 	def rate_arch(self, algs):
 		rate_algs = {}
@@ -90,15 +200,19 @@ class Arch(Space):
 				alg_case_dic = alg.case_gen(index)
 
 				rate_best = 0
+				conf_best = ""
 				for conf in self.confs:
 					conf_dic = self.confs[conf].gen_dic()
 					rate_temp = self.util_rate(alg_case_dic, conf_dic)
 					if rate_temp > rate_best:
 						rate_best = rate_temp
+						conf_best = conf
 
+				self.confs[conf_best].score += 1
 				rate_total += rate_best				
 
 			rate_algs[alg.name] = rate_total/alg.total_cases
+
 		return rate_algs
 	
 	def util_rate(self, alg_p_dic, conf_p_dic):
@@ -116,146 +230,12 @@ class Arch(Space):
 
 		return alg_mac / (conf_mac * conf_iter)
 
-	def print_configs(self):
+	def print_confs(self):
 		for conf in self.confs:
 			self.confs[conf].print_param_dic()
 
+	def reset_confs_score(self):
+		for conf in self.confs:
+			self.confs[conf].reset_score()
 
-
-		
-my_space = Space("space",
-				{	"d":	Param("IOW",	window_en=False),
-					"b":	Param("IO",		window_en=False),
-					"k":	Param("WO",		window_en=False),
-					"c":	Param("IW",		window_en=False),
-					"y":	Param("IO",		window_en=False),
-					"x":	Param("IO",		window_en=False),
-					"fy":	Param("IW",		window_en=True),
-					"fx":	Param("IW",		window_en=True)
-				})
-
-
-
-alg_BSConv = Algorithm("BSConv", 
-						{	"d":	None,
-							"b":	[1,2,4],
-							"k":	[32,64,128,256,512,1024],
-							"c":	[3,32,64,128,256,512,1024],
-							"y":	[2,4,8,16,32],
-							"x":	[2,4,8,16,32],
-							"fy":	[3,5,7,9],
-							"fx":	[3,5,7,9]
-						}, my_space)
-
-alg_BDWConv = Algorithm("BDWConv", {
-							"d":	[32,64,128,256,512,1024],
-							"b":	[1,2,4],
-							"k":	None,
-							"c":	None,
-							"y":	[2,4,8,16,32],
-							"x":	[2,4,8,16,32],
-							"fy":	[3,5,7,9],
-							"fx":	[3,5,7,9]
-						}, my_space)
-
-alg_BPWConv = Algorithm("BPWConv", 
-						{	"d":	None, 
-							"b":	[1,2,4], 
-							"k":	[32,64,128,256,512,1024], 
-							"c":	[3,32,64,128,256,512,1024], 
-							"y":	[2,4,8,16,32], 
-							"x":	[2,4,8,16,32], 
-							"fy":	None, 
-							"fx":	None 
-						}, my_space)
-
-alg_BMM = Algorithm("BMM", 
-						{	"d":	None, 
-							"b":	[1,2,4,8,16], 
-							"k":	[32,64,128,256,512,1024,2048], 
-							"c":	[32,64,128,256,512,1024,2048], 
-							"y":	None, 
-							"x":	[32,64,128,256,512,1024,2048], 
-							"fy":	None, 
-							"fx":	None 
-						}, my_space)
-
-algs = [alg_BSConv, alg_BDWConv, alg_BPWConv, alg_BMM]
-for alg in algs:
-	alg.print_param_dic()
-	print(alg.case_gen(5))
-	print()
-
-arch_MLBlock = Arch("MLBlock", 
-			{
-				"conf_0_0" : {
-					"d":	4,
-					"b":	1,
-					"k":	1,
-					"c":	1,
-					"y":	1,
-					"x":	1,
-					"fy":	1,
-					"fx":	3
-				},
-				"conf_0_1" : {
-					"d":	1,
-					"b":	4,
-					"k":	1,
-					"c":	1,
-					"y":	1,
-					"x":	1,
-					"fy":	1,
-					"fx":	3
-				},
-				"conf_0_2" : {
-					"d":	1,
-					"b":	1,
-					"k":	4,
-					"c":	1,
-					"y":	1,
-					"x":	1,
-					"fy":	1,
-					"fx":	3
-				},
-				"conf_1" : {
-					"d":	1,
-					"b":	1,
-					"k":	3,
-					"c":	4,
-					"y":	1,
-					"x":	1,
-					"fy":	1,
-					"fx":	1
-				},
-			}, 
-			my_space)
-
-#for conf in arch_MLBlock.confs:
-#	arch_MLBlock.confs[conf].print_param_dic()
-arch_MLBlock.print_configs()
-
-print (arch_MLBlock.rate_arch(algs))
-
-
-
-
-#def util_rate(alg_sample, conf_sample):
-#	alg_mac = arr2prod(alg_sample)
-#	conf_mac = arr2prod(conf_sample)
-#
-#	conf_iter = arr2prod(np.ceil(alg_sample / conf_sample))
-#
-#	return alg_mac / (conf_mac * conf_iter)
-#
-#alg  = np.array([1, 200, 5, 5, 5, 1])
-#conf = np.array([1, 3,   1, 1, 3, 1])
-#rate = util_rate(alg, conf)
-#print ("rate: %f" % (rate))
-
-
-# main 
-# setup space and algorithms.
-# for loop for different architectures
-#		measure the feasiblity and cost function for that
-# pich top few ones. 
+	
