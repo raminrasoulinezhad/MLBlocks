@@ -107,10 +107,6 @@ class Config(Space):
 						self.IO_Comp_spaces[j]["size"] *= self.param_dic[i].vals
 					self.IO_Comp_spaces[j]["dic"][i] = self.param_dic[i].vals
 
-		for i in self.IO_Comp_spaces:
-			print(str(i) + 	str(self.IO_Comp_spaces[i]))
-		print("****")
-
 	def print_IO_Comp_spaces(self):
 		for i in self.IO_Comp_spaces:
 			print(str(i) + 	str(self.IO_Comp_spaces[i]))
@@ -157,12 +153,17 @@ class Arch(Space):
 					conf_dic, 
 					space, 
 					stationary="W",						# W, I, O
-					precisions=	{	"I" : 8,
+					precisions=	{	
+									"I" : 8,
 									"W" : 8,
 									"O" : 32,
 								},
-					nmac=8,
-					limits= {	"IO_I" : 36,
+					size=	{	
+								"x" : 3,
+								"y" : 4,
+							},
+					limits=	{	
+								"IO_I" : 36,
 								"IO_W" : None,
 								"IO_O" : None,
 								"IO" : 48+30+18+27+48 	# = DSP48_out + DSP48_A + DSP48_B + DSP48_C + DSP48_D
@@ -173,21 +174,59 @@ class Arch(Space):
 
 		self.stationary = stationary	
 		self.precisions = precisions
-		self.nmac = nmac
+
+		self.space = space
+
+		self.size = size
+		self.nmac = size["x"] * size["y"]
+
+		
 		self.limits = limits
 
 		self.confs = {}
 		
-		if conf_dic == None:
-			self.gen_all_config(space)
-		else:
+		if conf_dic != None:
 			for i in conf_dic:
 				self.confs[i] = Config(i, conf_dic[i], space, stationary, precisions, limits)
+
+	def explore_config(self, algs_light, verbose=True):
+		# generate all possible configs (considering IO, # of MACs limits)
+		self.gen_all_config(self.space)
+		#self.print_confs()
+		print_("%d configurations are generated - cisidering IO limits" % (len(self.confs)), verbose)
+
+		# measure the configuration scheduling abilities
+		print_("Scoring the configurations regarding scheduling is started. Wait!", verbose)		
+		rates = self.rate_arch(algs_light)
+		for rate in rates:
+			print ("Algorithm name: %-10s  %.5f" % (rate, rates[rate]))
+
+		# remove non-used configs (non-used means it never ever used as the best case of scheduling for any benchmark points)
+		print_("Removing non-used configurations.", verbose)	
+		list_to_remove = []
+		for conf in self.confs:
+			#print(self.confs[conf].score)
+			if self.confs[conf].score == 0:
+				list_to_remove.append(conf)
+
+		for conf in list_to_remove:
+			del self.confs[conf]
+
+		self.reset_confs_score()
+		print_("Remaining configurations: %5d" % (len(self.confs)), verbose)
+
+		# print the remain configs
+		print_("\n***** Selected configurations *****\n", verbose)
+		self.print_confs()
+		# print dot product shapes
+		self.print_confs(type="IW")
+
 
 	def gen_all_config(self, space):
 
 		temp_dic = copy.deepcopy(space.param_dic)
 
+		self.confs = {}
 		conf_counter = 0
 		for case in param_gen_const_product(space.size, self.nmac):
 			

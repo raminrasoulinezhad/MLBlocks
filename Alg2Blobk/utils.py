@@ -52,6 +52,10 @@ def fill_dic_by_array(dic, arr):
 		counter += 1
 	return dic
 
+def print_(string, v):
+	if v:
+		print(string)
+
 if __name__ == "__main__":
 	print (check_presence("I", "IOW")) 	# True expected
 	print (check_presence("IW", "IOW")) # True expected

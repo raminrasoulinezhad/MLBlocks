@@ -1,6 +1,7 @@
 from models import *
 from benchmark_space import * 
 
+'''
 arch_MLBlock = Arch("MLBlock", 
 			{
 				"conf_0_0" : {
@@ -44,28 +45,47 @@ arch_MLBlock = Arch("MLBlock",
 					"fx":	1
 				},
 			}, 
-			my_space)
+			my_space,
+			stationary="W",
+			precisions=	{	
+							"I" : 8,
+							"W" : 8,
+							"O" : 32,
+						},
+			size=	{
+						"x" : 3,
+						"y" : 4,
+					},
+			limits= {	
+						"IO_I" : 36,
+						"IO_W" : None,
+						"IO_O" : 32*4,
+						"IO" : None,
+					}
+			)
+'''
 
 arch_all = Arch("all", 
 			None, 
 			my_space,
-
 			stationary="W",
-			precisions=	{	"I" : 8,
+			precisions=	{	
+							"I" : 8,
 							"W" : 8,
 							"O" : 32,
 						},
-			nmac=8,
-			limits= {	"IO_I" : 36,
+			size=	{
+						"x" : 3,
+						"y" : 4,
+					},
+			limits= {	
+						"IO_I" : 36,
 						"IO_W" : None,
 						"IO_O" : 32*4,
-
-						"IO" : None,
-						#"IO" : 48+30+18+27+48 # = DSP48_out + DSP48_A + DSP48_B + DSP48_C + DSP48_D
+						"IO" : None, 	# 48+30+18+27+48 # = DSP48_out + DSP48_A + DSP48_B + DSP48_C + DSP48_D
 					}
 			)
 
 if __name__ == "__main__":
-
 	arch_MLBlock.print_confs()
 	print (arch_MLBlock.rate_arch(algs))
