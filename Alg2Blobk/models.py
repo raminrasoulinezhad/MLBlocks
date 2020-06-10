@@ -219,7 +219,11 @@ class Arch(Space):
 		print_("\n***** Selected configurations *****\n", verbose)
 		self.print_confs()
 		# print dot product shapes
-		self.print_confs(type="IW")
+		self.print_confs(cat=["IW"])
+
+		# implementation configurations
+		print_("\n***** creating implementation configurations *****\n", verbose)
+		self.gen_imp_confs()
 
 
 	def gen_all_config(self, space):
@@ -264,26 +268,94 @@ class Arch(Space):
 		return rate_algs
 	
 	def util_rate(self, alg_p_dic, conf_p_dic):
-
-		alg_arr = np.array([])
-		conf_arr = np.array([])
-		for p in alg_p_dic:
-			alg_arr = np.append(alg_arr, alg_p_dic[p])
-			conf_arr = np.append(conf_arr, conf_p_dic[p])
+		alg_arr = dic2nparr(alg_p_dic)
+		conf_arr = dic2nparr(conf_p_dic)
 
 		alg_mac = arr2prod(alg_arr)
 		conf_mac = arr2prod(conf_arr)
-
 		conf_iter = arr2prod(np.ceil(alg_arr / conf_arr))
 
 		return alg_mac / (conf_mac * conf_iter)
 
-	def print_confs(self, type=None):
+	def print_confs(self, cat=None):
 		for conf in self.confs:
-			self.confs[conf].print_param_dic(type)
+			if type(cat) is list:
+				for c in cat:
+					self.confs[conf].print_param_dic(c)
+			else:
+				self.confs[conf].print_param_dic(cat)
 
 	def reset_confs_score(self):
 		for conf in self.confs:
 			self.confs[conf].reset_score()
 
 	
+	def gen_imp_confs(self):
+		self.confs_imp = {
+						"00":{	"P": self.size["y"],
+								"N": 1,
+								"W": self.size["x"],
+								"in_flex": 0,
+								"out_flex": 0,
+								"nes" : False,
+								"confs": [],
+								"scales": []
+							},
+						"01":{	"P": self.size["x"],
+								"N": self.size["y"],
+								"W": 1,
+								"in_flex": 0,
+								"out_flex": 1,
+								"nes" : False,
+								"confs": [],
+								"scales": []
+							},
+						"10":{	"P": self.size["x"],
+								"N": 1,
+								"W": self.size["y"],
+								"in_flex": 1,
+								"out_flex": 0,
+								"nes" : False,
+								"confs": [],
+								"scales": []
+							},
+						"11":{	"P": self.size["y"],
+								"N": self.size["x"],
+								"W": 1,
+								"in_flex": 1,
+								"out_flex": 1,
+								"nes" : False,
+								"confs": [],
+								"scales": []
+							}
+						}
+
+		for conf in self.confs:
+			dic = {	"P": 1,		# Parallel
+					"N": 1,		# Normal/Non-windowed
+					"W": 1}		# Windowed
+					
+			for p in self.confs[conf].param_dic:
+				if self.confs[conf].param_dic[p].type != "IW":
+					dic["P"] *=  self.confs[conf].param_dic[p].vals
+				elif self.confs[conf].param_dic[p].window_en != True:
+					dic["N"] *=  self.confs[conf].param_dic[p].vals
+				else:
+					dic["W"] *=  self.confs[conf].param_dic[p].vals
+
+			necessary = []
+			for conf_imp in self.confs_imp:
+				scale = check_scale_P_N_W(self.confs_imp[conf_imp], dic)
+				
+				if scale != None:
+					self.confs_imp[conf_imp]["confs"].append(conf)
+					necessary.append(conf_imp)
+					if scale not in self.confs_imp[conf_imp]["scales"]:
+						self.confs_imp[conf_imp]["scales"].append(scale)
+			
+			if len(necessary) == 1:
+				self.confs_imp[necessary[0]]["nes"] = True
+
+		for conf_imp in self.confs_imp:
+			print(str(conf_imp) + "  " + str(self.confs_imp[conf_imp]))
+

@@ -56,6 +56,33 @@ def print_(string, v):
 	if v:
 		print(string)
 
+def dic2nparr(dic):
+	arr = np.array([])
+	for p in dic:
+		arr = np.append(arr, dic[p])
+	return arr
+
+def check_scale_P_N_W(dic1, dic2):
+	#rate_P = dic2["P"] / dic1["P"]
+	rate_N = dic2["N"] / dic1["N"]
+	rate_W = dic2["W"] / dic1["W"]
+	print (rate_N, rate_W)
+
+	if ((dic2["N"] == 1) and (rate_N < 1.0)):
+		return None
+	elif ((dic2["W"] == 1) and (rate_W < 1.0)):
+		return None
+	elif ((isround(rate_N) or isround(1/rate_N)) and (isround(rate_W) or isround(1/rate_W))):
+		return (rate_N, rate_W)
+	else:
+		return None
+
+def isround(num):
+	if np.floor(num) == num:
+		return True
+	return False
+
+
 if __name__ == "__main__":
 	print (check_presence("I", "IOW")) 	# True expected
 	print (check_presence("IW", "IOW")) # True expected
@@ -68,3 +95,6 @@ if __name__ == "__main__":
 	print (check_equality("IOWL", "IOW")) 	# False expected
 	print()
 	print(param_gen_const_product(4, 12))
+	print(isround(1.5))					# False is expected
+	print(isround(2))					# True is expected
+	print(isround(2.0))					# True is expected
