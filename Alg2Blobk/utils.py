@@ -66,7 +66,6 @@ def check_scale_P_N_W(dic1, dic2):
 	#rate_P = dic2["P"] / dic1["P"]
 	rate_N = dic2["N"] / dic1["N"]
 	rate_W = dic2["W"] / dic1["W"]
-	print (rate_N, rate_W)
 
 	if ((dic2["N"] == 1) and (rate_N < 1.0)):
 		return None
@@ -82,19 +81,82 @@ def isround(num):
 		return True
 	return False
 
+def pick_optimum_necessary_cols(table, costs):
+	size = table.shape
+	if size[0] == 0:
+		return np.array([]), 0
+
+	for row in table:
+		if np.sum(row) == 0:
+			return None, -1
+
+	if size[1] == 1:
+		return np.array([0]), costs[0]
+	else:
+		# find smaller table shape
+		table_s_wf = np.array([])
+		for row in table:
+			if row[0] == 0:
+				if len(table_s_wf) == 0:
+					table_s_wf = np.reshape(np.array(row[1:]), (1,-1))
+				else:
+					table_s_wf = np.append(table_s_wf, np.reshape(row[1:], (1,-1)), axis=0)
+		
+		table_s_nf = table[:,1:]
+
+		cols_wf, costs_wf = pick_optimum_necessary_cols(table_s_wf, costs[1:])
+		cols_nf, costs_nf = pick_optimum_necessary_cols(table_s_nf, costs[1:])
+		
+		if costs_wf != -1:
+			cols_wf = np.append([0], (cols_wf + 1))
+			costs_wf += costs[0]
+
+		if costs_nf != -1:
+			cols_nf = cols_nf + 1
+
+		if costs_wf == -1: 
+			return cols_nf, costs_nf
+		elif costs_nf == -1:
+			return cols_wf, costs_wf
+		else:
+			if (costs_wf >= costs_nf):
+				return cols_nf, costs_nf
+			else:
+				return cols_wf, costs_wf
+
+
 
 if __name__ == "__main__":
-	print (check_presence("I", "IOW")) 	# True expected
-	print (check_presence("IW", "IOW")) # True expected
-	print (check_presence("IX", "IOW")) # False expected
-	print (check_presence("O", "IOW")) 	# True expected
-	print()
-	print (check_equality("OI", "IOW")) 	# False expected
-	print (check_equality("IOW", "IOW")) 	# True expected
-	print (check_equality("WIO", "IOW")) 	# True expected
-	print (check_equality("IOWL", "IOW")) 	# False expected
-	print()
+	print(check_presence("I", "IOW")) 	# True expected
+	print(check_presence("IW", "IOW")) # True expected
+	print(check_presence("IX", "IOW")) # False expected
+	print(check_presence("O", "IOW")) 	# True expected
+	print("********")
+	print(check_equality("OI", "IOW")) 	# False expected
+	print(check_equality("IOW", "IOW")) 	# True expected
+	print(check_equality("WIO", "IOW")) 	# True expected
+	print(check_equality("IOWL", "IOW")) 	# False expected
+	print("********")
 	print(param_gen_const_product(4, 12))
 	print(isround(1.5))					# False is expected
 	print(isround(2))					# True is expected
 	print(isround(2.0))					# True is expected
+	print("********")
+	costs = np.array(
+				[2,1,2,1,2,1,4,1,4,1,4])
+	table = np.array([
+				[0,0,1,0,0,0,1,0,0,1,0],
+				[0,0,0,0,0,0,0,0,0,1,0],
+				[0,1,1,1,0,0,0,0,0,1,0],
+				[0,0,0,1,0,0,1,0,1,1,0],
+				[0,1,1,1,0,0,1,0,1,1,0],
+				[0,1,0,1,0,0,0,0,1,0,0],
+				[0,1,0,0,0,0,0,0,0,0,0],
+				[0,0,0,0,0,0,0,0,1,0,0],
+				[0,1,1,0,0,0,1,0,1,1,0],
+			])
+	cols, cost = pick_optimum_necessary_cols(table, costs)
+	print("cols costs: \n " + str(costs))
+	print("table: \n" + str(table))
+	print("selected cols: \t" + str(cols))			# [1 8 9] 
+	print("selected costs: \t" + str(cost))			# 6
