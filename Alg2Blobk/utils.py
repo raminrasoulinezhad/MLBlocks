@@ -1,4 +1,6 @@
 import numpy as np
+import random
+import time
 
 def None2one(arr):
 	arr = [i if i !=None else 1 for i in arr]
@@ -86,9 +88,9 @@ def pick_optimum_necessary_cols(table, costs):
 	if size[0] == 0:
 		return np.array([]), 0
 
-	for row in table:
-		if np.sum(row) == 0:
-			return None, -1
+	table_r = np.sum(table, axis=1)
+	if not all(table_r):
+		return None, -1
 
 	if size[1] == 1:
 		return np.array([0]), costs[0]
@@ -158,5 +160,18 @@ if __name__ == "__main__":
 	cols, cost = pick_optimum_necessary_cols(table, costs)
 	print("cols costs: \n " + str(costs))
 	print("table: \n" + str(table))
-	print("selected cols: \t" + str(cols))			# [1 8 9] 
-	print("selected costs: \t" + str(cost))			# 6
+	print("selected cols: \t" + str(cols))			# expected [1 8 9] 
+	print("selected costs: \t" + str(cost))			# expected 6
+
+	for w in [10, 15, 20]:
+		for h in [100, 1000, 10000]:
+			#costs = np.array(random.randint(w))
+			#table = np.array(random.randint(h, w))
+			costs =	np.random.randint(2, size=(w))
+			table =	np.random.randint(2, size=(h,w))
+			
+			start = time.time()
+			cols, cost = pick_optimum_necessary_cols(table, costs)			
+			end = time.time()
+
+			print("pick_optimum_necessary_cols for w:%d\th:%-8d\ttime:%f," % (w,h,end - start))
