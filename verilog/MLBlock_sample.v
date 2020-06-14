@@ -4,18 +4,17 @@ module MLBlock_sample (
 
 		hp_en,
 
-		a, 
 		a_en,
-
+		a, 
+		
+		b_en,
 		b,
 		b_cas_in,
 		b_cas_out,
-		b_en,
-
+		
 		acc_en,
-		res_out,
-
 		res_cas_in,
+		res_out,
 		res_cas_out,
 
 		config_en,
@@ -27,6 +26,10 @@ module MLBlock_sample (
 	///////// Parameters
 	parameter PE_W = 3;
 	parameter PE_H = 4; //4
+
+	parameter FLEX_A   = "FIXED_H";		// "FIXED_H", "FIXED_V", "FLEXIBLE"
+	parameter FLEX_B   = "FIXED_V";		// "FIXED_V"
+	parameter FLEX_RES = "FLEXIBLE";	// "FIXED_H", "FIXED_V", "FLEXIBLE"
 
 	parameter PR_CAS = (PE_W > PE_H) ? PE_W : PE_H;
 
@@ -68,6 +71,10 @@ module MLBlock_sample (
 	defparam MLBlock_inst.PE_W = PE_W;
 	defparam MLBlock_inst.PE_H = PE_H;
 
+	defparam MLBlock_inst.FLEX_A = FLEX_A;
+	defparam MLBlock_inst.FLEX_B = FLEX_B;
+	defparam MLBlock_inst.FLEX_RES = FLEX_RES;
+
 	defparam MLBlock_inst.A_W = A_W;
 	defparam MLBlock_inst.A_D = A_D;
 	defparam MLBlock_inst.B_W = B_W;
@@ -81,19 +88,19 @@ module MLBlock_sample (
 
 		.hp_en(hp_en),
 
+		.a_en(a_en),
 		.a(a), 
 		.a_out(),
-		.a_en(a_en),
-
+		
+		.b_en(b_en),
 		.b(b),
 		.b_cas_in(b_cas_in),
+		.b_out(),
 		.b_cas_out(b_cas_out),
-		.b_en(b_en),
-
+		
 		.acc_en(acc_en),
-		.res_out(res_out),
-
 		.res_cas_in(res_cas_in),
+		.res_out(res_out),
 		.res_cas_out(res_cas_out),
 
 		.config_en(config_en),

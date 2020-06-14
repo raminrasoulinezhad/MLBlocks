@@ -7,15 +7,11 @@ module accumulator (
 		acc_mode,
 		acc_depth,
 
-		res_in_select,
-		res_in_h,
-		res_in_v,
+		res_in,
 
 		shifter_res,
 
-		res_out_h,
-		res_out_v
-
+		res_out
 	);
 	
 	///////// Parameters
@@ -33,23 +29,17 @@ module accumulator (
 	input acc_mode;
 	input [DEPTH_CNTL-1:0] acc_depth;
 
-	input res_in_select;
-	input signed [WIDTH-1:0] res_in_h;
-	input signed [WIDTH-1:0] res_in_v;
+	input signed [WIDTH-1:0] res_in;
 
 	input signed [WIDTH-1:0] shifter_res;
 
-	output signed [WIDTH-1:0] res_out_h;
-	output signed [WIDTH-1:0] res_out_v;
+	output signed [WIDTH-1:0] res_out;
 
 	///////// internal signals
-	wire [WIDTH-1:0] res_in;
 
 	reg signed [WIDTH-1:0] acc [DEPTH-1:0];
 	wire signed [WIDTH-1:0] acc_in;
 	reg signed [WIDTH-1:0] acc_temp [DEPTH-1:0];
-
-	assign res_in = (res_in_select == 1'b1) ? res_in_v : res_in_h;
 
 	generate  
 		if (TYPE == "FEEDBACK") begin 
@@ -82,7 +72,6 @@ module accumulator (
 		end
 	end 
 
-	assign res_out_h = acc_temp[DEPTH-1];
-	assign res_out_v = acc_temp[DEPTH-1];
+	assign res_out = acc_temp[DEPTH-1];
 
 endmodule 

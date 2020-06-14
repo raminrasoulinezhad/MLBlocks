@@ -4,19 +4,19 @@ module MLBlock (
 
 		hp_en,
 
+		a_en,
 		a, 
 		a_out,
-		a_en,
 
+		b_en,
 		b,
 		b_cas_in,
+		b_out,
 		b_cas_out,
-		b_en,
-
+		
 		acc_en,
-		res_out,
-
 		res_cas_in,
+		res_out,
 		res_cas_out,
 
 		config_en,
@@ -29,7 +29,28 @@ module MLBlock (
 	parameter PE_W = 3;
 	parameter PE_H = 4;
 
-	localparam PR_CAS = (PE_W > PE_H) ? PE_W : PE_H;
+	parameter FLEX_A   = "FIXED_H";		// "FIXED_H", "FIXED_V", "FLEXIBLE"
+	parameter FLEX_B   = "FIXED_V";		// "FIXED_V"
+	parameter FLEX_RES = "FLEXIBLE";	// "FIXED_H", "FIXED_V", "FLEXIBLE"
+
+	function integer port_sizer; 
+		input [40*8:0] str;
+		input integer pe_w;
+		input integer pe_h;
+		if (str == "FLEXIBLE") begin
+			port_sizer = (pe_h > pe_w)? pe_h : pe_w;
+		end else if (str == "FIXED_H") begin 
+			port_sizer = pe_h;
+		end else if (str == "FIXED_V") begin 
+			port_sizer = pe_w;
+		end else begin 
+			port_sizer = -1;
+		end 
+	endfunction
+
+	localparam PORT_A_SIZE   = port_sizer(FLEX_A,   PE_W, PE_H);
+	localparam PORT_B_SIZE   = port_sizer(FLEX_B,   PE_W, PE_H);
+	localparam PORT_RES_SIZE = port_sizer(FLEX_RES, PE_W, PE_H);
 
 	parameter A_W = 8;
 	parameter A_D = 4;
@@ -51,20 +72,20 @@ module MLBlock (
 
 	input hp_en;
 
-	input [PE_H*A_W-1:0] a;
-	output [PE_H*A_W-1:0] a_out;
 	input a_en;
-
-	input [PE_W*B_W-1:0] b;
-	input [PE_W*B_W-1:0] b_cas_in;
-	output [PE_W*B_W-1:0] b_cas_out;
+	input [PORT_A_SIZE*A_W-1:0] a;
+	output [PORT_A_SIZE*A_W-1:0] a_out;
+	
 	input b_en;
-
+	input [PORT_B_SIZE*B_W-1:0] b;
+	input [PORT_B_SIZE*B_W-1:0] b_cas_in;
+	output [PORT_B_SIZE*B_W-1:0] b_out;
+	output [PORT_B_SIZE*B_W-1:0] b_cas_out;
+	
 	input acc_en;
-	output [PR_CAS*RES_W-1:0] res_out;
-
-	input [PR_CAS*RES_W-1:0] res_cas_in;
-	output [PR_CAS*RES_W-1:0] res_cas_out;
+	input [PORT_RES_SIZE*RES_W-1:0] res_cas_in;
+	output [PORT_RES_SIZE*RES_W-1:0] res_out;
+	output [PORT_RES_SIZE*RES_W-1:0] res_cas_out;
 
 	input config_en;
 	input config_in;
@@ -72,10 +93,11 @@ module MLBlock (
 
 	///////// Configurations
 	reg [A_D_HALF-1:0] conf_a_mux;
-	reg conf_res_in_select;
+	reg conf_a_in_select;		// for primary model: fixed 0 (Horizontal)
+	reg conf_b_in_select;		// for primary model: fixed 1 (Vertical)
+	reg conf_res_in_select;		
 	reg conf_res_cas_in_zero;
-	reg conf_res_cas_h_v;
-	reg conf_b_cas;
+	reg conf_b_cas_in_select;
 	reg [ACC_D_CNTL-1:0] conf_acc_depth;
 
 	integer l, m;
@@ -85,26 +107,29 @@ module MLBlock (
 			for (l = 1; l < A_D_HALF; l = l + 1)begin
 				conf_a_mux[l] <= conf_a_mux[l-1];
 			end 
-			conf_res_in_select <= conf_a_mux[A_D_HALF-1];
+			conf_a_in_select <= conf_a_mux[A_D_HALF-1];
+			conf_b_in_select <= conf_a_in_select;
+			conf_res_in_select <= conf_b_in_select;
 			conf_res_cas_in_zero <= conf_res_in_select;
-			conf_res_cas_h_v <= conf_res_cas_in_zero;
-			conf_b_cas <= conf_res_cas_h_v;
-			conf_acc_depth[0] <= conf_b_cas;
+			conf_b_cas_in_select <= conf_res_cas_in_zero;
+			conf_acc_depth[0] <= conf_b_cas_in_select;
 			for (m = 1; m < ACC_D_CNTL; m = m + 1)begin
 				conf_acc_depth[m] <= conf_acc_depth[m-1];
 			end 
 		end
 	end 
 	wire config_in_pes;
-	assign config_in_pes = (ACC_D > 1) ? conf_acc_depth[ACC_D_CNTL-1] : conf_b_cas;
+	assign config_in_pes = (ACC_D > 1) ? conf_acc_depth[ACC_D_CNTL-1] : conf_b_cas_in_select;
 
 	///////// internal signals
-	wire [RES_W-1:0] res_cas_in_temp [PR_CAS-1:0];
+	wire [A_W-1:0] a_in_h_temp [PE_H-1:0][PE_W:0];
+	wire [A_W-1:0] a_in_v_temp [PE_H:0][PE_W-1:0];
 
-	wire [A_W-1:0] a_temp [PE_H-1:0][PE_W:0];
+	wire [B_W-1:0] b_in_temp [PORT_B_SIZE-1:0];
+	wire [B_W-1:0] b_in_h_temp [PE_H-1:0][PE_W:0];
+	wire [B_W-1:0] b_in_v_temp [PE_H:0][PE_W-1:0];
 
-	wire [B_W-1:0] b_temp [PE_H:0][PE_W-1:0];
-
+	wire [RES_W-1:0] res_cas_in_temp [PORT_RES_SIZE-1:0];
 	wire [RES_W-1:0] res_in_h_temp [PE_H-1:0][PE_W:0];
 	wire [RES_W-1:0] res_in_v_temp [PE_H:0][PE_W-1:0];
 
@@ -113,20 +138,34 @@ module MLBlock (
 	genvar i,j,k;
 	generate 
 		
-		for (k = 0; k < PR_CAS; k = k + 1) begin 
+		for (k = 0; k < PORT_RES_SIZE; k = k + 1) begin 
 			
 			assign res_cas_in_temp[k] = (conf_res_cas_in_zero) ? 0 : res_cas_in[(k+1)*RES_W-1:k*RES_W];
 
 			if (k > (PE_H-1)) begin 
-				assign res_cas_out[(k+1)*RES_W-1:k*RES_W] = res_in_v_temp[PE_H][k]; 
+				assign res_out[(k+1)*RES_W-1:k*RES_W] = res_in_v_temp[PE_H][k]; 
 			end else if (k > (PE_W-1)) begin 
-				assign res_cas_out[(k+1)*RES_W-1:k*RES_W] = res_in_h_temp[k][PE_W]; 
+				assign res_out[(k+1)*RES_W-1:k*RES_W] = res_in_h_temp[k][PE_W]; 
 			end else begin 
-				assign res_cas_out[(k+1)*RES_W-1:k*RES_W] = (conf_res_cas_h_v) ? res_in_v_temp[PE_H][k]: res_in_h_temp[k][PE_W]; 
+				assign res_out[(k+1)*RES_W-1:k*RES_W] = (conf_res_in_select) ? res_in_v_temp[PE_H][k]: res_in_h_temp[k][PE_W]; 
 			end 
 			
-			assign res_out[(k+1)*RES_W-1:k*RES_W] = res_cas_out[(k+1)*RES_W-1:k*RES_W];
+			assign res_cas_out[(k+1)*RES_W-1:k*RES_W] = res_out[(k+1)*RES_W-1:k*RES_W];
 		end 
+		
+		for (k = 0; k < PORT_B_SIZE; k = k + 1) begin 
+			assign b_in_temp[k] = (conf_b_cas_in_select) ? b_cas_in[(k+1)*B_W-1:k*B_W] : b[(k+1)*B_W-1:k*B_W];
+
+			if (k > (PE_H-1)) begin 
+				assign b_out[(k+1)*B_W-1:k*B_W] = b_in_v_temp[PE_H][k]; 
+			end else if (k > (PE_W-1)) begin 
+				assign b_out[(k+1)*B_W-1:k*B_W] = b_in_h_temp[k][PE_W]; 
+			end else begin 
+				assign b_out[(k+1)*B_W-1:k*B_W] = (conf_b_in_select) ? b_in_v_temp[PE_H][k]: b_in_h_temp[k][PE_W]; 
+			end 
+
+			assign b_cas_out[(k+1)*B_W-1:k*B_W] = b_out[(k+1)*B_W-1:k*B_W];
+		end 		
 
 		assign config_in_temp[0][0] = config_in_pes;
 
@@ -146,21 +185,33 @@ module MLBlock (
 
 					.hp_en(hp_en),
 
-					.a(a_temp[i][j]),
+					.a_in_select(conf_a_in_select),
+					.a_in_h(a_in_h_temp[i][j]),
+					.a_in_v(a_in_v_temp[i][j]),
+
 					.a_en(a_en),
 					.a_mux(conf_a_mux),
-					.a_out(a_temp[i][j+1]),
 
-					.b(b_temp[i+1][j]),
+					.a_out_h(a_in_h_temp[i][j+1]),
+					.a_out_v(a_in_v_temp[i+1][j]),
+
+
+					.b_in_select(conf_b_in_select),
+					.b_in_h(b_in_h_temp[i][j]),
+					.b_in_v(b_in_v_temp[i+1][j]),
+					
 					.b_en(b_en),
-					.b_out(b_temp[i][j]),
+					
+					.b_out_h(b_in_h_temp[i][j+1]),
+					.b_out_v(b_in_v_temp[i][j]),
 
-					.acc_en(acc_en),
-					.acc_depth(conf_acc_depth),
 
 					.res_in_select(conf_res_in_select),
 					.res_in_h(res_in_h_temp[i][j]),
 					.res_in_v(res_in_v_temp[i][j]),
+
+					.acc_en(acc_en),
+					.acc_depth(conf_acc_depth),
 
 					.res_out_h(res_in_h_temp[i][j+1]),
 					.res_out_v(res_in_v_temp[i+1][j]),
@@ -172,17 +223,46 @@ module MLBlock (
 
 
 				if (j == 0) begin 
-					assign a_temp[i][j] = a[(i+1)*A_W-1:i*A_W];
-					assign res_in_h_temp[i][j] = res_cas_in_temp[i];
+					if (FLEX_A != "FIXED_V") begin 
+						assign a_in_h_temp[i][j] = a[(i+1)*A_W-1:i*A_W];
+					end else begin
+						assign a_in_h_temp[i][j] = 0;
+					end 
+
+					if (FLEX_B != "FIXED_V") begin 
+						assign b_in_h_temp[i][j] = b_in_temp[i];
+					end else begin
+						assign b_in_h_temp[i][j] = 0;
+					end 		
+
+					if (FLEX_RES != "FIXED_V") begin 
+						assign res_in_h_temp[i][j] = res_cas_in_temp[i];
+					end else begin
+						assign res_in_h_temp[i][j] = 0;
+					end 			
 				end 
 
 				if (i == (PE_H-1)) begin 
-					assign b_temp[i+1][j] = (conf_b_cas) ? b_cas_in[(j+1)*B_W-1:j*B_W] : b[(j+1)*B_W-1:j*B_W];
+					//assign b_in_v_temp[i+1][j] = (conf_b_cas_in_select) ? b_cas_in[(j+1)*B_W-1:j*B_W] : b[(j+1)*B_W-1:j*B_W];
+					if (FLEX_B != "FIXED_H") begin 
+						assign b_in_v_temp[i+1][j] = b_in_temp[j];
+					end else begin
+						assign b_in_v_temp[i+1][j] = 0;
+					end 
 				end 
 
 				if (i == 0) begin 
-					assign res_in_v_temp[i][j] = res_cas_in_temp[j];
-					assign b_cas_out[(j+1)*B_W-1:j*B_W] = b_temp[i][j];
+					if (FLEX_A != "FIXED_H") begin 
+						assign a_in_v_temp[i][j] = a[(j+1)*A_W-1:j*A_W];
+					end else begin
+						assign a_in_v_temp[i][j] = 0;
+					end 				
+
+					if (FLEX_RES != "FIXED_H") begin 
+						assign res_in_v_temp[i][j] = res_cas_in_temp[j];
+					end else begin
+						assign res_in_v_temp[i][j] = 0;
+					end 
 				end 
 
 				if (j == (PE_W-1))begin
@@ -192,7 +272,7 @@ module MLBlock (
 						assign config_in_temp[i+1][0] = config_in_temp[i][j+1];
 					end 
 					
-					assign a_out[(i+1)*A_W-1:i*A_W] = a_temp[i][j+1];
+					assign a_out[(i+1)*A_W-1:i*A_W] = a_in_h_temp[i][j+1];
 				end 
 				
 			end 

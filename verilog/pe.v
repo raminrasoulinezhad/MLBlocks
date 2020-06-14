@@ -4,21 +4,34 @@ module pe (
 
 		hp_en,
 
-		a,
+
+		a_in_select,
+		a_in_h,
+		a_in_v,
+		
 		a_en,
 		a_mux,
-		a_out,
 
-		b,
+		a_out_h,
+		a_out_v,
+
+
+		b_in_select,
+		b_in_h,
+		b_in_v,
+
 		b_en,
-		b_out,
+		
+		b_out_h,
+		b_out_v,
 
-		acc_en,
-		acc_depth,
 
 		res_in_select,
 		res_in_h,
 		res_in_v,
+
+		acc_en,
+		acc_depth,
 
 		res_out_h,
 		res_out_v,
@@ -75,15 +88,27 @@ module pe (
 
 	input hp_en;
 	
-	input [A_W-1:0] a;
+	input a_in_select;
+	input [A_W-1:0] a_in_h;
+	input [A_W-1:0] a_in_v;
+	
 	input a_en;
 	input [A_D_HALF-1:0] a_mux;
-	output [A_W-1:0] a_out;
-
-	input [B_W-1:0] b;
-	input b_en;
-	output [B_W-1:0] b_out;
 	
+	output [A_W-1:0] a_out_h;
+	output [A_W-1:0] a_out_v;
+
+
+	input b_in_select;
+	input [B_W-1:0] b_in_h;
+	input [B_W-1:0] b_in_v;
+	
+	input b_en;
+	
+	output [B_W-1:0] b_out_h;
+	output [B_W-1:0] b_out_v;
+	
+
 	input acc_en;
 	input [ACC_D_CNTL-1:0] acc_depth;
 
@@ -100,6 +125,23 @@ module pe (
 
 	///////// internal signals
 	
+	wire [A_W-1:0] a;
+	wire [A_W-1:0] a_out;
+	assign a = (a_in_select == 1'b1) ? a_in_v : a_in_h; 
+	assign a_out_h = a_out;
+	assign a_out_v = a_out;
+
+	wire [B_W-1:0] b;
+	wire [B_W-1:0] b_out;
+	assign b = (b_in_select == 1'b1) ? b_in_v : b_in_h; 
+	assign b_out_h = b_out;
+	assign b_out_v = b_out;
+
+	wire [RES_W-1:0] res_in;
+	wire [RES_W-1:0] res_out;
+	assign res_in = (res_in_select == 1'b1) ? res_in_v : res_in_h;
+	assign res_out_h = res_out;
+	assign res_out_v = res_out;
 
 	wire [B_D_LOG2-1:0] b_addr;
 
@@ -187,15 +229,11 @@ module pe (
 		.acc_mode(acc_mode),
 		.acc_depth(acc_depth),
 		
-		.res_in_select(res_in_select),
-		.res_in_h(res_in_h),
-		.res_in_v(res_in_v),
+		.res_in(res_in),
 
 		.shifter_res(shifter_res),
 
-		.res_out_h(res_out_h),
-		.res_out_v(res_out_v)
-
+		.res_out(res_out)
 	);
 
 	defparam state_machine_inst.SHIFTER_TYPE = SHIFTER_TYPE;
