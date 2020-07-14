@@ -160,19 +160,19 @@ module pe (
 	wire acc_mode;
 	
 
-	defparam stream_flex_inst.A_W = A_W;
-	defparam stream_flex_inst.A_D = A_D;
+	defparam stream_flex_inst.WIDTH = A_W;
+	defparam stream_flex_inst.DEPTH = A_D;
 	stream_flex stream_flex_inst(
 		.clk(clk), 
 		.reset(reset),
 
-		.a(a),
-		.a_en(a_en),
+		.in(a),
+		.en(a_en),
 
-		.mult_out(mult_in_a),
+		.out(mult_in_a),
 
-		.a_mux(a_mux),
-		.a_out(a_out)
+		.depth(a_mux),
+		.cascade(a_out)
 	);
 
 	defparam stream_mem_inst.WIDTH = B_W;
