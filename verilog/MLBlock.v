@@ -22,8 +22,7 @@ module MLBlock (
 		config_en,
 		config_in,
 		config_out
-
-	);
+ 	);
 	
 	///////// Parameters
 	parameter PE_W = 3;
