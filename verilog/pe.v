@@ -175,19 +175,19 @@ module pe (
 		.a_out(a_out)
 	);
 
-	defparam stream_mem_inst.B_W = B_W;
-	defparam stream_mem_inst.B_D = B_D;
+	defparam stream_mem_inst.WIDTH = B_W;
+	defparam stream_mem_inst.DEPTH = B_D;
 	stream_mem stream_mem_inst (
 		.clk(clk), 
 		.reset(reset),
 
-		.b(b),
-		.b_en(b_en),
+		.in(b),
+		.en(b_en),
 
-		.mult_out(mult_in_b),
-		.b_addr(b_addr),
+		.addr(b_addr),
+		.out(mult_in_b),
 
-		.b_out(b_out)
+		.cascade(b_out)
 	);
 
 	defparam mult_flex_inst.A_W = A_W;
