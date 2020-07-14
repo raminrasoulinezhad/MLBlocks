@@ -225,13 +225,13 @@ module pe (
 		.clk(clk), 
 		.reset(reset),
 
+		.res_in(res_in),
 		.acc_en(acc_en),
+
 		.acc_mode(acc_mode),
 		.acc_depth(acc_depth),
-		
-		.res_in(res_in),
 
-		.shifter_res(shifter_res),
+		.res_mult(shifter_res),
 
 		.res_out(res_out)
 	);

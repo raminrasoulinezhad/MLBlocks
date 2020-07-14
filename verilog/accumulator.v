@@ -3,13 +3,13 @@ module accumulator (
 		clk, 
 		reset,
 
+		res_in,
 		acc_en,
+		
 		acc_mode,
 		acc_depth,
 
-		res_in,
-
-		shifter_res,
+		res_mult,
 
 		res_out
 	);
@@ -25,13 +25,13 @@ module accumulator (
 	input clk;
 	input reset;
 
+	input signed [WIDTH-1:0] res_in;
 	input acc_en;
+
 	input acc_mode;
 	input [DEPTH_CNTL-1:0] acc_depth;
 
-	input signed [WIDTH-1:0] res_in;
-
-	input signed [WIDTH-1:0] shifter_res;
+	input signed [WIDTH-1:0] res_mult;
 
 	output signed [WIDTH-1:0] res_out;
 
@@ -56,7 +56,7 @@ module accumulator (
 				acc[i] <= 0;
 			end 
 		end else if (acc_en) begin
-			acc[0] <= acc_in + shifter_res;
+			acc[0] <= acc_in + res_mult;
 
 			for (i = 1; i < DEPTH; i = i + 1) begin 
 				acc[i] <= acc_temp[i-1];
