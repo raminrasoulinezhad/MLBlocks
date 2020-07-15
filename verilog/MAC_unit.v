@@ -2,9 +2,8 @@ module MAC_unit (
 		clk, 
 		reset,
 
-		hp_en,
-
 		configg,
+		hp_en,
 
 		I_configs,
 		I_en,
@@ -38,6 +37,8 @@ module MAC_unit (
 	localparam W_D_LOG2 = $clog2(W_D);
 
 	parameter RES_W = 32;
+	parameter RES_D = 1;
+	localparam RES_D_CNTL = (RES_D > 1)? (RES_D-1): 1;
 
 	parameter SHIFTER_TYPE = "2Wx2V_by_WxV"; // "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv" 
 	
@@ -65,9 +66,6 @@ module MAC_unit (
 	localparam SHIFTER_OUT_WIDTH = RES_W;
 
 	localparam ACC_TYPE = (SHIFTER_TYPE == "BYPASS") ? ("FEEDFORWARD") : ("FEEDBACK");	// "FEEDBACK", "FEEDFORWARD"
-	localparam ACC_WIDTH = RES_W;
-	parameter ACC_D = 1;
-	localparam ACC_D_CNTL = (ACC_D > 1)? (ACC_D-1): 1;
 
 	///////// IOs
 	input clk;
@@ -88,7 +86,7 @@ module MAC_unit (
 
 	input [RES_W-1:0] Res_configs [N_OF_COFIGS-1:0];
 	input Res_en;
-	input [ACC_D_CNTL-1:0] Res_depth;
+	input [RES_D_CNTL-1:0] Res_depth;
 	output [RES_W-1:0] Res_cascade;
 
 	input config_en;
@@ -178,8 +176,8 @@ module MAC_unit (
 	);
 	
 	defparam accumulator_inst.TYPE = ACC_TYPE;
-	defparam accumulator_inst.WIDTH = ACC_WIDTH;
-	defparam accumulator_inst.DEPTH = ACC_D;
+	defparam accumulator_inst.WIDTH = RES_W;
+	defparam accumulator_inst.DEPTH = RES_D;
 	accumulator accumulator_inst(
 		.clk(clk), 
 		.reset(reset),
