@@ -69,9 +69,7 @@ module MLBlock_2Dflex (
 		end
 	end 
 
-	/// I_in_temp[PORT_A_SIZE], I_cascade[MAC_UNITS] ==> I_configs[MAC_UNITS][N_OF_COFIGS]
-	/// Res_cas_in_temp[PORT_RES_SIZE], Res_cascade[MAC_UNITS] ==> Res_configs[MAC_UNITS][N_OF_COFIGS] ==> Res_out_temp[PORT_RES_SIZE][N_OF_COFIGS-1:0]
-	// `include "bn1.sv"
+	`include "MLBlock_2Dflex_interconnects.sv"
 
 	///////// internal signals
 	wire [I_W-1:0] I_in_temp [PORT_A_SIZE-1:0];
