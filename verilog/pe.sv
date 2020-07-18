@@ -225,15 +225,15 @@ module pe (
 		.clk(clk), 
 		.reset(reset),
 
-		.res_in(res_in),
-		.acc_en(acc_en),
+		.Res_in(res_in),
+		.Res_en(acc_en),
 
-		.acc_mode(acc_mode),
-		.acc_depth(acc_depth),
+		.Res_mode(acc_mode),
+		.Res_depth(acc_depth),
 
-		.res_mult(shifter_res),
+		.mult_result(shifter_res),
 
-		.res_out(res_out)
+		.Res_cascade(res_out)
 	);
 
 	defparam state_machine_inst.SHIFTER_TYPE = SHIFTER_TYPE;

@@ -182,15 +182,15 @@ module MAC_unit (
 		.clk(clk), 
 		.reset(reset),
 
-		.res_in(Res_in),
-		.acc_en(Res_en),
+		.Res_in(Res_in),
+		.Res_en(Res_en),
 
-		.acc_mode(acc_mode),
-		.acc_depth(Res_depth),
+		.Res_mode(acc_mode),
+		.Res_depth(Res_depth),
 
-		.res_mult(shifter_res),
+		.mult_result(shifter_res),
 
-		.res_out(Res_cascade)
+		.Res_cascade(Res_cascade)
 	);
 
 	defparam state_machine_inst.SHIFTER_TYPE = SHIFTER_TYPE;

@@ -1,17 +1,16 @@
 module accumulator (
-
 		clk, 
 		reset,
 
-		res_in,
-		acc_en,
+		Res_in,
+		Res_en,
 		
-		acc_mode,
-		acc_depth,
+		Res_mode,
+		Res_depth,
 
-		res_mult,
+		mult_result,
 
-		res_out
+		Res_cascade
 	);
 	
 	///////// Parameters
@@ -25,15 +24,15 @@ module accumulator (
 	input clk;
 	input reset;
 
-	input signed [WIDTH-1:0] res_in;
-	input acc_en;
+	input signed [WIDTH-1:0] Res_in;
+	input Res_en;
 
-	input acc_mode;
-	input [DEPTH_CNTL-1:0] acc_depth;
+	input Res_mode;
+	input [DEPTH_CNTL-1:0] Res_depth;
 
-	input signed [WIDTH-1:0] res_mult;
+	input signed [WIDTH-1:0] mult_result;
 
-	output signed [WIDTH-1:0] res_out;
+	output signed [WIDTH-1:0] Res_cascade;
 
 	///////// internal signals
 
@@ -43,9 +42,9 @@ module accumulator (
 
 	generate  
 		if (TYPE == "FEEDBACK") begin 
-			assign acc_in = (acc_mode == 1'b0) ? res_in : acc[0];
+			assign acc_in = (Res_mode == 1'b0) ? Res_in : acc[0];
 		end else begin 
-			assign acc_in = res_in;
+			assign acc_in = Res_in;
 		end 
 	endgenerate
 
@@ -55,8 +54,8 @@ module accumulator (
 			for (i = 0; i < DEPTH; i = i + 1) begin 
 				acc[i] <= 0;
 			end 
-		end else if (acc_en) begin
-			acc[0] <= acc_in + res_mult;
+		end else if (Res_en) begin
+			acc[0] <= acc_in + mult_result;
 
 			for (i = 1; i < DEPTH; i = i + 1) begin 
 				acc[i] <= acc_temp[i-1];
@@ -68,10 +67,10 @@ module accumulator (
 	always @ (*)begin
 		acc_temp[0] = acc[0];
 		for (j = 1; j < DEPTH; j = j + 1) begin 
-			acc_temp[j] = (acc_depth[j-1]) ? acc[j] : acc_temp[j-1];
+			acc_temp[j] = (Res_depth[j-1]) ? acc[j] : acc_temp[j-1];
 		end
 	end 
 
-	assign res_out = acc_temp[DEPTH-1];
+	assign Res_cascade = acc_temp[DEPTH-1];
 
 endmodule 
