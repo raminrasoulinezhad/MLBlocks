@@ -2,7 +2,8 @@ module MAC_unit (
 		clk, 
 		reset,
 
-		configg,
+		config_I,
+		config_Res,
 		hp_en,
 
 		I_configs,
@@ -25,8 +26,10 @@ module MAC_unit (
 	);
 
 	///////// Parameters
-	parameter N_OF_COFIGS = 4;
-	localparam N_OF_COFIGS_LOG2 = $clog2(N_OF_COFIGS);
+	parameter N_OF_COFIGS_I = 4;
+	localparam N_OF_COFIGS_LOG2_I = $clog2(N_OF_COFIGS_I);
+	parameter N_OF_COFIGS_RES = 4;
+	localparam N_OF_COFIGS_LOG2_RES = $clog2(N_OF_COFIGS_RES);
 
 	parameter I_W = 8;
 	parameter I_D = 4;
@@ -73,9 +76,10 @@ module MAC_unit (
 
 	input hp_en;
 	
-	input [N_OF_COFIGS_LOG2-1:0] configg;
+	input [N_OF_COFIGS_LOG2_I-1:0] config_I;
+	input [N_OF_COFIGS_LOG2_RES-1:0] config_Res;
 		
-	input [I_W-1:0] I_configs [N_OF_COFIGS-1:0];
+	input [I_W-1:0] I_configs [N_OF_COFIGS_I-1:0];
 	input I_en;
 	input [I_D_HALF-1:0] I_mux;
 	output [I_W-1:0] I_cascade;
@@ -84,7 +88,7 @@ module MAC_unit (
 	input W_en;
 	output [W_W-1:0] W_out;
 
-	input [RES_W-1:0] Res_configs [N_OF_COFIGS-1:0];
+	input [RES_W-1:0] Res_configs [N_OF_COFIGS_RES-1:0];
 	input Res_en;
 	input [RES_D_CNTL-1:0] Res_depth;
 	output [RES_W-1:0] Res_cascade;
@@ -95,10 +99,10 @@ module MAC_unit (
 
 	///////// internal signals
 	wire [I_W-1:0] I_in;
-	assign I_in = I_configs[configg]; 
+	assign I_in = I_configs[config_I]; 
 
 	wire [RES_W-1:0] Res_in;
-	assign Res_in = Res_configs[configg];
+	assign Res_in = Res_configs[config_Res];
 
 	wire [W_D_LOG2-1:0] b_addr;
 
