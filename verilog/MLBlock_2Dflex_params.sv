@@ -4,8 +4,8 @@ parameter MAC_UNITS = 12;
 parameter N_OF_COFIGS = 3; 
 localparam N_OF_COFIGS_LOG2 = $clog2(N_OF_COFIGS); 
 
-parameter PORT_A_SIZE = 4; 
-parameter PORT_B_SIZE = 1;		// Other values are not supported 
+parameter PORT_I_SIZE = 4; 
+parameter PORT_W_SIZE = 1;		// Other values are not supported 
 parameter PORT_RES_SIZE = 4; 
 
 parameter I_W = 8; 

@@ -27,8 +27,8 @@ MAC_UNITS = 12
 
 N_OF_COFIGS = len(configs)
 
-PORT_A_SIZE   = 4
-PORT_B_SIZE   = 1		# Other values are not supported
+PORT_I_SIZE   = 4
+PORT_W_SIZE   = 1		# Other values are not supported
 PORT_RES_SIZE = 4
 
 I_W = 8
@@ -46,8 +46,8 @@ SHIFTER_TYPE = "2Wx2V_by_WxV"	# "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2
 
 '''
 # test 
-PORT_A_SIZE   = 16
-PORT_B_SIZE   = 1			# Other values are not supported
+PORT_I_SIZE   = 16
+PORT_W_SIZE   = 1			# Other values are not supported
 PORT_RES_SIZE = 16
 
 MAC_UNITS = 32
@@ -143,7 +143,7 @@ def get_IO_index(mac_index, config_base, step, mode="I"):
 	else:
 		raise Exception("get_IO_index does not support mode = %s" % (mode))
 
-def gen_interconnections(file_name, configs, PORT_A_SIZE, PORT_B_SIZE, PORT_RES_SIZE, MAC_UNITS, verbose=True):
+def gen_interconnections(file_name, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, MAC_UNITS, verbose=True):
 
 	file = open(file_name, "w")
 
@@ -156,7 +156,7 @@ def gen_interconnections(file_name, configs, PORT_A_SIZE, PORT_B_SIZE, PORT_RES_
 		
 		file.write("//////////////\n//%s\n" % config_name)
 
-		step_I  = PORT_A_SIZE   // (config["U_IW_NW"]*config["U_IO"]*config["U_IWO"])
+		step_I  = PORT_I_SIZE   // (config["U_IW_NW"]*config["U_IO"]*config["U_IWO"])
 		step_Res = PORT_RES_SIZE // (config["U_IO"]*config["U_WO"]*config["U_IWO"])
 		if verbose:
 			print ("I step: %d\t Res step: %d" % (step_I, step_Res))
@@ -165,7 +165,7 @@ def gen_interconnections(file_name, configs, PORT_A_SIZE, PORT_B_SIZE, PORT_RES_
 
 		file.write("\n")
 		for mac_index in range(MAC_UNITS):
-			# assign I_configs[MAC_UNITS][N_OF_COFIGS] = I_in_temp[PORT_A_SIZE] or  I_cascade[MAC_UNITS]
+			# assign I_configs[MAC_UNITS][N_OF_COFIGS] = I_in_temp[PORT_I_SIZE] or  I_cascade[MAC_UNITS]
 			if (mac_index % config["U_IW_W"] == 0):
 				I_index_mapped = get_IO_index(mac_index, config_base, step_I, mode="I")
 				file.write("assign I_configs[%d][%d] = I_in_temp[%d];\n" % (mac_index, conf_index, I_index_mapped))
@@ -195,15 +195,15 @@ def gen_interconnections(file_name, configs, PORT_A_SIZE, PORT_B_SIZE, PORT_RES_
 
 	file.close()
 
-def gen_params(file_name, MAC_UNITS, N_OF_COFIGS, PORT_A_SIZE, PORT_B_SIZE, PORT_RES_SIZE, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE):
+def gen_params(file_name, MAC_UNITS, N_OF_COFIGS, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE):
 	'''
 	parameter MAC_UNITS = 12;
 
 	parameter N_OF_COFIGS = 4;
 	localparam N_OF_COFIGS_LOG2 = $clog2(N_OF_COFIGS);
 
-	parameter PORT_A_SIZE   = 4;
-	parameter PORT_B_SIZE   = 1;		// Other values are not supported
+	parameter PORT_I_SIZE   = 4;
+	parameter PORT_W_SIZE   = 1;		// Other values are not supported
 	parameter PORT_RES_SIZE = 4;
 
 	parameter I_W = 8;
@@ -227,8 +227,8 @@ def gen_params(file_name, MAC_UNITS, N_OF_COFIGS, PORT_A_SIZE, PORT_B_SIZE, PORT
 	file.write("parameter N_OF_COFIGS = %d; \n" % (N_OF_COFIGS))
 	file.write("localparam N_OF_COFIGS_LOG2 = $clog2(N_OF_COFIGS); \n")
 	file.write("\n")
-	file.write("parameter PORT_A_SIZE = %d; \n" % (PORT_A_SIZE))
-	file.write("parameter PORT_B_SIZE = %d;\t\t// Other values are not supported \n" % (PORT_B_SIZE))
+	file.write("parameter PORT_I_SIZE = %d; \n" % (PORT_I_SIZE))
+	file.write("parameter PORT_W_SIZE = %d;\t\t// Other values are not supported \n" % (PORT_W_SIZE))
 	file.write("parameter PORT_RES_SIZE = %d; \n" % (PORT_RES_SIZE))
 	file.write("\n")
 	file.write("parameter I_W = %d; \n" % (I_W))
@@ -249,5 +249,5 @@ def gen_params(file_name, MAC_UNITS, N_OF_COFIGS, PORT_A_SIZE, PORT_B_SIZE, PORT
 
 
 
-gen_interconnections(file_name_interconnects, configs, PORT_A_SIZE, PORT_B_SIZE, PORT_RES_SIZE, MAC_UNITS)
-gen_params(file_name_params, MAC_UNITS, N_OF_COFIGS, PORT_A_SIZE, PORT_B_SIZE, PORT_RES_SIZE, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE)
+gen_interconnections(file_name_interconnects, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, MAC_UNITS)
+gen_params(file_name_params, MAC_UNITS, N_OF_COFIGS, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE)

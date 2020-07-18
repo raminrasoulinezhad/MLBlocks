@@ -35,11 +35,11 @@ module MLBlock_2Dflex (
 	input hp_en;
 
 	input I_en;
-	input [PORT_A_SIZE*I_W-1:0] I_in;
+	input [PORT_I_SIZE*I_W-1:0] I_in;
 	
 	input W_en;
-	input [PORT_B_SIZE*W_W-1:0] W_in;
-	output [PORT_B_SIZE*W_W-1:0] W_out;
+	input [PORT_W_SIZE*W_W-1:0] W_in;
+	output [PORT_W_SIZE*W_W-1:0] W_out;
 	
 	input Res_en;
 	input [PORT_RES_SIZE*RES_W-1:0] Res_cas_in;
@@ -72,7 +72,7 @@ module MLBlock_2Dflex (
 	`include "MLBlock_2Dflex_interconnects.sv"
 
 	///////// internal signals
-	wire [I_W-1:0] I_in_temp [PORT_A_SIZE-1:0];
+	wire [I_W-1:0] I_in_temp [PORT_I_SIZE-1:0];
 	wire [I_W-1:0] I_configs [MAC_UNITS-1:0][N_OF_COFIGS-1:0];
 	wire [I_W-1:0] I_cascade [MAC_UNITS-1:0];
 
@@ -84,7 +84,6 @@ module MLBlock_2Dflex (
 	wire [RES_W-1:0] Res_configs [MAC_UNITS-1:0][N_OF_COFIGS-1:0];
 	wire [RES_W-1:0] Res_cascade [MAC_UNITS-1:0];
 	wire [RES_W-1:0] Res_out_temp [PORT_RES_SIZE-1:0][N_OF_COFIGS-1:0];
-	//assign Res_out = Res_out_temp[configg];
 	assign Res_cas_out = Res_out; 
 
 
@@ -95,7 +94,7 @@ module MLBlock_2Dflex (
 	genvar i,j,k;
 	generate 
 		
-		for (j = 0; j < PORT_A_SIZE; j = j + 1) begin 
+		for (j = 0; j < PORT_I_SIZE; j = j + 1) begin 
 			assign I_in_temp[j] = I_in[(j+1)*I_W-1:j*I_W];
 		end 
 
@@ -124,7 +123,6 @@ module MLBlock_2Dflex (
 			defparam MAC_unit_inst.RES_W = RES_W;
 			defparam MAC_unit_inst.RES_D = RES_D;
 			defparam MAC_unit_inst.SHIFTER_TYPE = SHIFTER_TYPE;
-			
 			MAC_unit MAC_unit_inst(
 				.clk(clk), 
 				.reset(reset),
