@@ -115,13 +115,15 @@ module MLBlock_2Dflex (
 				assign Res_configs_local[j] = Res_configs[i][j];
 			end 
 
+			defparam MAC_unit_inst.N_OF_COFIGS = N_OF_COFIGS;
 			defparam MAC_unit_inst.I_W = I_W;
 			defparam MAC_unit_inst.I_D = I_D;
 			defparam MAC_unit_inst.W_W = W_W;
 			defparam MAC_unit_inst.W_D = W_D;
 			defparam MAC_unit_inst.RES_W = RES_W;
-			defparam MAC_unit_inst.SHIFTER_TYPE = SHIFTER_TYPE;
 			defparam MAC_unit_inst.RES_D = RES_D;
+			defparam MAC_unit_inst.SHIFTER_TYPE = SHIFTER_TYPE;
+			
 			MAC_unit MAC_unit_inst(
 				.clk(clk), 
 				.reset(reset),
