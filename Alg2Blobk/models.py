@@ -1,6 +1,7 @@
 import numpy as np
 import copy
 from utils import * 
+from MLBlock_2Dflex import gen_HDLs
 
 class Param():
 	def __init__(self, type="IW", window_en=False, vals=None):
@@ -9,14 +10,10 @@ class Param():
 		self.set_vals(vals)
 
 	def set_window_en(self, window_en):
-		# if a parameter is used with an acompany in inputs and is not used in outputs.
 		self.window_en = False if (window_en == None) else window_en
 		
 	def set_vals(self, vals):
 		self.vals = [1] if (vals == None) else vals
-		self.update_vals_size()
-	
-	def update_vals_size(self):
 		self.vals_size = len(self.vals)
 
 
@@ -83,11 +80,6 @@ class Config(Space):
 	def set_IO_Comp_spaces(self):
 		for i in self.param_dic:
 
-			#for j in self.spaces_lists:
-			#	if check_presence(j, self.param_dic[i].type):
-			#		self.IO_Comp_spaces[j]["size"] *= self.param_dic[i].vals
-			#		self.IO_Comp_spaces[j]["dic"][i] = self.param_dic[i].vals
-
 			for j in self.spaces_lists[0:3]:
 				if check_presence(j, self.param_dic[i].type):
 					if not self.param_dic[i].window_en:
@@ -103,7 +95,6 @@ class Config(Space):
 	def print_IO_Comp_spaces(self):
 		for i in self.IO_Comp_spaces:
 			print(str(i) + 	str(self.IO_Comp_spaces[i]))
-		print("****")
 
 	def IO_report(self, sources=["I", "W", "O"]):
 		temp = 0
@@ -169,19 +160,25 @@ class Arch(Space):
 			for i in conf_dic:
 				self.confs[i] = Config(i, conf_dic[i], space, stationary, precisions, limits)
 
-	def explore_config(self, algs_light, verbose=True):
+	def explore_config(self, algs_light, prune_methode="old", implementation_methode="old", verbose=True):
 		# generate all possible configs (considering IO, # of MACs limits)
 		self.gen_all_config(self.space)
 		print_("%d configurations are generated - cisidering IO limits" % (len(self.confs)), verbose)
 
 		# measure the configuration scheduling abilities
 		print_("Scoring the configurations regarding scheduling is started. Wait!", verbose)		
-		self.rate_arch(algs_light)
+		if prune_methode == "old":
+			self.rate_arch(algs_light)
+		elif prune_methode == "new":
+			self.rate_arch_new(algs_light)
 
 		# remove non-used configs (non-used means it never ever used as the best case of scheduling for any benchmark points)
 		print_("Removing non-used configurations.", verbose)	
-		self.remove_zero_scores()
-		self.reset_confs_score()
+		if prune_methode == "old":
+			self.remove_zero_scores()
+			self.reset_confs_score()
+		elif prune_methode == "new":
+			self.remove_nonnecessary_confs()
 		print_("Remaining configurations: %5d" % (len(self.confs)), verbose)
 
 		# print the remain configs
@@ -192,53 +189,24 @@ class Arch(Space):
 
 		# implementation configurations
 		print_("\n***** creating implementation configurations *****\n", verbose)
-		self.gen_imp_confs()
+		if implementation_methode == "old":
+			self.gen_imp_confs()
+		elif implementation_methode == "new":
+			self.gen_imp_confs_new()
 		print_("\n***** generating the verilog file *****\n", verbose)
 		self.gen_verilog()
-
-	def explore_config_new(self, algs_light, verbose=True):
-		# generate all possible configs (considering IO, # of MACs limits)
-		self.gen_all_config(self.space)
-		print_("%d configurations are generated - cisidering IO limits" % (len(self.confs)), verbose)
-
-		# measure the configuration scheduling abilities
-		print_("Scoring the configurations regarding scheduling is started. Wait!", verbose)		
-		self.rate_arch_new(algs_light)
-
-		# remove non-used configs (non-used means it never ever used as the best case of scheduling for any benchmark points)
-		print_("Removing non-used configurations.", verbose)
-		self.remove_nonnecessary_confs()		
-		print_("Remaining configurations: %5d" % (len(self.confs)), verbose)
-
-		# print the remain configs
-		print_("\n***** Selected configurations *****\n", verbose)
-		self.print_confs()
-		# print dot product shapes
-		self.print_confs(cat=["IW"])
-
-		# implementation configurations
-		print_("\n***** creating implementation configurations *****\n", verbose)
-		self.gen_imp_confs()
-		print_("\n***** generating the verilog file *****\n", verbose)
-		self.gen_verilog()
-
 
 	def gen_all_config(self, space):
-
 		temp_dic = copy.deepcopy(space.param_dic)
-
 		self.confs = {}
-		conf_counter = 0
+		counter = 0
 		for case in param_gen_const_product(space.size, self.nmac):
-			
 			temp_dic = fill_dic_by_array(temp_dic, case)
-			conf_name = 'conf' + str(conf_counter)
-
+			conf_name = 'conf_' + str(counter)
 			conf = Config(conf_name , temp_dic, space, self.stationary, self.precisions, self.limits)
 			if conf.OK():
 				self.confs[conf_name] = conf
-				
-			conf_counter += 1
+			counter += 1
 
 	def rate_arch(self, algs):
 		rate_algs = {}
@@ -359,6 +327,62 @@ class Arch(Space):
 		for conf in self.confs:
 			self.confs[conf].reset_score()
 	
+
+	def conf_to_impconf(self, conf):
+		impconfig = {	"U_IW_W":	1,		
+						"U_IW_NW":	1,		
+						"U_WO": 	1,
+						"U_IO": 	1,
+						"U_IWO": 	1,}		
+					
+		for p in conf.param_dic:
+			if conf.param_dic[p].type != "IW":
+				impconfig["U_%s"%(conf.param_dic[p].type)] *=  conf.param_dic[p].vals
+			elif conf.param_dic[p].window_en != True:
+				impconfig["U_IW_NW"] *=  conf.param_dic[p].vals
+			else:
+				impconfig["U_IW_W"] *=  conf.param_dic[p].vals
+
+		return impconfig
+
+	def impconf_iscovered(self, impconfig_new, impconfigs):
+		for ic in impconfigs:
+			if (impconfigs[ic]["U_IW_W"] == impconfig_new["U_IW_W"]):
+				if (impconfigs[ic]["U_IW_NW"] == impconfig_new["U_IW_NW"]):
+					if (impconfigs[ic]["U_WO"] == impconfig_new["U_WO"]):
+						if (impconfigs[ic]["U_IO"] * impconfigs[ic]["U_IWO"] == impconfig_new["U_IO"] * impconfig_new["U_IWO"]):
+							return True
+		return False
+
+	def gen_imp_confs_new(self):
+		self.impconfigs = {}
+		counter = 0
+		for conf in self.confs:
+			impconfig_new = self.conf_to_impconf(self.confs[conf])
+			print (impconfig_new)
+			
+			if (not self.impconf_iscovered(impconfig_new, self.impconfigs)):
+				self.impconfigs["conf_%d"%(counter)] = impconfig_new
+				counter += 1
+
+		print(self.impconfigs)
+
+		I_D = 4
+		W_D = 4
+		RES_D = 1
+		SHIFTER_TYPE = "2Wx2V_by_WxV"	# "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
+
+		gen_HDLs("MLBlock_2Dflex_new", self.impconfigs, self.nmac, 
+			self.precisions["I"], I_D, 
+			self.precisions["W"], W_D, 
+			self.precisions["O"], RES_D, 
+			SHIFTER_TYPE)
+
+			
+
+
+
+
 	def gen_imp_confs(self):
 		self.flex={
 			"A" : "",
