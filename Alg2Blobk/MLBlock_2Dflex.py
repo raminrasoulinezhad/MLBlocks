@@ -1,99 +1,5 @@
 import re
 
-configs = {	"conf_0":{
-						"U_IW_W": 	3,
-						"U_IW_NW": 	1,
-						"U_WO": 	1,
-						"U_IO": 	1,
-						"U_IWO": 	4,
-					},
-			"conf_1":{
-						"U_IW_W": 	1,
-						"U_IW_NW": 	3,
-						"U_WO": 	4,
-						"U_IO": 	1,
-						"U_IWO": 	1,
-					},
-			"conf_2":{
-						"U_IW_W": 	4,
-						"U_IW_NW": 	1,
-						"U_WO": 	1,
-						"U_IO": 	1,
-						"U_IWO": 	3,
-					},
-		}
-
-MAC_UNITS = 12
-
-N_OF_COFIGS = len(configs)
-
-PORT_I_SIZE   = 4
-PORT_W_SIZE   = 1		# Other values are not supported
-PORT_RES_SIZE = 4
-
-I_W = 8
-I_D = 4
-W_W = 8
-W_D = 4
-RES_W = 32
-RES_D = 1
-SHIFTER_TYPE = "2Wx2V_by_WxV"	# "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
-
-
-
-
-
-
-'''
-# test 
-PORT_I_SIZE   = 16
-PORT_W_SIZE   = 1			# Other values are not supported
-PORT_RES_SIZE = 16
-
-MAC_UNITS = 32
-configs = {	"conf_0":{
-						"U_IW_W": 	2,
-						"U_IW_NW": 	2,
-						"U_WO": 	2,
-						"U_IO": 	2,
-						"U_IWO": 	2,
-					},
-			"conf_1":{
-						"U_IW_W": 	1,
-						"U_IW_NW": 	4,
-						"U_WO": 	2,
-						"U_IO": 	2,
-						"U_IWO": 	2,
-					},
-			"conf_2":{
-						"U_IW_W": 	1,
-						"U_IW_NW": 	2,
-						"U_WO": 	4,
-						"U_IO": 	2,
-						"U_IWO": 	2,
-					},
-			"conf_3":{
-						"U_IW_W": 	1,
-						"U_IW_NW": 	2,
-						"U_WO": 	2,
-						"U_IO": 	4,
-						"U_IWO": 	2,
-					},
-			"conf_4":{
-						"U_IW_W": 	4,
-						"U_IW_NW": 	4,
-						"U_WO": 	2,
-						"U_IO": 	1,
-						"U_IWO": 	1,
-					},
-		}
-'''
-
-
-
-file_name_interconnects = "../verilog/MLBlock_2Dflex_interconnects.sv"
-file_name_params = "../verilog/MLBlock_2Dflex_params.sv"
-
 def get_config_index(config_name):
 	m = re.match(r"conf\_(?P<index>\d+)", config_name)
 	if m:
@@ -196,29 +102,7 @@ def gen_interconnections(file_name, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_
 	file.close()
 
 def gen_params(file_name, MAC_UNITS, N_OF_COFIGS, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE):
-	'''
-	parameter MAC_UNITS = 12;
 
-	parameter N_OF_COFIGS = 4;
-	localparam N_OF_COFIGS_LOG2 = $clog2(N_OF_COFIGS);
-
-	parameter PORT_I_SIZE   = 4;
-	parameter PORT_W_SIZE   = 1;		// Other values are not supported
-	parameter PORT_RES_SIZE = 4;
-
-	parameter I_W = 8;
-	parameter I_D = 4;
-	localparam I_D_HALF = I_D / 2;
-
-	parameter W_W = 8;
-	parameter W_D = 4;
-
-	parameter RES_W = 32;
-	parameter RES_D = 1;
-	localparam RES_D_CNTL = (RES_D > 1)? (RES_D-1): 1;
-
-	parameter SHIFTER_TYPE = "2Wx2V_by_WxV";	// "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
-	'''
 	file = open(file_name, "w")
 	
 	file.write("// parameters \n")
@@ -247,7 +131,134 @@ def gen_params(file_name, MAC_UNITS, N_OF_COFIGS, PORT_I_SIZE, PORT_W_SIZE, PORT
 
 	file.close()
 
+def gen_HDLs(model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE):
+
+	N_OF_COFIGS = len(configs)
+	
+	PORT_I_SIZE = 1 
+	PORT_W_SIZE = 1
+	PORT_RES_SIZE = 1 
+
+	for conf in configs:
+		PORT_I_SIZE_temp = configs[conf]["U_IW_NW"] * configs[conf]["U_IO"] * configs[conf]["U_IWO"]
+		PORT_RES_SIZE_temp = configs[conf]["U_WO"] * configs[conf]["U_IO"] * configs[conf]["U_IWO"]
+
+		if (PORT_I_SIZE_temp > PORT_I_SIZE):
+			PORT_I_SIZE = PORT_I_SIZE_temp
+		if (PORT_RES_SIZE_temp > PORT_RES_SIZE):
+			PORT_RES_SIZE = PORT_RES_SIZE_temp
+
+	gen_interconnections(	"../verilog/" + model_name + "_interconnects.sv", 
+							configs, 
+							PORT_I_SIZE, 
+							PORT_W_SIZE, 
+							PORT_RES_SIZE, 
+							MAC_UNITS)
+
+	gen_params( "../verilog/" + model_name + "_params.sv", 
+				MAC_UNITS, 
+				N_OF_COFIGS, 
+				PORT_I_SIZE, 
+				PORT_W_SIZE, 
+				PORT_RES_SIZE, 
+				I_W, 
+				I_D, 
+				W_W, 
+				W_D, 
+				RES_W, 
+				RES_D, 
+				SHIFTER_TYPE)
 
 
-gen_interconnections(file_name_interconnects, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, MAC_UNITS)
-gen_params(file_name_params, MAC_UNITS, N_OF_COFIGS, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE)
+if __name__ == "__main__":
+	
+	configs = {	"conf_0":{
+							"U_IW_W": 	3,
+							"U_IW_NW": 	1,
+							"U_WO": 	1,
+							"U_IO": 	1,
+							"U_IWO": 	4,
+						},
+				"conf_1":{
+							"U_IW_W": 	1,
+							"U_IW_NW": 	3,
+							"U_WO": 	4,
+							"U_IO": 	1,
+							"U_IWO": 	1,
+						},
+				"conf_2":{
+							"U_IW_W": 	4,
+							"U_IW_NW": 	1,
+							"U_WO": 	1,
+							"U_IO": 	1,
+							"U_IWO": 	3,
+						},
+			}
+
+	MAC_UNITS = 12
+
+	N_OF_COFIGS = len(configs)
+
+	PORT_I_SIZE   = 4
+	PORT_W_SIZE   = 1		# Other values are not supported
+	PORT_RES_SIZE = 4
+
+	I_W = 8
+	I_D = 4
+	W_W = 8
+	W_D = 4
+	RES_W = 32
+	RES_D = 1
+	SHIFTER_TYPE = "2Wx2V_by_WxV"	# "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
+
+	'''
+	# test 
+	PORT_I_SIZE   = 16
+	PORT_W_SIZE   = 1			# Other values are not supported
+	PORT_RES_SIZE = 16
+
+	MAC_UNITS = 32
+	configs = {	"conf_0":{
+							"U_IW_W": 	2,
+							"U_IW_NW": 	2,
+							"U_WO": 	2,
+							"U_IO": 	2,
+							"U_IWO": 	2,
+						},
+				"conf_1":{
+							"U_IW_W": 	1,
+							"U_IW_NW": 	4,
+							"U_WO": 	2,
+							"U_IO": 	2,
+							"U_IWO": 	2,
+						},
+				"conf_2":{
+							"U_IW_W": 	1,
+							"U_IW_NW": 	2,
+							"U_WO": 	4,
+							"U_IO": 	2,
+							"U_IWO": 	2,
+						},
+				"conf_3":{
+							"U_IW_W": 	1,
+							"U_IW_NW": 	2,
+							"U_WO": 	2,
+							"U_IO": 	4,
+							"U_IWO": 	2,
+						},
+				"conf_4":{
+							"U_IW_W": 	4,
+							"U_IW_NW": 	4,
+							"U_WO": 	2,
+							"U_IO": 	1,
+							"U_IWO": 	1,
+						},
+			}
+	'''
+
+
+	file_name_interconnects = "../verilog/MLBlock_2Dflex_interconnects.sv"
+	file_name_params = "../verilog/MLBlock_2Dflex_params.sv"
+
+	gen_interconnections(file_name_interconnects, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, MAC_UNITS)
+	gen_params(file_name_params, MAC_UNITS, N_OF_COFIGS, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE)
