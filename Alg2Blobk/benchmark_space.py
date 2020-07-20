@@ -1,7 +1,7 @@
 from models import *
 
 my_space = Space("space",
-				{	"d":	Param("IOW",	window_en=False),
+				{	"d":	Param("IWO",	window_en=False),
 					"b":	Param("IO",		window_en=False),
 					"k":	Param("WO",		window_en=False),
 					"c":	Param("IW",		window_en=False),
