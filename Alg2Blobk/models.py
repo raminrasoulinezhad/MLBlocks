@@ -135,6 +135,12 @@ class Arch(Space):
 									"W" : 8,
 									"O" : 32,
 								},
+					subprecisions=	{	
+									"I_D" : 2,
+									"W_D" : 3,
+									"RES_D" : 1,
+									"SHIFTER_TYPE" : "2Wx2V_by_WxV",	# "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
+								},
 					size=	{	
 								"x" : 3,
 								"y" : 4,
@@ -153,6 +159,12 @@ class Arch(Space):
 		self.space = space
 		self.size = size
 		self.nmac = size["x"] * size["y"]
+
+		self.I_D = subprecisions["I_D"]
+		self.W_D = subprecisions["W_D"]
+		self.RES_D = subprecisions["RES_D"]
+		self.SHIFTER_TYPE = subprecisions["SHIFTER_TYPE"]
+
 		self.limits = limits
 		self.confs = {}
 		
@@ -160,7 +172,7 @@ class Arch(Space):
 			for i in conf_dic:
 				self.confs[i] = Config(i, conf_dic[i], space, stationary, precisions, limits)
 
-	def explore_config(self, algs_light, prune_methode="old", implementation_methode="old", verbose=True):
+	def explore_config(self, algs_light, prune_methode="old", verbose=True):
 		# generate all possible configs (considering IO, # of MACs limits)
 		self.gen_all_config(self.space)
 		print_("%d configurations are generated - cisidering IO limits" % (len(self.confs)), verbose)
@@ -188,13 +200,8 @@ class Arch(Space):
 		self.print_confs(cat=["IW"])
 
 		# implementation configurations
-		print_("\n***** creating implementation configurations *****\n", verbose)
-		if implementation_methode == "old":
-			self.gen_imp_confs()
-		elif implementation_methode == "new":
-			self.gen_imp_confs_new()
-		print_("\n***** generating the verilog file *****\n", verbose)
-		self.gen_verilog()
+		print_("\n***** generating verilog model of MLBlock_2Dflex *****\n", verbose)
+		self.gen_imp_confs_new()
 
 	def gen_all_config(self, space):
 		temp_dic = copy.deepcopy(space.param_dic)
@@ -367,187 +374,10 @@ class Arch(Space):
 
 		print(self.impconfigs)
 
-		I_D = 4
-		W_D = 4
-		RES_D = 1
-		SHIFTER_TYPE = "2Wx2V_by_WxV"	# "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
-
 		gen_HDLs("MLBlock_2Dflex", self.impconfigs, self.nmac, 
-			self.precisions["I"], I_D, 
-			self.precisions["W"], W_D, 
-			self.precisions["O"], RES_D, 
-			SHIFTER_TYPE)
+			self.precisions["I"], self.I_D, 
+			self.precisions["W"], self.W_D, 
+			self.precisions["O"], self.RES_D, 
+			self.SHIFTER_TYPE)
 
-			
-
-
-
-'''
-	def gen_imp_confs(self):
-		self.flex={
-			"A" : "",
-			"B" : "",
-			"RES" : "",
-		}
-		self.IOs ={
-			"I": 0,
-			"W": 0,
-			"O": 0,
-		}
-		self.confs_imp = {
-						"00":{	"P": self.size["y"],
-								"N": 1,
-								"W": self.size["x"],
-								"in_flex": 0,
-								"out_flex": 0,
-								"nes" : False,
-								"confs": [],
-								"nofconfs": 0,
-								"scales": []
-							},
-						"01":{	"P": self.size["x"],
-								"N": self.size["y"],
-								"W": 1,
-								"in_flex": 0,
-								"out_flex": 1,
-								"nes" : False,
-								"confs": [],
-								"nofconfs": 0,
-								"scales": []
-							},
-						"10":{	"P": self.size["x"],
-								"N": 1,
-								"W": self.size["y"],
-								"in_flex": 1,
-								"out_flex": 0,
-								"nes" : False,
-								"confs": [],
-								"nofconfs": 0,
-								"scales": []
-							},
-						"11":{	"P": self.size["y"],
-								"N": self.size["x"],
-								"W": 1,
-								"in_flex": 1,
-								"out_flex": 1,
-								"nes" : False,
-								"confs": [],
-								"nofconfs": 0,
-								"scales": []
-							}
-						}
-
-		for conf in self.confs:
-			dic = {	"P": 1,		# Parallel
-					"N": 1,		# Normal/Non-windowed
-					"W": 1}		# Windowed
-					
-			for p in self.confs[conf].param_dic:
-				if self.confs[conf].param_dic[p].type != "IW":
-					dic["P"] *=  self.confs[conf].param_dic[p].vals
-				elif self.confs[conf].param_dic[p].window_en != True:
-					dic["N"] *=  self.confs[conf].param_dic[p].vals
-				else:
-					dic["W"] *=  self.confs[conf].param_dic[p].vals
-
-			necessary = []
-			for conf_imp in self.confs_imp:
-				scale = check_scale_P_N_W(self.confs_imp[conf_imp], dic)
-				
-				if scale != None:
-					self.confs_imp[conf_imp]["confs"].append(conf)
-					self.confs_imp[conf_imp]["nofconfs"] += 1
-					necessary.append(conf_imp)
-					if scale not in self.confs_imp[conf_imp]["scales"]:
-						self.confs_imp[conf_imp]["scales"].append(scale)
-			
-			if len(necessary) == 1:
-				self.confs_imp[necessary[0]]["nes"] = True
-
-		for conf_imp in self.confs_imp:
-
-			print("implementation config: " + str(conf_imp)) 
-			for temp in self.confs_imp[conf_imp]:
-				print("\t" + temp + ": " + str(self.confs_imp[conf_imp][temp]))
-
-
-		# IOs
-		for conf in self.confs:
-			for io in self.IOs:
-				temp = self.confs[conf].IO_report([io])
-				if (self.IOs[io] < temp):
-					self.IOs[io] = temp
-
-		self.IOs["W"] = max(self.size["x"],self.size["y"]) * self.precisions["W"]
-		print(self.IOs)
 		
-		if (self.confs_imp["00"]["nofconfs"] + self.confs_imp["01"]["nofconfs"] > 0):
-			if (self.confs_imp["10"]["nofconfs"] + self.confs_imp["11"]["nofconfs"] > 0):
-				self.flex["A"] = "FLEXIBLE"
-			else:
-				self.flex["A"] = "FIXED_H"
-		else:
-			self.flex["A"] = "FIXED_V"
-
-		if (self.confs_imp["00"]["nofconfs"] + self.confs_imp["10"]["nofconfs"] > 0):
-			if (self.confs_imp["01"]["nofconfs"] + self.confs_imp["11"]["nofconfs"] > 0):
-				self.flex["RES"] = "FLEXIBLE"
-			else:
-				self.flex["RES"] = "FIXED_V"
-		else:
-			self.flex["RES"] = "FIXED_H"
-
-		self.flex["B"] = "FIXED_V"
-
-		print(self.flex)
-
-
-	def gen_verilog(self):
-
-		filename = "MLBlock.v"
-
-		f = open(filename, "w")
-		f.write("// This is generated by the tool. dont change\n")
-		f.write("module MLBlock (\n")
-		f.write("\t\tclk,\n")
-		f.write("\t\treset,\n")
-		f.write("\n")
-		f.write("\t\thp_en,\n")
-		f.write("\t\ta_en,\n")
-		f.write("\t\ta,\n")
-		f.write("\t\ta_out,\n")
-		f.write("\n")
-		f.write("\t\tb_en,\n")
-		f.write("\t\tb,\n")
-		f.write("\t\tb_cas_in,\n")
-		f.write("\t\tb_out,\n")
-		f.write("\t\tb_cas_out,\n")
-		f.write("\n")
-		f.write("\t\tacc_en,\n")
-		f.write("\t\tres_cas_in,\n")
-		f.write("\t\tres_out,\n")
-		f.write("\t\tres_cas_out,\n")
-		f.write("\n")
-		f.write("\t\tconfig_en,\n")
-		f.write("\t\tconfig_in,\n")
-		f.write("\t\tconfig_out\n")
-		f.write("\t);\n")
-		f.write("\n")
-		f.write("\t///////// Parameters\n")
-		f.write("\tparameter PE_W = %d;\n" % (self.size["x"]))
-		f.write("\tparameter PE_H = %d;\n" % (self.size["y"]))
-		f.write("\n")
-		f.write("\t\n")
-		f.write("\t\n")
-		f.write("\t\n")
-		
-
-		a_in_h_temp = []
-		a_in_v_temp = []
-		b_in_h_temp = []
-		b_in_v_temp = []
-		res_in_h_temp = []
-		res_in_v_temp = []
-		
-		f.close()
-'''
