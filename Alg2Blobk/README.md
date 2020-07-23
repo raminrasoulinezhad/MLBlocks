@@ -1,13 +1,30 @@
+This directory include the python modeling of the MLBlock generalization. The prepared tool is able to do the followings:
+
+### Benchmark to MLBlock: 
+This framework explore the benchmark algorithm and finds a set of valid configurations which are able to impleemnt the benchmarks with the best tiling possible. This is a Heuristic approach which is based on pruning the non-beneficiary configuration among the valid configurations.
+
+How:
+
+	python3 main.py
+
+Results: 
+	
+	../verilog/MLBlock_2Dflex_interconnects.sv
+	../verilog/MLBlock_2Dflex_params.sv
+
+
+### best MLBlock pareto:
+
 
 ## requirements 
 
     pip3 install mip numpy
 
-## run the tool
-
-	python3 main.py
-
 ## TODO:
+
+### full search 
+
+### 1D superflex architecture
 
 ### among window-able parameters, fx is now the only which can be windowed. 
 

@@ -372,7 +372,7 @@ class Arch(Space):
 		RES_D = 1
 		SHIFTER_TYPE = "2Wx2V_by_WxV"	# "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
 
-		gen_HDLs("MLBlock_2Dflex_new", self.impconfigs, self.nmac, 
+		gen_HDLs("MLBlock_2Dflex", self.impconfigs, self.nmac, 
 			self.precisions["I"], I_D, 
 			self.precisions["W"], W_D, 
 			self.precisions["O"], RES_D, 
@@ -382,7 +382,7 @@ class Arch(Space):
 
 
 
-
+'''
 	def gen_imp_confs(self):
 		self.flex={
 			"A" : "",
@@ -550,3 +550,4 @@ class Arch(Space):
 		res_in_v_temp = []
 		
 		f.close()
+'''
