@@ -56,7 +56,7 @@ class Algorithm(Space):
 		return case
 
 
-class Unrooling(Space):
+class Unrolling(Space):
 	def __init__(self, name, param_dic, space, stationary, precisions, limits):
 		super().__init__(name, space.param_dic)	
 		
@@ -127,7 +127,7 @@ class Unrooling(Space):
 class Arch(Space):
 	def __init__(	self, 
 					name, 
-					conf_dic, 
+					unrollings_dic, 
 					space, 
 					stationary="W",						# W, I, O
 					precisions=	{	
@@ -163,22 +163,22 @@ class Arch(Space):
 		self.SHIFTER_TYPE = subprecisions["SHIFTER_TYPE"]
 
 		self.limits = limits
-		self.confs = {}
+		self.unrollings = {}
 		
-		if conf_dic != None:
-			for i in conf_dic:
-				self.confs[i] = Unrooling(i, conf_dic[i], space, stationary, precisions, limits)
+		if unrollings_dic != None:
+			for i in unrollings_dic:
+				self.unrollings[i] = Unrolling(i, unrollings_dic[i], space, stationary, precisions, limits)
 
 	def search_full(self, algs_light, verbose=True):
-		self.gen_all_config(self.space)
-		print_("%d configurations are generated - cisidering IO limits" % (len(self.confs)), verbose)
+		self.gen_all_unrollings(self.space)
+		print_("%d configurations are generated - cisidering IO limits" % (len(self.unrollings)), verbose)
 		self.gen_imp_confs_new()
 		return 
 
 	def search_heuristic(self, algs_light, prune_methode="old", verbose=True):
 		# generate all possible configs (considering IO, # of MACs limits)
-		self.gen_all_config(self.space)
-		print_("%d configurations are generated - cisidering IO limits" % (len(self.confs)), verbose)
+		self.gen_all_unrollings(self.space)
+		print_("%d configurations are generated - cisidering IO limits" % (len(self.unrollings)), verbose)
 
 		# measure the configuration scheduling abilities
 		print_("Scoring the configurations regarding scheduling is started. Wait!", verbose)		
@@ -194,7 +194,7 @@ class Arch(Space):
 			self.reset_confs_score()
 		elif prune_methode == "new":
 			self.remove_nonnecessary_confs()
-		print_("Remaining configurations: %5d" % (len(self.confs)), verbose)
+		print_("Remaining configurations: %5d" % (len(self.unrollings)), verbose)
 
 		# print the remain configs
 		print_("\n***** Selected configurations *****\n", verbose)
@@ -211,17 +211,17 @@ class Arch(Space):
 			self.precisions["O"], self.RES_D, 
 			self.SHIFTER_TYPE)
 
-	def gen_all_config(self, space):
+	def gen_all_unrollings(self, space):
 		temp_dic = copy.deepcopy(space.param_dic)
-		self.confs = {}
+		self.unrollings = {}
 		counter = 0
 		for case in param_gen_const_product(space.size, self.nmac):
 			temp_dic = fill_dic_by_array(temp_dic, case)
 			conf_name = 'conf_' + str(counter)
-			conf = Unrooling(conf_name , temp_dic, space, self.stationary, self.precisions, self.limits)
-			if conf.OK():
-				self.confs[conf_name] = conf
-				conf.print_param_dic()
+			unrolling = Unrolling(conf_name , temp_dic, space, self.stationary, self.precisions, self.limits)
+			if unrolling.OK():
+				self.unrollings[conf_name] = unrolling
+				unrolling.print_param_dic()
 			counter += 1
 
 	def rate_arch(self, algs):
@@ -234,14 +234,14 @@ class Arch(Space):
 
 				rate_best = 0
 				conf_best = ""
-				for conf in self.confs:
-					conf_dic = self.confs[conf].gen_dic()
-					rate_temp = self.util_rate(alg_case_dic, conf_dic)
+				for conf in self.unrollings:
+					unrolling_dic = self.unrollings[conf].gen_dic()
+					rate_temp = self.util_rate(alg_case_dic, unrolling_dic)
 					if rate_temp > rate_best:
 						rate_best = rate_temp
 						conf_best = conf
 
-				self.confs[conf_best].score += 1
+				self.unrollings[conf_best].score += 1
 				rate_total += rate_best				
 
 			rate_algs[alg.name] = rate_total/alg.total_cases
@@ -260,9 +260,9 @@ class Arch(Space):
 
 				rate_best = 0
 				conf_best = []
-				for conf in self.confs:
-					conf_dic = self.confs[conf].gen_dic()
-					rate_temp = self.util_rate(alg_case_dic, conf_dic)
+				for conf in self.unrollings:
+					unrolling_dic = self.unrollings[conf].gen_dic()
+					rate_temp = self.util_rate(alg_case_dic, unrolling_dic)
 					
 					if rate_temp > rate_best:
 						rate_best = rate_temp
@@ -270,11 +270,11 @@ class Arch(Space):
 					elif rate_temp == rate_best:
 						conf_best.append(conf)
 
-				for conf in self.confs:
+				for conf in self.unrollings:
 					if conf in conf_best:
-						self.confs[conf].scores.append(1)
+						self.unrollings[conf].scores.append(1)
 					else:
-						self.confs[conf].scores.append(0)
+						self.unrollings[conf].scores.append(0)
 					
 				rate_total += rate_best				
 
@@ -285,22 +285,22 @@ class Arch(Space):
 
 	def remove_zero_scores(self):
 		list_to_remove = []
-		for conf in self.confs:
-			if self.confs[conf].score == 0:
+		for conf in self.unrollings:
+			if self.unrollings[conf].score == 0:
 				list_to_remove.append(conf)
 
 		for conf in list_to_remove:
-			del self.confs[conf]
+			del self.unrollings[conf]
 
 	def remove_nonnecessary_confs(self):
 		conf_names = []
 		table = []
-		for conf in self.confs:
+		for conf in self.unrollings:
 			conf_names.append(conf)
 			if len(table) == 0:
-				table = np.reshape(np.array(self.confs[conf].scores), (-1,1))
+				table = np.reshape(np.array(self.unrollings[conf].scores), (-1,1))
 			else:
-				table = np.append(table, np.reshape(self.confs[conf].scores, (-1,1)), axis=1)
+				table = np.append(table, np.reshape(self.unrollings[conf].scores, (-1,1)), axis=1)
 
 		print(len(conf_names))
 		print(conf_names)
@@ -313,12 +313,12 @@ class Arch(Space):
 
 
 		list_to_remove = []
-		for conf in self.confs:
-			if self.confs[conf].score == 0:
+		for conf in self.unrollings:
+			if self.unrollings[conf].score == 0:
 				list_to_remove.append(conf)
 
 		for conf in list_to_remove:
-			del self.confs[conf]
+			del self.unrollings[conf]
 
 	def util_rate(self, alg_p_dic, conf_p_dic):
 		alg_arr = dic2nparr(alg_p_dic)
@@ -331,23 +331,23 @@ class Arch(Space):
 		return alg_mac / (conf_mac * conf_iter)
 
 	def print_confs(self, cat=None):
-		for conf in self.confs:
+		for conf in self.unrollings:
 			if type(cat) is list:
 				for c in cat:
-					self.confs[conf].print_param_dic(c)
+					self.unrollings[conf].print_param_dic(c)
 			else:
-				self.confs[conf].print_param_dic(cat)
+				self.unrollings[conf].print_param_dic(cat)
 
 	def reset_confs_score(self):
-		for conf in self.confs:
-			self.confs[conf].reset_score()
+		for conf in self.unrollings:
+			self.unrollings[conf].reset_score()
 	
 	def gen_imp_confs_new(self):
 		self.impconfigs = []
 		counter = 0
-		for conf in self.confs:
+		for conf in self.unrollings:
 			impconfig = ImpConfig()
-			impconfig.conf_to_impconf(self.confs[conf])
+			impconfig.conf_to_impconf(self.unrollings[conf])
 			
 			if (not impconfig.iscovered(self.impconfigs)):
 				impconfig.set_name("impconf_%d"%(counter))
@@ -367,26 +367,26 @@ class ImpConfig():
 		self.U_IO 	 = U_IO
 		self.U_IWO 	 = U_IWO
 
-		self.unroolings = []
+		self.unrollings = []
 
 	def print(self):
 		print ("%s:  U_IW_W: %3d, U_IW_NW: %3d, U_WO: %3d,  U_IO: %3d,  U_IWO: %3d" % (self.name, self.U_IW_W, self.U_IW_NW, self.U_WO, self.U_IO, self.U_IWO))
 
-	def conf_to_impconf(self, unrooling):
-		for p in unrooling.param_dic:
-			if unrooling.param_dic[p].type == "IW":
-				if unrooling.param_dic[p].window_en != True:
-					self.U_IW_NW *=  unrooling.param_dic[p].vals
+	def conf_to_impconf(self, unrolling):
+		for p in unrolling.param_dic:
+			if unrolling.param_dic[p].type == "IW":
+				if unrolling.param_dic[p].window_en != True:
+					self.U_IW_NW *=  unrolling.param_dic[p].vals
 				else:
-					self.U_IW_W *=  unrooling.param_dic[p].vals
-			elif unrooling.param_dic[p].type == "WO":
-				self.U_WO *=  unrooling.param_dic[p].vals
-			elif unrooling.param_dic[p].type == "IO":
-				self.U_IO *=  unrooling.param_dic[p].vals
-			elif unrooling.param_dic[p].type == "IWO":
-				self.U_IWO *=  unrooling.param_dic[p].vals
+					self.U_IW_W *=  unrolling.param_dic[p].vals
+			elif unrolling.param_dic[p].type == "WO":
+				self.U_WO *=  unrolling.param_dic[p].vals
+			elif unrolling.param_dic[p].type == "IO":
+				self.U_IO *=  unrolling.param_dic[p].vals
+			elif unrolling.param_dic[p].type == "IWO":
+				self.U_IWO *=  unrolling.param_dic[p].vals
 			else:
-				raise Exception ("conf_to_impconf: unrooling.param_dic[p].type is not supported !!!")
+				raise Exception ("conf_to_impconf: unrolling.param_dic[p].type is not supported !!!")
 
 	def set_name(self, name):
 		self.name = name
