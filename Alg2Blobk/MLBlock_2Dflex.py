@@ -1,7 +1,7 @@
 import re
 
 def get_config_index(config_name):
-	m = re.match(r"conf\_(?P<index>\d+)", config_name)
+	m = re.match(r"impconf\_(?P<index>\d+)", config_name)
 	if m:
 		return int(m.groups("index")[0])
 	else:
@@ -11,7 +11,7 @@ def index_mapper_opt(index, step):
 	return (index * step) + step - 1 
 
 def get_base_array (config):
-	return [config["U_IW_W"], config["U_IW_NW"], config["U_IO"], config["U_WO"], config["U_IWO"]]
+	return [config.U_IW_W, config.U_IW_NW, config.U_IO, config.U_WO, config.U_IWO]
 
 def get_base_mask_I():
 	return [0, 1, 1, 0, 1]
@@ -53,17 +53,16 @@ def gen_interconnections(file_name, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_
 
 	file = open(file_name, "w")
 
-	for config_name in sorted(configs):
+	for config in configs:
 
-		config = configs[config_name]
 		if verbose:
-			print (config)
-		conf_index = get_config_index(config_name)
+			config.print()
+		conf_index = get_config_index(config.name)
 		
-		file.write("//////////////\n//%s\n" % config_name)
+		file.write("//////////////\n//%s\n" % config.name)
 
-		step_I  = PORT_I_SIZE   // (config["U_IW_NW"]*config["U_IO"]*config["U_IWO"])
-		step_Res = PORT_RES_SIZE // (config["U_IO"]*config["U_WO"]*config["U_IWO"])
+		step_I  = PORT_I_SIZE   // (config.U_IW_NW * config.U_IO * config.U_IWO)
+		step_Res = PORT_RES_SIZE // (config.U_IO * config.U_WO * config.U_IWO)
 		if verbose:
 			print ("I step: %d\t Res step: %d" % (step_I, step_Res))
 		
@@ -72,7 +71,7 @@ def gen_interconnections(file_name, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_
 		file.write("\n")
 		for mac_index in range(MAC_UNITS):
 			# assign I_configs[MAC_UNITS][N_OF_COFIGS] = I_in_temp[PORT_I_SIZE] or  I_cascade[MAC_UNITS]
-			if (mac_index % config["U_IW_W"] == 0):
+			if (mac_index % config.U_IW_W == 0):
 				I_index_mapped = get_IO_index(mac_index, config_base, step_I, mode="I")
 				file.write("assign I_configs[%d][%d] = I_in_temp[%d];\n" % (mac_index, conf_index, I_index_mapped))
 			else:
@@ -81,7 +80,7 @@ def gen_interconnections(file_name, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_
 		file.write("\n")
 		for mac_index in range(MAC_UNITS):		
 			# assign Res_configs[MAC_UNITS][N_OF_COFIGS] = Res_cas_in_temp[PORT_RES_SIZE] or Res_cascade[MAC_UNITS] 
-			if (mac_index % (config["U_IW_W"]*config["U_IW_NW"]) == 0):
+			if (mac_index % (config.U_IW_W * config.U_IW_NW) == 0):
 				Res_index_mapped = get_IO_index(mac_index, config_base, step_Res, mode="Res")
 				file.write("assign Res_configs[%d][%d] = Res_cas_in_temp[%d];\n" % (mac_index, conf_index, Res_index_mapped) )
 			else:
@@ -91,7 +90,7 @@ def gen_interconnections(file_name, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_
 		for out_index in range(PORT_RES_SIZE):
 			# assign Res_out_temp[PORT_RES_SIZE][N_OF_COFIGS-1:0] = Res_cascade[MAC_UNITS]
 			if (((out_index + 1) % step_Res) == 0):
-				Res_cascade_index = ((out_index+1)/step_Res)*config["U_IW_W"]*config["U_IW_NW"] - 1
+				Res_cascade_index = ((out_index+1)/step_Res) * config.U_IW_W * config.U_IW_NW - 1
 				if Res_cascade_index < MAC_UNITS:
 					file.write("assign Res_out_temp[%d][%d] = Res_cascade[%d];\n" % ( out_index, conf_index, Res_cascade_index) )
 				else:
@@ -131,7 +130,7 @@ def gen_params(file_name, MAC_UNITS, N_OF_COFIGS, PORT_I_SIZE, PORT_W_SIZE, PORT
 
 	file.close()
 
-def gen_HDLs(model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE):
+def gen_HDLs(dir, model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE):
 
 	N_OF_COFIGS = len(configs)
 	
@@ -140,22 +139,22 @@ def gen_HDLs(model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES_D, S
 	PORT_RES_SIZE = 1 
 
 	for conf in configs:
-		PORT_I_SIZE_temp = configs[conf]["U_IW_NW"] * configs[conf]["U_IO"] * configs[conf]["U_IWO"]
-		PORT_RES_SIZE_temp = configs[conf]["U_WO"] * configs[conf]["U_IO"] * configs[conf]["U_IWO"]
+		PORT_I_SIZE_temp = conf.U_IW_NW * conf.U_IO * conf.U_IWO
+		PORT_RES_SIZE_temp = conf.U_WO * conf.U_IO * conf.U_IWO
 
 		if (PORT_I_SIZE_temp > PORT_I_SIZE):
 			PORT_I_SIZE = PORT_I_SIZE_temp
 		if (PORT_RES_SIZE_temp > PORT_RES_SIZE):
 			PORT_RES_SIZE = PORT_RES_SIZE_temp
 
-	gen_interconnections(	"../verilog/" + model_name + "_interconnects.sv", 
+	gen_interconnections(	dir + model_name + "_interconnects.sv", 
 							configs, 
 							PORT_I_SIZE, 
 							PORT_W_SIZE, 
 							PORT_RES_SIZE, 
 							MAC_UNITS)
 
-	gen_params( "../verilog/" + model_name + "_params.sv", 
+	gen_params( dir + model_name + "_params.sv", 
 				MAC_UNITS, 
 				N_OF_COFIGS, 
 				PORT_I_SIZE, 
@@ -170,23 +169,27 @@ def gen_HDLs(model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES_D, S
 				SHIFTER_TYPE)
 
 
+
+
+
+######################################################################################################
 if __name__ == "__main__":
 	
-	configs = {	"conf_0":{
+	configs = {	"impconf_0":{
 							"U_IW_W": 	3,
 							"U_IW_NW": 	1,
 							"U_WO": 	1,
 							"U_IO": 	1,
 							"U_IWO": 	4,
 						},
-				"conf_1":{
+				"impconf_1":{
 							"U_IW_W": 	1,
 							"U_IW_NW": 	3,
 							"U_WO": 	4,
 							"U_IO": 	1,
 							"U_IWO": 	1,
 						},
-				"conf_2":{
+				"impconf_2":{
 							"U_IW_W": 	4,
 							"U_IW_NW": 	1,
 							"U_WO": 	1,
@@ -218,35 +221,35 @@ if __name__ == "__main__":
 	PORT_RES_SIZE = 16
 
 	MAC_UNITS = 32
-	configs = {	"conf_0":{
+	configs = {	"impconf_0":{
 							"U_IW_W": 	2,
 							"U_IW_NW": 	2,
 							"U_WO": 	2,
 							"U_IO": 	2,
 							"U_IWO": 	2,
 						},
-				"conf_1":{
+				"impconf_1":{
 							"U_IW_W": 	1,
 							"U_IW_NW": 	4,
 							"U_WO": 	2,
 							"U_IO": 	2,
 							"U_IWO": 	2,
 						},
-				"conf_2":{
+				"impconf_2":{
 							"U_IW_W": 	1,
 							"U_IW_NW": 	2,
 							"U_WO": 	4,
 							"U_IO": 	2,
 							"U_IWO": 	2,
 						},
-				"conf_3":{
+				"impconf_3":{
 							"U_IW_W": 	1,
 							"U_IW_NW": 	2,
 							"U_WO": 	2,
 							"U_IO": 	4,
 							"U_IWO": 	2,
 						},
-				"conf_4":{
+				"impconf_4":{
 							"U_IW_W": 	4,
 							"U_IW_NW": 	4,
 							"U_WO": 	2,

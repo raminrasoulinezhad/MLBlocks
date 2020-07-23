@@ -56,7 +56,7 @@ class Algorithm(Space):
 		return case
 
 
-class Config(Space):
+class Unrooling(Space):
 	def __init__(self, name, param_dic, space, stationary, precisions, limits):
 		super().__init__(name, space.param_dic)	
 		
@@ -141,10 +141,7 @@ class Arch(Space):
 									"RES_D" : 1,
 									"SHIFTER_TYPE" : "2Wx2V_by_WxV",	# "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
 								},
-					size=	{	
-								"x" : 3,
-								"y" : 4,
-							},
+					nmac=12,
 					limits=	{	
 								"IO_I" : 36,
 								"IO_W" : None,
@@ -153,12 +150,12 @@ class Arch(Space):
 							}
 					):	
 
-		self.name = name 
+		self.name = name
+		self.dir = "../verilog/" 
 		self.stationary = stationary	
 		self.precisions = precisions
 		self.space = space
-		self.size = size
-		self.nmac = size["x"] * size["y"]
+		self.nmac = nmac
 
 		self.I_D = subprecisions["I_D"]
 		self.W_D = subprecisions["W_D"]
@@ -170,9 +167,15 @@ class Arch(Space):
 		
 		if conf_dic != None:
 			for i in conf_dic:
-				self.confs[i] = Config(i, conf_dic[i], space, stationary, precisions, limits)
+				self.confs[i] = Unrooling(i, conf_dic[i], space, stationary, precisions, limits)
 
-	def explore_config(self, algs_light, prune_methode="old", verbose=True):
+	def search_full(self, algs_light, verbose=True):
+		self.gen_all_config(self.space)
+		print_("%d configurations are generated - cisidering IO limits" % (len(self.confs)), verbose)
+		self.gen_imp_confs_new()
+		return 
+
+	def search_heuristic(self, algs_light, prune_methode="old", verbose=True):
 		# generate all possible configs (considering IO, # of MACs limits)
 		self.gen_all_config(self.space)
 		print_("%d configurations are generated - cisidering IO limits" % (len(self.confs)), verbose)
@@ -202,6 +205,11 @@ class Arch(Space):
 		# implementation configurations
 		print_("\n***** generating verilog model of MLBlock_2Dflex *****\n", verbose)
 		self.gen_imp_confs_new()
+		gen_HDLs(self.dir, "MLBlock_2Dflex", self.impconfigs, self.nmac, 
+			self.precisions["I"], self.I_D, 
+			self.precisions["W"], self.W_D, 
+			self.precisions["O"], self.RES_D, 
+			self.SHIFTER_TYPE)
 
 	def gen_all_config(self, space):
 		temp_dic = copy.deepcopy(space.param_dic)
@@ -210,9 +218,10 @@ class Arch(Space):
 		for case in param_gen_const_product(space.size, self.nmac):
 			temp_dic = fill_dic_by_array(temp_dic, case)
 			conf_name = 'conf_' + str(counter)
-			conf = Config(conf_name , temp_dic, space, self.stationary, self.precisions, self.limits)
+			conf = Unrooling(conf_name , temp_dic, space, self.stationary, self.precisions, self.limits)
 			if conf.OK():
 				self.confs[conf_name] = conf
+				conf.print_param_dic()
 			counter += 1
 
 	def rate_arch(self, algs):
@@ -241,6 +250,7 @@ class Arch(Space):
 			print("Algorithm name: %-10s  %.5f" % (rate, rate_algs[rate]))
 	
 	def rate_arch_new(self, algs):
+		print ("$$$$ Under development $$$$$")
 		rate_algs = {}
 
 		for alg in algs: 
@@ -310,8 +320,6 @@ class Arch(Space):
 		for conf in list_to_remove:
 			del self.confs[conf]
 
-
-
 	def util_rate(self, alg_p_dic, conf_p_dic):
 		alg_arr = dic2nparr(alg_p_dic)
 		conf_arr = dic2nparr(conf_p_dic)
@@ -334,50 +342,70 @@ class Arch(Space):
 		for conf in self.confs:
 			self.confs[conf].reset_score()
 	
+	def gen_imp_confs_new(self):
+		self.impconfigs = []
+		counter = 0
+		for conf in self.confs:
+			impconfig = ImpConfig()
+			impconfig.conf_to_impconf(self.confs[conf])
+			
+			if (not impconfig.iscovered(self.impconfigs)):
+				impconfig.set_name("impconf_%d"%(counter))
+				self.impconfigs.append(impconfig)
+				counter += 1
 
-	def conf_to_impconf(self, conf):
-		impconfig = {	"U_IW_W":	1,		
-						"U_IW_NW":	1,		
-						"U_WO": 	1,
-						"U_IO": 	1,
-						"U_IWO": 	1,}		
-					
-		for p in conf.param_dic:
-			if conf.param_dic[p].type != "IW":
-				impconfig["U_%s"%(conf.param_dic[p].type)] *=  conf.param_dic[p].vals
-			elif conf.param_dic[p].window_en != True:
-				impconfig["U_IW_NW"] *=  conf.param_dic[p].vals
+		for impconfig in self.impconfigs:
+			impconfig.print()
+
+class ImpConfig():
+	def __init__(self, name="", U_IW_W=1, U_IW_NW=1, U_WO=1, U_IO=1, U_IWO=1):
+		self.name = name
+
+		self.U_IW_W	 = U_IW_W
+		self.U_IW_NW = U_IW_NW
+		self.U_WO 	 = U_WO
+		self.U_IO 	 = U_IO
+		self.U_IWO 	 = U_IWO
+
+		self.unroolings = []
+
+	def print(self):
+		print ("%s:  U_IW_W: %3d, U_IW_NW: %3d, U_WO: %3d,  U_IO: %3d,  U_IWO: %3d" % (self.name, self.U_IW_W, self.U_IW_NW, self.U_WO, self.U_IO, self.U_IWO))
+
+	def conf_to_impconf(self, unrooling):
+		for p in unrooling.param_dic:
+			if unrooling.param_dic[p].type == "IW":
+				if unrooling.param_dic[p].window_en != True:
+					self.U_IW_NW *=  unrooling.param_dic[p].vals
+				else:
+					self.U_IW_W *=  unrooling.param_dic[p].vals
+			elif unrooling.param_dic[p].type == "WO":
+				self.U_WO *=  unrooling.param_dic[p].vals
+			elif unrooling.param_dic[p].type == "IO":
+				self.U_IO *=  unrooling.param_dic[p].vals
+			elif unrooling.param_dic[p].type == "IWO":
+				self.U_IWO *=  unrooling.param_dic[p].vals
 			else:
-				impconfig["U_IW_W"] *=  conf.param_dic[p].vals
+				raise Exception ("conf_to_impconf: unrooling.param_dic[p].type is not supported !!!")
 
-		return impconfig
+	def set_name(self, name):
+		self.name = name
 
-	def impconf_iscovered(self, impconfig_new, impconfigs):
-		for ic in impconfigs:
-			if (impconfigs[ic]["U_IW_W"] == impconfig_new["U_IW_W"]):
-				if (impconfigs[ic]["U_IW_NW"] == impconfig_new["U_IW_NW"]):
-					if (impconfigs[ic]["U_WO"] == impconfig_new["U_WO"]):
-						if (impconfigs[ic]["U_IO"] * impconfigs[ic]["U_IWO"] == impconfig_new["U_IO"] * impconfig_new["U_IWO"]):
+	def iscovered(self, impconfigs):
+		for impconfig in impconfigs:
+			if (impconfig.U_IW_W == self.U_IW_W):
+				if (impconfig.U_IW_NW == self.U_IW_NW):
+					if (impconfig.U_WO == self.U_WO):
+						if (impconfig.U_IO * impconfig.U_IWO == self.U_IO * self.U_IWO):
 							return True
 		return False
 
-	def gen_imp_confs_new(self):
-		self.impconfigs = {}
-		counter = 0
-		for conf in self.confs:
-			impconfig_new = self.conf_to_impconf(self.confs[conf])
-			print (impconfig_new)
-			
-			if (not self.impconf_iscovered(impconfig_new, self.impconfigs)):
-				self.impconfigs["conf_%d"%(counter)] = impconfig_new
-				counter += 1
-
-		print(self.impconfigs)
-
-		gen_HDLs("MLBlock_2Dflex", self.impconfigs, self.nmac, 
-			self.precisions["I"], self.I_D, 
-			self.precisions["W"], self.W_D, 
-			self.precisions["O"], self.RES_D, 
-			self.SHIFTER_TYPE)
-
-		
+	def isunique(self, impconfigs):
+		for impconfig in impconfigs:
+			if (impconfig.U_IW_W == self.U_IW_W):
+				if (impconfig.U_IW_NW == self.U_IW_NW):
+					if (impconfig.U_WO == self.U_WO):
+						if (impconfig.U_IO == self.U_IO):
+							if (impconfig.U_IWO == self.U_IWO):
+								return True
+		return False

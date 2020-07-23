@@ -1,5 +1,5 @@
 //////////////
-//conf_0
+//impconf_0
 
 assign I_configs[0][0] = I_in_temp[0];
 assign I_configs[1][0] = I_in_temp[1];
@@ -32,7 +32,7 @@ assign Res_out_temp[1][0] = Res_cascade[5];
 assign Res_out_temp[2][0] = Res_cascade[8];
 assign Res_out_temp[3][0] = Res_cascade[11];
 //////////////
-//conf_1
+//impconf_1
 
 assign I_configs[0][1] = I_in_temp[0];
 assign I_configs[1][1] = I_in_temp[1];
@@ -65,7 +65,7 @@ assign Res_out_temp[1][1] = Res_cascade[7];
 assign Res_out_temp[2][1] = Res_cascade[11];
 assign Res_out_temp[3][1] = {RES_W{1'bx}};
 //////////////
-//conf_2
+//impconf_2
 
 assign I_configs[0][2] = I_in_temp[0];
 assign I_configs[1][2] = I_cascade[0];
@@ -98,7 +98,7 @@ assign Res_out_temp[1][2] = Res_cascade[5];
 assign Res_out_temp[2][2] = Res_cascade[8];
 assign Res_out_temp[3][2] = Res_cascade[11];
 //////////////
-//conf_3
+//impconf_3
 
 assign I_configs[0][3] = I_in_temp[1];
 assign I_configs[1][3] = I_cascade[0];
@@ -131,7 +131,7 @@ assign Res_out_temp[1][3] = Res_cascade[5];
 assign Res_out_temp[2][3] = Res_cascade[8];
 assign Res_out_temp[3][3] = Res_cascade[11];
 //////////////
-//conf_4
+//impconf_4
 
 assign I_configs[0][4] = I_in_temp[3];
 assign I_configs[1][4] = I_cascade[0];
@@ -164,7 +164,7 @@ assign Res_out_temp[1][4] = Res_cascade[5];
 assign Res_out_temp[2][4] = Res_cascade[8];
 assign Res_out_temp[3][4] = Res_cascade[11];
 //////////////
-//conf_5
+//impconf_5
 
 assign I_configs[0][5] = I_in_temp[0];
 assign I_configs[1][5] = I_cascade[0];
@@ -197,7 +197,7 @@ assign Res_out_temp[1][5] = Res_cascade[7];
 assign Res_out_temp[2][5] = Res_cascade[11];
 assign Res_out_temp[3][5] = {RES_W{1'bx}};
 //////////////
-//conf_6
+//impconf_6
 
 assign I_configs[0][6] = I_in_temp[0];
 assign I_configs[1][6] = I_cascade[0];
