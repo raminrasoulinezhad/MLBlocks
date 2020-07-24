@@ -54,7 +54,7 @@ class Arch(Space):
 	def search_full(self, algs_light, verbose=True):
 		self.gen_all_unrollings(self.space)
 		print_("%d configurations are generated - cisidering IO limits" % (len(self.unrollings)), verbose)
-		self.gen_imp_confs()
+		self.gen_imp_confs(filter_methode="unique")
 		return 
 
 	def search_heuristic(self, algs_light, prune_methode="old", verbose=True):
@@ -225,14 +225,14 @@ class Arch(Space):
 		for unrolling in self.unrollings:
 			self.unrollings[unrolling].reset_score()
 	
-	def gen_imp_confs(self):
+	def gen_imp_confs(self, filter_methode="covered"):
 		self.impconfigs = []
 		counter = 0
 		for unrolling in self.unrollings:
 			impconfig = ImpConfig()
 			impconfig.conf_to_impconf(self.unrollings[unrolling])
 			
-			if (not impconfig.iscovered(self.impconfigs)):
+			if (not impconfig.isnew(self.impconfigs, methode=filter_methode)):		
 				impconfig.set_name("impconf_%d"%(counter))
 				self.impconfigs.append(impconfig)
 				counter += 1
