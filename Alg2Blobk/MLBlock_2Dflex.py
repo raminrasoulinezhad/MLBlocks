@@ -130,7 +130,7 @@ def gen_params(file_name, MAC_UNITS, N_OF_COFIGS, PORT_I_SIZE, PORT_W_SIZE, PORT
 
 	file.close()
 
-def gen_HDLs(dir, model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE):
+def gen_HDLs(dir, model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE, verbose=True):
 
 	N_OF_COFIGS = len(configs)
 	
@@ -152,7 +152,8 @@ def gen_HDLs(dir, model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES
 							PORT_I_SIZE, 
 							PORT_W_SIZE, 
 							PORT_RES_SIZE, 
-							MAC_UNITS)
+							MAC_UNITS,
+							verbose=verbose)
 
 	gen_params( dir + model_name + "_params.sv", 
 				MAC_UNITS, 

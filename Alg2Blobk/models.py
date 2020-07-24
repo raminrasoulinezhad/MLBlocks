@@ -209,7 +209,8 @@ class Arch(Space):
 			self.precisions["I"], self.I_D, 
 			self.precisions["W"], self.W_D, 
 			self.precisions["O"], self.RES_D, 
-			self.SHIFTER_TYPE)
+			self.SHIFTER_TYPE,
+			verbose=False)
 
 	def gen_all_unrollings(self, space):
 		temp_dic = copy.deepcopy(space.param_dic)
