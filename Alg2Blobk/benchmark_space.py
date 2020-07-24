@@ -1,4 +1,5 @@
-from models import *
+from Param import Param
+from Space import Space
 
 my_space = Space("space",
 				{	"d":	Param("IWO",	window_en=False),

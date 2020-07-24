@@ -1,6 +1,5 @@
-from models import *
-from benchmark_space import * 
-
+from Arch import Arch
+from benchmark_space import *
 
 arch = Arch("all", 
 			None, 
@@ -21,5 +20,5 @@ arch = Arch("all",
 			)
 
 if __name__ == "__main__":
-	arch_MLBlock.print_confs()
+	arch_MLBlock.print_confs()	 
 	print (arch_MLBlock.rate_arch(algs))

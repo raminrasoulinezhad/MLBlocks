@@ -1,4 +1,4 @@
-from models import *
+from Algorithm import Algorithm
 from benchmark_space import * 
 
 alg_BSConv = Algorithm("BSConv", 
