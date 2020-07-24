@@ -54,7 +54,7 @@ class Arch(Space):
 	def search_full(self, algs_light, verbose=True):
 		self.gen_all_unrollings(self.space)
 		print_("%d configurations are generated - cisidering IO limits" % (len(self.unrollings)), verbose)
-		self.gen_imp_confs_new()
+		self.gen_imp_confs()
 		return 
 
 	def search_heuristic(self, algs_light, prune_methode="old", verbose=True):
@@ -73,20 +73,20 @@ class Arch(Space):
 		print_("Removing non-used configurations.", verbose)	
 		if prune_methode == "old":
 			self.remove_zero_scores()
-			self.reset_confs_score()
+			self.reset_unrollings_score()
 		elif prune_methode == "new":
 			self.remove_nonnecessary_confs()
 		print_("Remaining configurations: %5d" % (len(self.unrollings)), verbose)
 
 		# print the remain configs
 		print_("\n***** Selected configurations *****\n", verbose)
-		self.print_confs()
+		self.print_unrollings()
 		# print dot product shapes
-		self.print_confs(cat=["IW"])
+		self.print_unrollings(cat=["IW"])
 
 		# implementation configurations
 		print_("\n***** generating verilog model of MLBlock_2Dflex *****\n", verbose)
-		self.gen_imp_confs_new()
+		self.gen_imp_confs()
 		gen_HDLs(self.dir, "MLBlock_2Dflex", self.impconfigs, self.nmac, 
 			self.precisions["I"], self.I_D, 
 			self.precisions["W"], self.W_D, 
@@ -203,34 +203,34 @@ class Arch(Space):
 		for conf in list_to_remove:
 			del self.unrollings[conf]
 
-	def util_rate(self, alg_p_dic, conf_p_dic):
+	def util_rate(self, alg_p_dic, unrolling_p_dic):
 		alg_arr = dic2nparr(alg_p_dic)
-		conf_arr = dic2nparr(conf_p_dic)
+		unrolling_arr = dic2nparr(unrolling_p_dic)
 
 		alg_mac = arr2prod(alg_arr)
-		conf_mac = arr2prod(conf_arr)
-		conf_iter = arr2prod(np.ceil(alg_arr / conf_arr))
+		unrolling_mac = arr2prod(unrolling_arr)
+		unrolling_iter = arr2prod(np.ceil(alg_arr / unrolling_arr))
 
-		return alg_mac / (conf_mac * conf_iter)
+		return alg_mac / (unrolling_mac * unrolling_iter)
 
-	def print_confs(self, cat=None):
-		for conf in self.unrollings:
+	def print_unrollings(self, cat=None):
+		for unrolling in self.unrollings:
 			if type(cat) is list:
 				for c in cat:
-					self.unrollings[conf].print_param_dic(c)
+					self.unrollings[unrolling].print_param_dic(c)
 			else:
-				self.unrollings[conf].print_param_dic(cat)
+				self.unrollings[unrolling].print_param_dic(cat)
 
-	def reset_confs_score(self):
-		for conf in self.unrollings:
-			self.unrollings[conf].reset_score()
+	def reset_unrollings_score(self):
+		for unrolling in self.unrollings:
+			self.unrollings[unrolling].reset_score()
 	
-	def gen_imp_confs_new(self):
+	def gen_imp_confs(self):
 		self.impconfigs = []
 		counter = 0
-		for conf in self.unrollings:
+		for unrolling in self.unrollings:
 			impconfig = ImpConfig()
-			impconfig.conf_to_impconf(self.unrollings[conf])
+			impconfig.conf_to_impconf(self.unrollings[unrolling])
 			
 			if (not impconfig.iscovered(self.impconfigs)):
 				impconfig.set_name("impconf_%d"%(counter))
