@@ -1,4 +1,6 @@
 import copy
+import time
+import random
 from utils import * 
 
 from Space import Space
@@ -51,42 +53,91 @@ class Arch(Space):
 			for i in unrollings_dic:
 				self.unrollings[i] = Unrolling(i, unrollings_dic[i], space, stationary, precisions, limits)
 
-	def search_full(self, algs_light, verbose=True):
+	def search_full(self, algs, randomness=False, verbose=True):
 		self.gen_all_unrollings(self.space)
-		print_("%d configurations are generated - cisidering IO limits" % (len(self.unrollings)), verbose)
+		print_("%d Unrollings are generated - cisidering IO limits" % (len(self.unrollings)), verbose)
 		self.gen_imp_confs(filter_methode="unique")
-		return 
 
-	def search_heuristic(self, algs_light, prune_methode="old", verbose=True):
-		# generate all possible configs (considering IO, # of MACs limits)
+		best_case = 0
+		best_rate = 0
+		self.set_total_number_of_arch_sample()
+
+		if randomness == True:
+			the_range = random.choices(range(self.total_number_of_arch_sample), k=10)
+		else:
+			the_range = range(self.total_number_of_arch_sample)
+
+		for case in the_range:
+			t0 = time.time()
+			self.get_arch_sample(case)
+
+			unrollings_temp = {}
+			for impconfig in self.impconfigs:
+				if impconfig.enable_mask == 1:
+					for i in impconfig.unrollings:
+						unrollings_temp[i] = self.unrollings[i]
+			
+			rate = self.rate_arch(unrollings_temp, algs, scoring=False, verbose=False)		
+			t1 = time.time()
+			if (best_rate < rate):
+				best_rate = rate
+				best_case = case
+
+			print("rate: %f, time: %f (sec)" % (rate, t1-t0))
+			if ((case+1) % 100 == 0):
+				print ("system is working: %d\%" % (((case+1)*100) / self.total_number_of_arch_sample))
+
+		print("best rate: %f " % best_rate)
+		
+		self.get_arch_sample(best_case)
+
+		counter = 0
+		impconfigs_temp = []
+		for impconfig in self.impconfigs:
+			if impconfig.enable_mask:
+				impconfig.name = "impconf_%d" % (counter)
+				counter += 1
+				impconfigs_temp.append(impconfig)
+
+		gen_HDLs(self.dir, "MLBlock_2Dflex_best", impconfigs_temp, self.nmac, 
+			self.precisions["I"], self.I_D, 
+			self.precisions["W"], self.W_D, 
+			self.precisions["O"], self.RES_D, 
+			self.SHIFTER_TYPE,
+			verbose=False)
+
+
+	def search_heuristic(self, algs, prune_methode="old", verbose=True):
+		# generate all possible unrollings (considering IO, # of MACs limits)
 		self.gen_all_unrollings(self.space)
-		print_("%d configurations are generated - cisidering IO limits" % (len(self.unrollings)), verbose)
+		print_("%d Unrollings are generated - cisidering IO limits" % (len(self.unrollings)), verbose)
 
-		# measure the configuration scheduling abilities
-		print_("Scoring the configurations regarding scheduling is started. Wait!", verbose)		
+		# measure the unrollings scheduling abilities
+		print_("Scoring the unrollings regarding scheduling is started. Wait!", verbose)		
 		if prune_methode == "old":
-			self.rate_arch(algs_light)
+			rate_report = self.rate_arch(self.unrollings, algs)
+			print("Average utilization rate: %.5f" % (rate_report))
 		elif prune_methode == "new":
-			self.rate_arch_new(algs_light)
+			self.rate_arch_new(self.unrollings, algs)
 
-		# remove non-used configs (non-used means it never ever used as the best case of scheduling for any benchmark points)
-		print_("Removing non-used configurations.", verbose)	
+		# remove non-used unrollings (non-used means it never ever used as the best case of scheduling for any benchmark points)
+		print_("Removing non-used unrollings.", verbose)	
 		if prune_methode == "old":
 			self.remove_zero_scores()
 			self.reset_unrollings_score()
 		elif prune_methode == "new":
-			self.remove_nonnecessary_confs()
-		print_("Remaining configurations: %5d" % (len(self.unrollings)), verbose)
+			self.remove_nonnecessary_unrollings()
+		print_("Remaining unrollings: %5d" % (len(self.unrollings)), verbose)
 
-		# print the remain configs
-		print_("\n***** Selected configurations *****\n", verbose)
+		# print the remaining unrollings
+		print_("\n***** Selected unrollings *****\n", verbose)
 		self.print_unrollings()
 		# print dot product shapes
 		self.print_unrollings(cat=["IW"])
 
 		# implementation configurations
 		print_("\n***** generating verilog model of MLBlock_2Dflex *****\n", verbose)
-		self.gen_imp_confs()
+		self.gen_imp_confs(filter_methode="covered")
 		gen_HDLs(self.dir, "MLBlock_2Dflex", self.impconfigs, self.nmac, 
 			self.precisions["I"], self.I_D, 
 			self.precisions["W"], self.W_D, 
@@ -100,14 +151,14 @@ class Arch(Space):
 		counter = 0
 		for case in param_gen_const_product(space.size, self.nmac):
 			temp_dic = fill_dic_by_array(temp_dic, case)
-			conf_name = 'conf_' + str(counter)
-			unrolling = Unrolling(conf_name , temp_dic, space, self.stationary, self.precisions, self.limits)
+			unrolling_name = 'unrolling_' + str(counter)
+			unrolling = Unrolling(unrolling_name , temp_dic, space, self.stationary, self.precisions, self.limits)
 			if unrolling.OK():
-				self.unrollings[conf_name] = unrolling
+				self.unrollings[unrolling_name] = unrolling
 				unrolling.print_param_dic()
 			counter += 1
 
-	def rate_arch(self, algs):
+	def rate_arch(self, unrollings, algs, scoring=True, verbose=True):
 		rate_algs = {}
 
 		for alg in algs: 
@@ -116,23 +167,29 @@ class Arch(Space):
 				alg_case_dic = alg.case_gen(index)
 
 				rate_best = 0
-				conf_best = ""
-				for conf in self.unrollings:
-					unrolling_dic = self.unrollings[conf].gen_dic()
+				unrolling_best = ""
+				for unrolling in unrollings:
+					unrolling_dic = self.unrollings[unrolling].gen_dic()
 					rate_temp = self.util_rate(alg_case_dic, unrolling_dic)
 					if rate_temp > rate_best:
 						rate_best = rate_temp
-						conf_best = conf
-
-				self.unrollings[conf_best].score += 1
+						unrolling_best = unrolling
+				if scoring:
+					unrollings[unrolling_best].score += 1
 				rate_total += rate_best				
 
 			rate_algs[alg.name] = rate_total/alg.total_cases
 
+		rate_report = 0
 		for rate in rate_algs:
-			print("Algorithm name: %-10s  %.5f" % (rate, rate_algs[rate]))
+			rate_report += rate_algs[rate]
+			if (verbose):
+				print("Algorithm name: %-10s  %.5f" % (rate, rate_algs[rate]))
+
+		return rate_report / len(rate_algs)
+		
 	
-	def rate_arch_new(self, algs):
+	def rate_arch_new(self, unrollings, algs):
 		print ("$$$$ Under development $$$$$")
 		rate_algs = {}
 
@@ -142,22 +199,22 @@ class Arch(Space):
 				alg_case_dic = alg.case_gen(index)
 
 				rate_best = 0
-				conf_best = []
-				for conf in self.unrollings:
-					unrolling_dic = self.unrollings[conf].gen_dic()
+				unrolling_best = []
+				for unrolling in unrollings:
+					unrolling_dic = unrollings[unrolling].gen_dic()
 					rate_temp = self.util_rate(alg_case_dic, unrolling_dic)
 					
 					if rate_temp > rate_best:
 						rate_best = rate_temp
-						conf_best = [conf]
+						unrolling_best = [unrolling]
 					elif rate_temp == rate_best:
-						conf_best.append(conf)
+						unrolling_best.append(unrolling)
 
-				for conf in self.unrollings:
-					if conf in conf_best:
-						self.unrollings[conf].scores.append(1)
+				for unrolling in unrollings:
+					if unrolling in unrolling_best:
+						unrollings[unrolling].scores.append(1)
 					else:
-						self.unrollings[conf].scores.append(0)
+						unrollings[unrolling].scores.append(0)
 					
 				rate_total += rate_best				
 
@@ -168,40 +225,38 @@ class Arch(Space):
 
 	def remove_zero_scores(self):
 		list_to_remove = []
-		for conf in self.unrollings:
-			if self.unrollings[conf].score == 0:
-				list_to_remove.append(conf)
+		for unrolling in self.unrollings:
+			if self.unrollings[unrolling].score == 0:
+				list_to_remove.append(unrolling)
 
-		for conf in list_to_remove:
-			del self.unrollings[conf]
+		for unrolling in list_to_remove:
+			del self.unrollings[unrolling]
 
-	def remove_nonnecessary_confs(self):
-		conf_names = []
+	def remove_nonnecessary_unrollings(self):
+		unrolling_names = []
 		table = []
-		for conf in self.unrollings:
-			conf_names.append(conf)
+		for unrolling in self.unrollings:
+			unrolling_names.append(unrolling)
 			if len(table) == 0:
-				table = np.reshape(np.array(self.unrollings[conf].scores), (-1,1))
+				table = np.reshape(np.array(self.unrollings[unrolling].scores), (-1,1))
 			else:
-				table = np.append(table, np.reshape(self.unrollings[conf].scores, (-1,1)), axis=1)
+				table = np.append(table, np.reshape(self.unrollings[unrolling].scores, (-1,1)), axis=1)
 
-		print(len(conf_names))
-		print(conf_names)
+		print(len(unrolling_names))
+		print(unrolling_names)
 		print(table.shape)
 		print(table)
 		cols, costs = pick_optimum_necessary_cols(table, np.ones(table.shape[1]))
 		print(cols, costs)
 		exit()
 
-
-
 		list_to_remove = []
-		for conf in self.unrollings:
-			if self.unrollings[conf].score == 0:
-				list_to_remove.append(conf)
+		for unrolling in self.unrollings:
+			if self.unrollings[unrolling].score == 0:
+				list_to_remove.append(unrolling)
 
-		for conf in list_to_remove:
-			del self.unrollings[conf]
+		for unrolling in list_to_remove:
+			del self.unrollings[unrolling]
 
 	def util_rate(self, alg_p_dic, unrolling_p_dic):
 		alg_arr = dic2nparr(alg_p_dic)
@@ -232,10 +287,23 @@ class Arch(Space):
 			impconfig = ImpConfig()
 			impconfig.conf_to_impconf(self.unrollings[unrolling])
 			
-			if (not impconfig.isnew(self.impconfigs, methode=filter_methode)):		
+			if (not impconfig.isnew(self.impconfigs, self.unrollings[unrolling].name, methode=filter_methode)):		
 				impconfig.set_name("impconf_%d"%(counter))
+				impconfig.add_unrolling_name(self.unrollings[unrolling].name)
 				self.impconfigs.append(impconfig)
 				counter += 1
 
 		for impconfig in self.impconfigs:
 			impconfig.print()
+
+	def set_total_number_of_arch_sample(self):
+		total_configs = len(self.impconfigs)
+		self.total_number_of_arch_sample = 2 ** total_configs
+
+	def get_arch_sample(self, index):
+		for impconfig in self.impconfigs:
+			if (index % 2):
+				impconfig.enable_mask = 1
+			else:
+				impconfig.enable_mask = 0
+			index = index // 2

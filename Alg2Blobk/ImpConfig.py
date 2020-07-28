@@ -9,9 +9,11 @@ class ImpConfig():
 		self.U_IWO 	 = U_IWO
 
 		self.unrollings = []
+		self.enable_mask = 1
 
 	def print(self):
-		print ("%-10s:  U_IW_W: %2d, U_IW_NW: %2d, U_WO: %2d,  U_IO: %2d,  U_IWO: %2d" % (self.name, self.U_IW_W, self.U_IW_NW, self.U_WO, self.U_IO, self.U_IWO))
+		print ("%-10s:  IW_W: %2d, IW_NW:%2d, WO: %2d,  IO: %2d,  IWO: %2d, %s" % (self.name, self.U_IW_W, self.U_IW_NW, self.U_WO, self.U_IO, self.U_IWO, self.unrollings))
+		
 
 	def conf_to_impconf(self, unrolling):
 		for p in unrolling.param_dic:
@@ -32,29 +34,36 @@ class ImpConfig():
 	def set_name(self, name):
 		self.name = name
 
-	def isunique(self, impconfigs):
-		for impconfig in impconfigs:
-			if (impconfig.U_IW_W == self.U_IW_W):
-				if (impconfig.U_IW_NW == self.U_IW_NW):
-					if (impconfig.U_WO == self.U_WO):
-						if (impconfig.U_IO == self.U_IO):
-							if (impconfig.U_IWO == self.U_IWO):
-								return True
-		return False
-
-	def iscovered(self, impconfigs):
-		for impconfig in impconfigs:
-			if (impconfig.U_IW_W == self.U_IW_W):
-				if (impconfig.U_IW_NW == self.U_IW_NW):
-					if (impconfig.U_WO == self.U_WO):
-						if (impconfig.U_IO * impconfig.U_IWO == self.U_IO * self.U_IWO):
+	def isequal(self, impconfig):
+		if (impconfig.U_IW_W == self.U_IW_W):
+			if (impconfig.U_IW_NW == self.U_IW_NW):
+				if (impconfig.U_WO == self.U_WO):
+					if (impconfig.U_IO == self.U_IO):
+						if (impconfig.U_IWO == self.U_IWO):
 							return True
 		return False
 
-	def isnew(self, impconfigs, methode="unique"):
-		if methode == "unique":
-			return self.isunique(impconfigs)
-		elif methode == "covered":
-			return self.iscovered(impconfigs)
-		else:
+	def iscompatible(self, impconfig):
+		if (impconfig.U_IW_W == self.U_IW_W):
+			if (impconfig.U_IW_NW == self.U_IW_NW):
+				if (impconfig.U_WO == self.U_WO):
+					if (impconfig.U_IO * impconfig.U_IWO == self.U_IO * self.U_IWO):
+						return True
+		return False
+
+	def isnew(self, impconfigs, unrolling_name, methode="unique", save_track=True):
+		if (not methode in ["unique", "covered"]):
 			raise Exception ("The isnew function: The methode is not supported !!!")
+
+		out = False
+		for impconfig in impconfigs:
+
+			if ( ((methode == "unique") and (self.isequal(impconfig))) or ((methode == "covered") and (self.iscompatible(impconfig))) ):
+				out = True 
+				if save_track:
+					impconfig.add_unrolling_name(unrolling_name)
+
+		return out
+
+	def add_unrolling_name(self, unrolling_name):
+		self.unrollings.append(unrolling_name)
