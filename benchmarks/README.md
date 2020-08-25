@@ -7,12 +7,12 @@ We have three set of benchmarks plus an extra total set:
     + EfficientNet layers 
     + baidu benchmarks
 
-2- LSTM: 
+2- RNNs: 
 
-    + baidu benchmark - lstm kernels (DeepBenchmark)
-    + HALP
-    + Hebrue
-    + Microsoft model 
+    + baidu benchmark - lstm/GRU kernels (DeepBenchmark)
+    + HALP - LSTM
+    + Hebrue - LSTM
+    + Microsoft model - LSTM
 
 
 3- DSP:  FIR, IIR, (excluding FFT) - source: ?
@@ -22,7 +22,7 @@ We have three set of benchmarks plus an extra total set:
 
 # potential benchmarks:
 
-# DSP benchmarks: 
+## DSP benchmarks: 
     
 ### ADASMark Benchmark (good but we wait for licence):
 
@@ -42,25 +42,25 @@ FIR, LMS FIR,
     1997_benchmark_v1.0.tar.gz, 1997, http://groups.csail.mit.edu/cag/raw/benchmark/README.html
 
 
-# LSTM benchmarks:
+## RNN (LSTM/GRU) benchmarks:
 
 This paper helped me to fine the sources: 
 
     https://arxiv.org/pdf/1806.01818.pdf
 
-Understanding of LSTM costs:
+Understanding of LSTM/GRU costs:
 
     https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html
     https://pytorch.org/tutorials/beginner/nlp/sequence_models_tutorial.html
+    https://towardsdatascience.com/gate-recurrent-units-explained-using-matrices-part-1-3c781469fc18
 
-Computation:
+### LSTM Computation:
 
 concatanations: "|" horizental and "/" vertical
 
     [i/f/c/o] = ([[wiin/wfin/wcin/woin] | [wih/wfh/wch/woh]) * ([in/ht-1]) + [b/b/b/b]
 
-#### cost:
-
+cost:
 
 without batch:
 
@@ -70,6 +70,26 @@ without batch:
 with batch:
 
     [] = [4h x (in | h)]       x  [(in / h) x B]
+
+
+** baidu assumes:  in = h **
+
+### GRU computation:
+
+    [i/f/c/o] = ([[wzin/wrin/whin] | [wzh/wrh/whh]) * ([in/ht-1]) + [b/b/b]
+
+cost:
+
+without batch:
+
+    [] = [[3h x in],[3h x h]]  x  [(in / h) x 1]
+    [] = [3h x (in | h)]       x  [(in / h) x 1]
+
+with batch:
+
+    [] = [3h x (in | h)]       x  [(in / h) x B]
+
+** baidu assumes:  in = h **
 
 ### DeepBench(great): 
 baidu benchmark 
