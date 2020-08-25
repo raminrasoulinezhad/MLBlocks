@@ -10,3 +10,6 @@ class Param():
 	def set_vals(self, vals):
 		self.vals = [1] if (vals == None) else vals
 		self.vals_size = len(self.vals)
+
+	def get_vals(self):
+		return self.vals

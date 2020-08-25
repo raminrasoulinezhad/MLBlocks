@@ -53,6 +53,23 @@ Understanding of LSTM costs:
     https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html
     https://pytorch.org/tutorials/beginner/nlp/sequence_models_tutorial.html
 
+Computation:
+
+concatanations: "|" horizental and "/" vertical
+
+    [i/f/c/o] = ([[wiin/wfin/wcin/woin] | [wih/wfh/wch/woh]) * ([in/ht-1]) + [b/b/b/b]
+
+#### cost:
+
+
+without batch:
+
+    [] = [[4h x in],[4h x h]]  x  [(in / h) x 1]
+    [] = [4h x (in | h)]       x  [(in / h) x 1]
+
+with batch:
+
+    [] = [4h x (in | h)]       x  [(in / h) x B]
 
 ### DeepBench(great): 
 baidu benchmark 

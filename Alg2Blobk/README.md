@@ -1,4 +1,4 @@
-This directory include the python modeling of the MLBlock generalization. The prepared tool is able to do the followings:
+# MLBlocks - a generalization for desiging FPGA compute units to accelerate nested loop-based computations 
 
 ### Benchmark to MLBlock: 
 This framework explore the benchmark algorithm and finds a set of valid configurations which are able to impleemnt the benchmarks with the best tiling possible. This is a Heuristic approach which is based on pruning the non-beneficiary configuration among the valid configurations.
@@ -16,11 +16,13 @@ Results:
 ### best MLBlock pareto:
 
 
-## requirements 
+# requirements 
 
     pip3 install mip numpy
 
-## TODO:
+
+
+# TODO:
 
 ### full search 
 
@@ -32,7 +34,7 @@ It is fine in our case. However, this is wrong in general. Any parameter, 1) whi
 
 In our eight-nested loop supermodel, **fx** and **fy** are those candidates. However, windowing both **fx** and **fy** does not make sense in practice. Since a line buffer per dot-product is required. Thus, we decided to make fx the only window-able parameter. (**fy** is not appearing in 1D algorithms). Note, **fx**, **fy** and **fz** are parameters different dimensions of the same characteristics)
 
-## File notes:
+# File notes:
 
 ### benchmark_archs
 
