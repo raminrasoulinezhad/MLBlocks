@@ -45,6 +45,8 @@ LSTM/RNNs:
 
 &nbsp;
 &nbsp;
+&nbsp;
+&nbsp;
 
 ## DSP benchmarks: 
     
@@ -54,8 +56,7 @@ A full object detection system (complex but perfect, we are waiting for the univ
 
     https://www.eembc.org/adasmark/
 
-### UTDSP (1997):
-FIR, LMS FIR, 
+### UTDSP (1997 - FIR,LMS,FIR):
     
     https://www.eecg.utoronto.ca/~corinna/
 
@@ -64,6 +65,8 @@ FIR, LMS FIR,
     1997_benchmark_v1.0.tar.gz, 1997, http://groups.csail.mit.edu/cag/raw/benchmark/README.html
 
 
+&nbsp;
+&nbsp;
 &nbsp;
 &nbsp;
 
@@ -79,32 +82,27 @@ Understanding of LSTM/GRU costs:
     https://pytorch.org/tutorials/beginner/nlp/sequence_models_tutorial.html
     https://towardsdatascience.com/gate-recurrent-units-explained-using-matrices-part-1-3c781469fc18
 
-### LSTM Computation:
-
-concatanations: "|" horizental and "/" vertical
+**LSTM Computation:** (concatanations: "|" horizental and "/" vertical)**:**
 
     [i/f/c/o] = ([[wiin/wfin/wcin/woin] | [wih/wfh/wch/woh]) * ([in/ht-1]) + [b/b/b/b]
 
-cost without batch:
+The cost (without batch):
 
     [] = [[4h x in],[4h x h]]  x  [(in / h) x 1]
     [] = [4h x (in | h)]       x  [(in / h) x 1]
 
-cost with batch (baidu DeepBench assumes:  in = h):
+The cost with batch (baidu DeepBench assumes:  in = h):
 
     [] = [4h x (in | h)]       x  [(in / h) x B]
 
 
-### GRU computation:
+**GRU computation:**
 
     [i/f/c/o] = ([[wzin/wrin/whin] | [wzh/wrh/whh]) * ([in/ht-1]) + [b/b/b]
 
-cost with batch (baidu DeepBench assumes:  in = h):
+The cost with batch (baidu DeepBench assumes:  in = h):
 
     [] = [3h x (in | h)]       x  [(in / h) x B]
-
-
-
 
 ### HALP (good):
 
