@@ -1,4 +1,4 @@
-# selected benchmarks:
+# Selected benchmarks:
 
 We have three set of benchmarks plus an extra total set:
 
@@ -20,13 +20,37 @@ We have three set of benchmarks plus an extra total set:
     + (maybe) ADASMark (some layers)
     
 
-# potential benchmarks:
+# Founded benchmarks:
+
+## General benchmarks (GEMMs, CNNs, RNNs): 
+
+### DeepBench(great, by Baidu): 
+
+    (https://github.com/baidu-research/DeepBench)
+
+### MLPerf (No good): 
+    
+CNNs:    
+    
+    Resnet50-v1.5
+    MobileNets-v1
+    SSD-ResNet34
+    SSD-MobileNets-v1
+
+LSTM/RNNs:
+
+    https://mlperf.org/inference-overview/#overview
+    GNMT Model (big and complex): https://arxiv.org/pdf/1609.08144.pdf
+    code: https://github.com/mlperf/inference/blob/master/v0.5/translation/gnmt/tensorflow/nmt/gnmt_model.py
+
+&nbsp;
+&nbsp;
 
 ## DSP benchmarks: 
     
 ### ADASMark Benchmark (good but we wait for licence):
 
-A full process of preprocessing and object detection  (complex but perfect)
+A full object detection system (complex but perfect, we are waiting for the university permission)
 
     https://www.eembc.org/adasmark/
 
@@ -35,12 +59,13 @@ FIR, LMS FIR,
     
     https://www.eecg.utoronto.ca/~corinna/
 
-
-    mm_benchmark_suite, 2001, https://people.eecs.berkeley.edu/~slingn/
     mm_benchmark_suite, 2001, https://people.eecs.berkeley.edu/~slingn/
 
     1997_benchmark_v1.0.tar.gz, 1997, http://groups.csail.mit.edu/cag/raw/benchmark/README.html
 
+
+&nbsp;
+&nbsp;
 
 ## RNN (LSTM/GRU) benchmarks:
 
@@ -60,55 +85,26 @@ concatanations: "|" horizental and "/" vertical
 
     [i/f/c/o] = ([[wiin/wfin/wcin/woin] | [wih/wfh/wch/woh]) * ([in/ht-1]) + [b/b/b/b]
 
-cost:
-
-without batch:
+cost without batch:
 
     [] = [[4h x in],[4h x h]]  x  [(in / h) x 1]
     [] = [4h x (in | h)]       x  [(in / h) x 1]
 
-with batch:
+cost with batch (baidu DeepBench assumes:  in = h):
 
     [] = [4h x (in | h)]       x  [(in / h) x B]
 
-
-** baidu assumes:  in = h **
 
 ### GRU computation:
 
     [i/f/c/o] = ([[wzin/wrin/whin] | [wzh/wrh/whh]) * ([in/ht-1]) + [b/b/b]
 
-cost:
-
-without batch:
-
-    [] = [[3h x in],[3h x h]]  x  [(in / h) x 1]
-    [] = [3h x (in | h)]       x  [(in / h) x 1]
-
-with batch:
+cost with batch (baidu DeepBench assumes:  in = h):
 
     [] = [3h x (in | h)]       x  [(in / h) x B]
 
-** baidu assumes:  in = h **
 
-### DeepBench(great): 
-baidu benchmark 
 
-    (https://github.com/baidu-research/DeepBench)
-
-### MLPerf (No good): 
-    
-GNMT model (big and complex)
-
-    https://mlperf.org/inference-overview/#overview
-
-GNMT Model:
-
-    https://arxiv.org/pdf/1609.08144.pdf
-
-code: 
-    
-    https://github.com/mlperf/inference/blob/master/v0.5/translation/gnmt/tensorflow/nmt/gnmt_model.py
 
 ### HALP (good):
 
@@ -116,7 +112,6 @@ code:
 
     https://www.cs.cornell.edu/~cdesa/papers/arxiv2018_lpsvrg.pdf
     https://arxiv.org/pdf/1803.03383.pdf
-
 
 ### Hebrue et al. (good):
 
@@ -128,20 +123,19 @@ LSTM 1 hidden 300, 3-4 bit
 
 ### A google model (complex):
 
-4 layers mixed of RNN and LSTM, 8 bit
+A quantized (8bit) 4 layers mixed of RNN and LSTM:
 
     https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45379.pdf
 
-
 ### Alibaba (ok)
 
-quantized, sound detector, 
+A quantized sound detector:
 
     ALTERNATINGMULTI-BITQUANTIZATION FORRECURRENTNEURALNETWORKS (https://arxiv.org/pdf/1802.00150.pdf)
     
 ### Microsoft LSTM network (easy):
 
-2 separate LSTM50-->64,LSTM100-->64, FC128-->64 
+Two separate LSTM50-->64 and LSTM100-->64 followed by a FC128-->64 
 
     A Sentiment-and-Semantics-Based Approach for EmotionDetection in Textual Conversations (https://www.researchgate.net/publication/318671090_A_Sentiment-and-Semantics-Based_Approach_for_Emotion_Detection_in_Textual_Conversations?enrichId=rgreq-76d09f0b0a6b99e51e03b476603f55cc-XXX&enrichSource=Y292ZXJQYWdlOzMxODY3MTA5MDtBUzo1NjA2MTkyOTc4ODIxMTJAMTUxMDY3MzQ2NDU5NA%3D%3D&el=1_x_3&_esc=publicationCoverPdf)
 
