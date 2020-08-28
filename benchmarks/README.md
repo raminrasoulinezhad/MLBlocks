@@ -50,7 +50,7 @@ LSTM/RNNs:
 
 ## DSP benchmarks: 
     
-### ADASMark Benchmark (good but we wait for licence):
+### ADASMark Benchmark, EEMBC (good but we wait for licence):
 
 A full object detection system (complex but perfect, we are waiting for the university permission)
 
@@ -61,7 +61,7 @@ A full object detection system (complex but perfect, we are waiting for the univ
     1997_UTDSP.tar.gz, https://www.eecg.utoronto.ca/~corinna/
 
 **FFT:**
-we don't support fft now 1) low number of data reusement, 2) not sequentive data access pattern for combined computations 
+we don't support fft now 1) low number of data reusement, 2) none sequentive data access pattern for combined computations 
 
 **FIR**
 like 1D-Convolution (256 and 32 tap FIR)
@@ -83,13 +83,19 @@ We don't support IIRs now, but to support them, we need configurations where the
 ![IIR](IIR.jpg){:height="50%" width="50%"}
 
 **LATNRM**
-we don't support this types of functions as there are many loop dependencies 
+we don't support this types of functions as there are many **loop dependencies**. 
 
 **lmsfir**
-the adaptive feature prevents usage of MLblok since we relay of Weight stationary technique.
+the adaptive feature prevents usage of MLblok since we relay of **Weight stationary** technique. Updating the weights are not possible.
 
 **mult**
-matrix multiplication which we use them in our experiments
+matrix multiplication which we use them in our experiments.
+
+### BDTI:
+tasks are: **FIR**, LMS Adaptive FIR, IIR, **Vector Dot Product**, Vector Add, Vector Maximum, Viterbi Decoder, Control, 256-Point In-Place FFT, Bit Unpack,
+I emailed them.
+
+    https://www.bdti.com/services/bdti-dsp-kernel-benchmarks
 
 ### Berkeley multimedia (2001):
 

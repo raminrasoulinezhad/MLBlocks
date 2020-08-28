@@ -1,6 +1,10 @@
 from Algorithm import Algorithm
 from benchmark_space import * 
 
+# ############################################################################################################################################
+# Custom benchmarks
+# ############################################################################################################################################
+
 # Sample benchmark
 custom_kernel_BSConv = Algorithm("custom_kernel_BSConv", 
 						{	"d":	None,
@@ -93,10 +97,13 @@ custom_kernel_BMM_light = Algorithm("custom_kernel_BMM_light",
 							"fx":	None 
 						}, my_space)
 
+custom_algs = [custom_kernel_BSConv, custom_kernel_BDWConv, custom_kernel_BPWConv, custom_kernel_BMM]
+custom_algs_light = [custom_kernel_BSConv_light, custom_kernel_BDWConv_light, custom_kernel_BPWConv_light, custom_kernel_BMM_light]
 
-# ####################
+
+# ############################################################################################################################################
 # Baidu - DeepBench
-# ####################
+# ############################################################################################################################################
 
 # --- GEM --- source: https://github.com/baidu-research/DeepBench
 # 	Various conditions:  
@@ -156,8 +163,28 @@ baidu_kernel_LSTM = Algorithm("baidu_kernel_LSTM",
 							"fx":	None
 						}, my_space, case_gen_method="specific_samples")
 
-custom_algs = [custom_kernel_BSConv, custom_kernel_BDWConv, custom_kernel_BPWConv, custom_kernel_BMM]
-custom_algs_light = [custom_kernel_BSConv_light, custom_kernel_BDWConv_light, custom_kernel_BPWConv_light, custom_kernel_BMM_light]
+# ############################################################################################################################################
+# UTDSP_test_suite
+# ############################################################################################################################################
+# it includes:
+# 	1- FIR (256,64) and (32,1)
+#	2- mmult (10,10,10) and (4,4,4)
+# 	
+# 	We don't include 
+#		-- fft:		low data reusement and none sequentive data access pattern
+#		-- IIR: 	To support that we need to add by pass to the windowing register circuit. 
+# 		-- LATNRM:	loop dependency
+#		-- lmsfir:	weight stationary does not support adaptive filters
+utdsp_kernels = Algorithm("utdsp_kernels", 
+						{	"d":	[1,		1,		1,	1, ],
+							"b":	[1,		1,		1,	1, ],
+							"k":	[1,		1,		10,	4, ],
+							"c":	[1,		1,		10,	4, ],
+							"y":	[1,		1,		1,	1, ],
+							"x":	[64,	1,		10,	4, ],
+							"fy":	[1,		1,		1,	1, ],
+							"fx":	[256,	32,		1,	1, ]
+						}, my_space, case_gen_method="specific_samples")
 
 
 if __name__ == "__main__":
