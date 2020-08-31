@@ -54,8 +54,7 @@ class Arch(Space):
 				self.unrollings[i] = Unrolling(i, unrollings_dic[i], space, stationary, precisions, limits)
 
 	def search_full(self, algs, randomness=False, verbose=True):
-		self.gen_all_unrollings(self.space)
-		print_("%d Unrollings are generated - cisidering IO limits" % (len(self.unrollings)), verbose)
+		self.unrollings = self.gen_possible_unrollings(self.space, verbose)
 		self.gen_imp_confs(filter_methode="unique")
 
 		best_case = 0
@@ -109,8 +108,7 @@ class Arch(Space):
 
 	def search_heuristic(self, algs, prune_methode="old", verbose=True):
 		# generate all possible unrollings (considering IO, # of MACs limits)
-		self.gen_all_unrollings(self.space)
-		print_("%d Unrollings are generated - cisidering IO limits" % (len(self.unrollings)), verbose)
+		self.unrollings = self.gen_possible_unrollings(self.space, verbose)
 
 		# measure the unrollings scheduling abilities
 		print_("Scoring the unrollings regarding scheduling is started. Wait!", verbose)		
@@ -145,18 +143,23 @@ class Arch(Space):
 			self.SHIFTER_TYPE,
 			verbose=False)
 
-	def gen_all_unrollings(self, space):
-		temp_dic = copy.deepcopy(space.param_dic)
-		self.unrollings = {}
+
+
+	def gen_possible_unrollings(self, space, verbose):
+		space_dic = copy.deepcopy(space.param_dic)
+		unrollings_valid = {}
 		counter = 0
 		for case in param_gen_const_product(space.size, self.nmac):
-			temp_dic = fill_dic_by_array(temp_dic, case)
+			temp_dic = fill_dic_by_array(space_dic, case)
 			unrolling_name = 'unrolling_' + str(counter)
 			unrolling = Unrolling(unrolling_name , temp_dic, space, self.stationary, self.precisions, self.limits)
 			if unrolling.OK():
-				self.unrollings[unrolling_name] = unrolling
+				unrollings_valid[unrolling_name] = unrolling
 				unrolling.print_param_dic()
 			counter += 1
+
+		print_("%d Unrollings are generated - cisidering IO limits" % (len(unrollings_valid)), verbose)
+		return unrollings_valid
 
 	def rate_arch(self, unrollings, algs, scoring=True, verbose=True):
 		rate_algs = {}
