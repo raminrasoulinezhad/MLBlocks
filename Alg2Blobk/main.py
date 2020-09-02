@@ -12,4 +12,4 @@ from benchmark_archs import *
 #arch.search_full(custom_algs_light, randomness=False)
 #arch.search_full(custom_algs_light, randomness=True)
 #arch.search_heuristic(custom_algs_light, prune_methode="old")
-arch.search_heuristic_v2(custom_algs_light, prune_methode="old")
+arch.search_heuristic_v2(baidu_algs)

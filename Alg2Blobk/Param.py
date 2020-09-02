@@ -1,35 +1,77 @@
 class Param():
-	def __init__(self, type="IW", window_en=False, vals=None, strides=None):
-		self.type = type 
-		self.set_window_en(window_en)
-		self.set_vals(vals)
-		self.set_strides(strides)
+	def __init__(self, p_type, windowed=False, window_accompany=False):
+		# inputs:
+		# 	p_type: "IW", "IO", "WO", "IWO"
+		# 	windowed: "True", "False" 
 
+		self.set_type(p_type)
+		self.set_as_windowed(windowed)
+		self.set_as_window_accompany(window_accompany)
 
-	def set_window_en(self, window_en):
-		self.window_en = False if (window_en == None) else window_en
-		
-	def set_vals(self, vals):
-		self.vals = [1] if (vals == None) else vals
-		
-		if isinstance(self.vals, list):
-			self.vals_size = len(self.vals)
-		else:
-			self.vals_size = None
+		self.set_vals(None)
+		self.set_vals_size(None)
+		self.set_val(None)
 
-	def set_strides(self, strides):
-		self.strides = [1] if (strides == None) else strides
-		self.strides_size = len(self.strides)
-
+	def set_type(self, p_type):
+		if not p_type in ["IW", "IO", "WO", "IWO"]:
+			raise Exception ('Param type is wrone. It is set %s which is not in the [IW, IO, WO, IWO]' % (str(p_type)))
+		self.p_type = p_type 
 
 	def get_type(self):
-		return self.type
+		return self.p_type
+
+
+	def set_as_windowed(self, windowed):
+		self.windowed = False if (windowed == None) else windowed
+
+	def is_windowed(self):
+		return self.windowed
+		
+
+	def set_as_window_accompany(self, window_accompany):
+		self.window_accompany = False if (window_accompany == None) else window_accompany
+
+	def is_window_accompany(self):
+		return self.window_accompany
+
+		
+	def set_vals(self, vals):
+		vals = [(1,1)] if (vals == None) else vals
+		if not isinstance(vals, list):
+			raise Exception ('The input of the set_vals should be a list or None')
+		
+		self.vals_ = []		
+		for val in vals:
+			if isinstance(val, tuple):
+				self.vals_.append(val)
+			else:
+				self.vals_.append((val,1))
+
+		self.set_vals_size(len(self.vals_))
+
+	def set_val(self, val):
+		self.val_ = (1,1) if (val == None) else val
+		if not isinstance(val, tuple):
+			self.val_ = (self.val_,1)
+
 
 	def get_vals(self):
-		return self.vals
+		return self.vals_
+
+	def get_val(self, mode='all'):
+		if not mode in ['all', 'unroll', 'stride']:
+			raise Exception ('get_val accepts mode in [] where \'%s\' is requested' % (mode))
+		
+		if mode == 'all':
+			return self.val_
+		elif mode == 'unroll':
+			return self.val_[0]
+		else:
+			return self.val_[1]
+
 
 	def get_vals_size(self):
 		return self.vals_size 
 
-	def get_strides(self):
-		return self.strides
+	def set_vals_size(self, vals_size):
+		self.vals_size = vals_size

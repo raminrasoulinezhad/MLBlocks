@@ -6,7 +6,7 @@ class Unrolling(Space):
 		super().__init__(name, space.param_dic)	
 		
 		for p in param_dic:
-			self.param_dic[p].set_vals( param_dic[p] )
+			self.param_dic[p].set_val( param_dic[p] )
 
 		self.stationary = stationary 
 		self.precisions = precisions
@@ -21,21 +21,21 @@ class Unrolling(Space):
 		self.scores= []
 
 	def set_IO_Comp_spaces(self):
-		for i in self.spaces_lists:
-			self.IO_Comp_spaces[i] = {"size" : 1, "dic": {}}
+		for s in self.spaces_lists:
+			self.IO_Comp_spaces[s] = {"size" : 1, "dic": {}}
 
-		for i in self.param_dic:
-			for j in self.spaces_lists[0:3]:
-				if check_presence(j, self.param_dic[i].type):
-					if not self.param_dic[i].window_en:
-						self.IO_Comp_spaces[j]["size"] *= self.param_dic[i].get_vals()
-					self.IO_Comp_spaces[j]["dic"][i] = self.param_dic[i].get_vals()
+		for p in self.param_dic:
+			for s in self.spaces_lists[0:3]:
+				if check_presence(s, self.param_dic[p].get_type()):
+					if not self.param_dic[p].is_windowed():
+						self.IO_Comp_spaces[s]["size"] *= self.param_dic[p].get_val('unroll')
+					self.IO_Comp_spaces[s]["dic"][p] = self.param_dic[p].get_val('unroll')
 
-			for j in self.spaces_lists[3:]:
-				if check_equality(j, self.param_dic[i].type):
-					if not self.param_dic[i].window_en:
-						self.IO_Comp_spaces[j]["size"] *= self.param_dic[i].get_vals()
-					self.IO_Comp_spaces[j]["dic"][i] = self.param_dic[i].get_vals()
+			for s in self.spaces_lists[3:]:
+				if check_equality(s, self.param_dic[p].get_type()):
+					if not self.param_dic[p].is_windowed():
+						self.IO_Comp_spaces[s]["size"] *= self.param_dic[p].get_val('unroll')
+					self.IO_Comp_spaces[s]["dic"][p] = self.param_dic[p].get_val('unroll')
 
 	def print_IO_Comp_spaces(self):
 		for i in self.IO_Comp_spaces:
@@ -62,7 +62,7 @@ class Unrolling(Space):
 	def gen_dic(self):
 		dic = {}
 		for p in self.param_dic:
-			dic[p] = self.param_dic[p].get_vals()
+			dic[p] = self.param_dic[p].get_val()
 		return dic
 
 	def reset_score(self):
@@ -70,3 +70,19 @@ class Unrolling(Space):
 
 	def clear_scores(self):
 		self.scores = []
+
+	def set_stride(self, alg_dic): 
+		for p in self.param_dic:
+			temp = self.param_dic[p].get_val()
+			temp = (temp[0], alg_dic[p][1])
+			self.param_dic[p].set_val(temp)
+
+	def is_new(self, unrolls):
+		for u in unrolls:
+			found = True
+			for p in self.param_dic:
+				if (self.param_dic[p].get_val() != unrolls[u].param_dic[p].get_val()):
+					found = False
+			if found == True:
+				return False
+		return True

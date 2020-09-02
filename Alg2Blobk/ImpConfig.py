@@ -1,8 +1,10 @@
 class ImpConfig():
-	def __init__(self, name="", U_IW_W=1, U_IW_NW=1, U_WO=1, U_IO=1, U_IWO=1):
+	def __init__(self, name="", U_IW_W=1, U_IW_W_S=1, U_IW_W_G=1, U_IW_NW=1, U_WO=1, U_IO=1, U_IWO=1):
 		self.name = name
 
 		self.U_IW_W	 = U_IW_W
+		self.U_IW_W_S = U_IW_W_S
+		self.U_IW_W_G = U_IW_W_G
 		self.U_IW_NW = U_IW_NW
 		self.U_WO 	 = U_WO
 		self.U_IO 	 = U_IO
@@ -12,24 +14,30 @@ class ImpConfig():
 		self.enable_mask = 1
 
 	def print(self):
-		print ("%-10s:  IW_W: %2d, IW_NW:%2d, WO: %2d,  IO: %2d,  IWO: %2d, %s" % (self.name, self.U_IW_W, self.U_IW_NW, self.U_WO, self.U_IO, self.U_IWO, self.unrollings))
+		print ("%-10s:  IW_W: %2d (S:%1d, G:%1d), IW_NW:%2d, WO: %2d,  IO: %2d,  IWO: %2d, %s" % (self.name, self.U_IW_W, self.U_IW_W_S, self.U_IW_W_G, self.U_IW_NW, self.U_WO, self.U_IO, self.U_IWO, self.unrollings))
 		
 
 	def conf_to_impconf(self, unrolling):
 		for p in unrolling.param_dic:
-			if unrolling.param_dic[p].type == "IW":
-				if unrolling.param_dic[p].window_en != True:
-					self.U_IW_NW *=  unrolling.param_dic[p].vals
+			if unrolling.param_dic[p].get_type() == "IW":
+				if unrolling.param_dic[p].is_windowed() != True:
+					self.U_IW_NW *=  unrolling.param_dic[p].get_val('unroll')
 				else:
-					self.U_IW_W *=  unrolling.param_dic[p].vals
-			elif unrolling.param_dic[p].type == "WO":
-				self.U_WO *=  unrolling.param_dic[p].vals
-			elif unrolling.param_dic[p].type == "IO":
-				self.U_IO *=  unrolling.param_dic[p].vals
-			elif unrolling.param_dic[p].type == "IWO":
-				self.U_IWO *=  unrolling.param_dic[p].vals
+					self.U_IW_W *=  unrolling.param_dic[p].get_val('unroll')
+			elif unrolling.param_dic[p].get_type() == "WO":
+				self.U_WO *=  unrolling.param_dic[p].get_val('unroll')
+			elif unrolling.param_dic[p].get_type() == "IO":
+				self.U_IO *=  unrolling.param_dic[p].get_val('unroll')
+			elif unrolling.param_dic[p].get_type() == "IWO":
+				self.U_IWO *=  unrolling.param_dic[p].get_val('unroll')
 			else:
 				raise Exception ("conf_to_impconf: unrolling.param_dic[p].type is not supported !!!")
+
+			if unrolling.param_dic[p].is_windowed():
+				self.U_IW_W_G = unrolling.param_dic[p].get_val('stride')
+
+			if unrolling.param_dic[p].is_window_accompany():
+				self.U_IW_W_S = unrolling.param_dic[p].get_val('stride')
 
 	def set_name(self, name):
 		self.name = name

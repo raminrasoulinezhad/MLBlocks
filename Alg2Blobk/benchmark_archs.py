@@ -19,6 +19,8 @@ arch = Arch("all",
 					}
 			)
 
+print ("\n-- Arch. descriptions are loaded\n")
+
 if __name__ == "__main__":
 	arch_MLBlock.print_confs()	 
 	print (arch_MLBlock.rate_arch(algs))

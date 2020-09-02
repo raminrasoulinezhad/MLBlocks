@@ -11,13 +11,12 @@ class Algorithm(Space):
 			raise Exception ("Algorithm %s defenition is wrong ! (case generator method is not defined: %s)" % (self.case_gen_method))
 
 		for val in vals_dic:
-			vals = vals_dic[val] if (vals_dic[val] != None) else [1]
-			self.param_dic[val].set_vals(vals)
+			self.param_dic[val].set_vals(vals_dic[val])
 
 		self.total_cases = self.calculate_total_cases()
 
 		if verbose: 
-			print("Algorithm %s has %d number of cases." % (self.name, self.total_cases))
+			print("Algorithm %-30s  %10d cases." % (self.name, self.total_cases))
 
 
 	def calculate_total_cases(self):
@@ -53,7 +52,7 @@ class Algorithm(Space):
 		for p in self.param_dic:
 			if self.case_gen_method == "all_combinations":
 				w = self.param_dic[p].get_vals_size()
-				case[p] = self.param_dic[p].vals[index % w]
+				case[p] = self.param_dic[p].get_vals()[index % w]
 				index = int(np.floor(index / w))
 
 			elif self.case_gen_method == "specific_samples": 

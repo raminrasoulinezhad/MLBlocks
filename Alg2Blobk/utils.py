@@ -58,10 +58,13 @@ def print_(string, v):
 	if v:
 		print(string)
 
-def dic2nparr(dic):
+def dic2nparr(dic, tuple_index=None):
 	arr = np.array([])
 	for p in dic:
-		arr = np.append(arr, dic[p])
+		if tuple_index == None:
+			arr = np.append(arr, dic[p])
+		else:
+			arr = np.append(arr, dic[p][tuple_index])
 	return arr
 
 def check_scale_P_N_W(dic1, dic2):

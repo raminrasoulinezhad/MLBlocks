@@ -2,13 +2,14 @@ from Param import Param
 from Space import Space
 
 my_space = Space("space",
-				{	"d":	Param("IWO",	window_en=False),
-					"b":	Param("IO",		window_en=False),
-					"k":	Param("WO",		window_en=False),
-					"c":	Param("IW",		window_en=False),
-					"y":	Param("IO",		window_en=False),
-					"x":	Param("IO",		window_en=False),
-					"fy":	Param("IW",		window_en=False),	# logically True
-					"fx":	Param("IW",		window_en=True)			
+				{	"d":	Param("IWO"),
+					"b":	Param("IO"),
+					"k":	Param("WO"),
+					"c":	Param("IW"),
+					"y":	Param("IO"),
+					"x":	Param("IO", 	window_accompany=True),
+					"fy":	Param("IW"),	# logically can be windowed as well
+					"fx":	Param("IW",		windowed=True)			
 				})
 
+print ("\n-- The space is loaded\n")
