@@ -163,6 +163,20 @@ class Arch(Space):
 			self.SHIFTER_TYPE,
 			verbose=False)
 
+	def search_area_in_loop (self, algs, verbose=True):
+
+		self.unrollings = self.gen_possible_unrollings(self.space, verbose)
+	
+		print("\nlet's find the best impconfig set :) ")
+		self.impconfigs = self.pick_efficient_implementation_configs(self.unrollings, algs)
+
+		gen_HDLs(self.dir, "MLBlock_2Dflex", self.impconfigs, self.nmac, 
+			self.precisions["I"], self.I_D, 
+			self.precisions["W"], self.W_D, 
+			self.precisions["O"], self.RES_D, 
+			self.SHIFTER_TYPE,
+			verbose=False)
+
 	def gen_possible_unrollings(self, space, verbose):
 		space_dic = copy.deepcopy(space.param_dic)
 		unrollings_valid = {}
@@ -298,6 +312,41 @@ class Arch(Space):
 		
 		unrollings_pruned = unrollings_selected
 		return unrollings_pruned 
+
+	def pick_efficient_implementation_configs (self, unrollings, algs):
+		rate_algs = {}
+		
+		unrollings_selected = {}
+		counter = 0
+
+		for alg in algs: 
+			print( "\n -- evaluating alg: %s" % (alg.get_name()) )
+			rate_total = 0 
+			for index in range(alg.total_cases):
+				alg_case_dic = alg.case_gen(index)
+				#print(alg_case_dic)
+				#rate_list = []
+				for unrolling in unrollings:
+					unrolling_dic = unrollings[unrolling].gen_dic()
+					rate_temp = self.util_rate(alg_case_dic, unrolling_dic)		
+
+					unrolling_temp = copy.deepcopy(unrollings[unrolling])
+					unrolling_temp.set_stride(alg_case_dic)
+
+					if unrolling_temp.is_new(unrollings_selected):
+						temp_name = 'unrolling_selected_' + str(counter)
+						unrolling_temp.set_name(temp_name)
+						unrollings_selected[temp_name] = unrolling_temp
+						unrolling_temp.print_param_dic()
+						counter += 1
+		
+		print('number of selected unrolling is %d' % (len(unrollings_selected)))
+
+		impconfigs = self.gen_imp_confs(unrollings_selected, filter_methode="covered")
+
+		print('number of impconfig is %d' % (len(impconfigs)))
+
+		return impconfigs 
 
 
 	def remove_zero_scores(self):

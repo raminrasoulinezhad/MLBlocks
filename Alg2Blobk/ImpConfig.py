@@ -43,20 +43,24 @@ class ImpConfig():
 		self.name = name
 
 	def isequal(self, impconfig):
-		if (impconfig.U_IW_W == self.U_IW_W):
-			if (impconfig.U_IW_NW == self.U_IW_NW):
-				if (impconfig.U_WO == self.U_WO):
-					if (impconfig.U_IO == self.U_IO):
-						if (impconfig.U_IWO == self.U_IWO):
-							return True
+		if (impconfig.U_IW_W_G == self.U_IW_W_G):
+			if (impconfig.U_IW_W_S == self.U_IW_W_S):
+				if (impconfig.U_IW_W == self.U_IW_W):
+					if (impconfig.U_IW_NW == self.U_IW_NW):
+						if (impconfig.U_WO == self.U_WO):
+							if (impconfig.U_IO == self.U_IO):
+								if (impconfig.U_IWO == self.U_IWO):
+									return True
 		return False
 
 	def iscompatible(self, impconfig):
-		if (impconfig.U_IW_W == self.U_IW_W):
-			if (impconfig.U_IW_NW == self.U_IW_NW):
-				if (impconfig.U_WO == self.U_WO):
-					if (impconfig.U_IO * impconfig.U_IWO == self.U_IO * self.U_IWO):
-						return True
+		if (impconfig.U_IW_W_G == self.U_IW_W_G):
+			if (impconfig.U_IW_W_S == self.U_IW_W_S):
+				if (impconfig.U_IW_W == self.U_IW_W):
+					if (impconfig.U_IW_NW == self.U_IW_NW):
+						if (impconfig.U_WO == self.U_WO):
+							if (impconfig.U_IO * impconfig.U_IWO == self.U_IO * self.U_IWO):
+								return True
 		return False
 
 	def isnew(self, impconfigs, unrolling_name, methode="unique", save_track=True):
