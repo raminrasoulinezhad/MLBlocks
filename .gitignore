@@ -11,5 +11,8 @@ asic/*
 !asic/*.py
 !asic/Makefile
 
+PIRDSP_verilogs/test
+
 __pycache__/
 *.pyc
+
