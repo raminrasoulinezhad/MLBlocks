@@ -4,6 +4,7 @@
 # rc source:
 # 	cd ~/setup/setup_working_dir_130nm/
 #	source .cshrc_hcmos9a_v1 
+#	cd ~/workspace/MLBlocks/asic
 .PHONY:  asic_MLBlock_sample  asic_MLBlobk  asic_dsp  asic_accumulator asic_shifter asic_pe asic_adder asic_mux clean  
 
 asic_MLBlock_sample:
@@ -35,6 +36,7 @@ asic_mux:
 # clean
 clean:
 	rm -rf rc.* *initialtest* fv
+	rm -rf rc.cmd* rc.log*
 
 # experiments
 asic_all:
