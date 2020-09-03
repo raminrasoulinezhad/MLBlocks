@@ -10,3 +10,6 @@ asic/*
 !asic/*.md
 !asic/*.py
 !asic/Makefile
+
+__pycache__/
+*.pyc
