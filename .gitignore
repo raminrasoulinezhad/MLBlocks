@@ -16,3 +16,5 @@ PIRDSP_verilogs/test
 __pycache__/
 *.pyc
 
+venv36/
+
