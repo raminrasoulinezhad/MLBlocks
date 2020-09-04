@@ -12,4 +12,4 @@ exp_addr=${directory}/index_${index}
 
 #echo ${exp_addr}
 
-cd ${exp_addr} && pwd && rc -f exp.tcl -ex "array set paramters [list period $(period)]" -E
+cd ${exp_addr} && pwd && rc -f exp.tcl -ex "array set paramters [list period ${period}]" -E

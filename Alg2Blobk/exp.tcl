@@ -40,9 +40,11 @@ set_attribute lib_search_path {/mnt/edatools/PDKs/STMicro28nm/cmos28fdsoi_29/C28
 set_attribute library [list C28SOI_SC_12_CORE_LR_tt28_1.20V_25C.lib]
 set_attribute information_level 6 
 
-set myFiles [list MLBlock_2Dflex.sv MLBlock_2Dflex_params.sv MLBlock_2Dflex_interconnects.sv  MAC_unit.sv  stream_mem.sv  mult_flex.sv  state_machine.sv  shifter.v  stream_flex.sv  accumulator.sv];
+set myFiles [list MLBlock_2Dflex.sv  MAC_unit.sv  stream_mem.sv  mult_flex.sv  state_machine.sv  shifter.sv  stream_flex.sv  accumulator.sv];
+#MLBlock_2Dflex_params.sv MLBlock_2Dflex_interconnects.sv
+
 # name of top level module
-set basename MLBlock_sample;
+set basename MLBlock_2Dflex;
 set myClk clk                    ;# clock name
 set myPeriod_ps $paramters(period)             ;# Clock period in ps
 set myInDelay_ns 0.0             ;# delay from clock to inputs valid
