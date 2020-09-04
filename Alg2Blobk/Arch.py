@@ -1,3 +1,4 @@
+import os
 import copy
 import time
 import random
@@ -163,21 +164,21 @@ class Arch(Space):
 			self.SHIFTER_TYPE,
 			verbose=False)
 
-	def search_area_in_loop (self, algs, verbose=True):
+	def search_area_in_loop (self, algs, subset_length=2, do_synthesis=False, verbose=True):
 
-		self.unrollings = self.gen_possible_unrollings(self.space, verbose)
+		self.unrollings = self.gen_possible_unrollings(self.space, verbose=False)
 	
-		print("\nlet's find the best impconfig set :) ")
-		self.impconfigs = self.pick_efficient_implementation_configs(self.unrollings, algs)
+		print("\nLet's find the unrolling and impconfig set")
+		self.impconfigs = self.pick_efficient_implementation_configs(self.unrollings, algs, subset_length=subset_length, do_synthesis=do_synthesis, verbose=False)
 
-		gen_HDLs(self.dir, "MLBlock_2Dflex", self.impconfigs, self.nmac, 
-			self.precisions["I"], self.I_D, 
-			self.precisions["W"], self.W_D, 
-			self.precisions["O"], self.RES_D, 
-			self.SHIFTER_TYPE,
-			verbose=False)
+		#gen_HDLs(self.dir, "MLBlock_2Dflex", self.impconfigs, self.nmac, 
+		#	self.precisions["I"], self.I_D, 
+		#	self.precisions["W"], self.W_D, 
+		#	self.precisions["O"], self.RES_D, 
+		#	self.SHIFTER_TYPE,
+		#	verbose=False)
 
-	def gen_possible_unrollings(self, space, verbose):
+	def gen_possible_unrollings(self, space, verbose=True):
 		space_dic = copy.deepcopy(space.param_dic)
 		unrollings_valid = {}
 		counter = 0
@@ -187,7 +188,8 @@ class Arch(Space):
 			unrolling = Unrolling(unrolling_name , temp_dic, space, self.stationary, self.precisions, self.limits)
 			if unrolling.OK():
 				unrollings_valid[unrolling_name] = unrolling
-				unrolling.print_param_dic()
+				if verbose:
+					unrolling.print_param_dic()
 				counter += 1
 
 		print_("%d Unrollings are generated - cisidering IO limits" % (len(unrollings_valid)), verbose)
@@ -204,8 +206,7 @@ class Arch(Space):
 				rate_best = 0
 				unrolling_best = ""
 				for unrolling in unrollings:
-					unrolling_dic = unrollings[unrolling].gen_dic()
-					rate_temp = self.util_rate(alg_case_dic, unrolling_dic)
+					rate_temp = self.util_rate(alg_case_dic, unrollings[unrolling])
 					if rate_temp > rate_best:
 						rate_best = rate_temp
 						unrolling_best = unrolling
@@ -236,9 +237,7 @@ class Arch(Space):
 				rate_best = 0
 				unrolling_best = []
 				for unrolling in unrollings:
-					unrolling_dic = unrollings[unrolling].gen_dic()
-					rate_temp = self.util_rate(alg_case_dic, unrolling_dic)
-					
+					rate_temp = self.util_rate(alg_case_dic, unrollings[unrolling])
 					if rate_temp > rate_best:
 						rate_best = rate_temp
 						unrolling_best = [unrolling]
@@ -262,7 +261,7 @@ class Arch(Space):
 	def rate_and_prune_unrollings (self, unrollings, algs):
 		rate_algs = {}
 		
-		unrollings_selected = {}
+		selected_unrolls = {}
 		counter = 0
 
 		trate = 0
@@ -277,9 +276,7 @@ class Arch(Space):
 				rate_best = -1
 				best_list = []
 				for unrolling in unrollings:
-					unrolling_dic = unrollings[unrolling].gen_dic()
-					rate_temp = self.util_rate(alg_case_dic, unrolling_dic)
-
+					rate_temp = self.util_rate(alg_case_dic, unrollings[unrolling])
 					if rate_temp > rate_best:
 						rate_best = rate_temp
 						unrolling_best = unrolling
@@ -290,13 +287,13 @@ class Arch(Space):
 				print(" ------ best rate (%0.5f) is by %s" % (rate_best, best_list))
 				rate_total += rate_best				
 
-				unrolling_temp = copy.deepcopy(unrollings[unrolling_best])
+				u_copy = copy.deepcopy(unrollings[unrolling_best])
 				
-				unrolling_temp.set_stride(alg_case_dic)
-				if unrolling_temp.is_new(unrollings_selected):
+				u_copy.set_stride(alg_case_dic)
+				if u_copy.is_new(selected_unrolls):
 					temp_name = 'unrolling_selected_' + str(counter)
-					unrolling_temp.set_name(temp_name)
-					unrollings_selected[temp_name] = unrolling_temp
+					u_copy.set_name(temp_name)
+					selected_unrolls[temp_name] = u_copy
 					counter += 1
 
 			rate_algs[alg.name] = rate_total/alg.total_cases
@@ -310,42 +307,110 @@ class Arch(Space):
 			print("Algorithm name: %-10s  %.5f" % (rate, rate_algs[rate]))
 		print("In average :   %.5f" % (average_rate))
 		
-		unrollings_pruned = unrollings_selected
+		unrollings_pruned = selected_unrolls
 		return unrollings_pruned 
 
-	def pick_efficient_implementation_configs (self, unrollings, algs):
+	def pick_efficient_implementation_configs (self, unrolls, algs, subset_length=2, do_synthesis=False, verbose=True):
 		rate_algs = {}
 		
-		unrollings_selected = {}
+		selected_unrolls = {}
 		counter = 0
 
 		for alg in algs: 
 			print( "\n -- evaluating alg: %s" % (alg.get_name()) )
 			rate_total = 0 
 			for index in range(alg.total_cases):
+
 				alg_case_dic = alg.case_gen(index)
-				#print(alg_case_dic)
-				#rate_list = []
-				for unrolling in unrollings:
-					unrolling_dic = unrollings[unrolling].gen_dic()
-					rate_temp = self.util_rate(alg_case_dic, unrolling_dic)		
+				
+				for u in unrolls:
+					
+					u_copy = copy.deepcopy(unrolls[u])
+					u_copy.set_stride(alg_case_dic)
 
-					unrolling_temp = copy.deepcopy(unrollings[unrolling])
-					unrolling_temp.set_stride(alg_case_dic)
-
-					if unrolling_temp.is_new(unrollings_selected):
+					if u_copy.is_new(selected_unrolls):
 						temp_name = 'unrolling_selected_' + str(counter)
-						unrolling_temp.set_name(temp_name)
-						unrollings_selected[temp_name] = unrolling_temp
-						unrolling_temp.print_param_dic()
+						u_copy.set_name(temp_name)
+						selected_unrolls[temp_name] = u_copy
 						counter += 1
+					else:
+						temp_name = u_copy.find(selected_unrolls)
+
+					rate = self.util_rate(alg_case_dic, u_copy)
+					alg.set_rate(index, temp_name, rate)
 		
-		print('number of selected unrolling is %d' % (len(unrollings_selected)))
+		print('\n -- number of selected unrolling is %d' % (len(selected_unrolls)))
 
-		impconfigs = self.gen_imp_confs(unrollings_selected, filter_methode="covered")
+		impconfigs = self.gen_imp_confs(selected_unrolls, filter_methode="covered", verbose=False)
+		print('\n -- number of impconfig is %d' % (len(impconfigs)))
+						
+		set_elements = len(impconfigs)
+		subset = SubSet(subset_length, set_elements)
+		print("\n Let's find the best %d-impconfig set" % (subset_length))
 
-		print('number of impconfig is %d' % (len(impconfigs)))
+		util_best = 0
+		for index in range(subset.get_total()):
 
+			impconfigs_subset = [impconfigs[i] for i in subset.get_subset(index)]
+
+			trate, tcase = 0, 0
+			for alg in algs: 
+				rate_temp = alg.evaluate(impconfigs_subset)
+				case_temp = alg.get_total_cases()
+				tcase += case_temp
+				trate += rate_temp * case_temp
+			average_rate = trate / tcase
+			if verbose:
+				print("In average :   %.5f" % (average_rate))
+
+			if util_best < average_rate:
+				util_best = average_rate
+				best_impconfigs_subset = impconfigs_subset
+
+			# generate verilog --> area 
+			# print("Area :   %.5f" % (average_rate))
+
+			impconfigs_string = ''
+			for i in impconfigs_subset:
+				impconfigs_string += '_' + i.get_name()[8:] 
+			
+			if do_synthesis:
+				dir_temp = '../experiments'
+				os.system('mkdir -p ' + dir_temp)
+				dir_temp += '/MLBlock_2Dflex_' + str(self.nmac)
+				os.system('mkdir -p ' + dir_temp)
+				dir_temp += '/index_' +  str(index) + '/'     # 'impconfigs' + impconfigs_string + '/'
+				os.system('mkdir -p ' + dir_temp)
+				
+				gen_HDLs(dir_temp, 'MLBlock_2Dflex', impconfigs_subset, self.nmac, 
+						self.precisions["I"], self.I_D, 
+						self.precisions["W"], self.W_D, 
+						self.precisions["O"], self.RES_D, 
+						self.SHIFTER_TYPE,
+						verbose=False)
+				os.system('cp ../verilog/MLBlock_2Dflex.sv ' + dir_temp + 'MLBlock_2Dflex.sv')
+				os.system('cp ../verilog/MAC_unit.sv ' + dir_temp + 'MAC_unit.sv')
+				os.system('cp ../verilog/stream_mem.sv ' + dir_temp + 'stream_mem.sv')
+				os.system('cp ../verilog/mult_flex.sv ' + dir_temp + 'mult_flex.sv')
+				os.system('cp ../verilog/state_machine.sv ' + dir_temp + 'state_machine.sv')
+				os.system('cp ../verilog/shifter.sv ' + dir_temp + 'shifter.sv')
+				os.system('cp ../verilog/stream_flex.sv ' + dir_temp + 'stream_flex.sv')
+				os.system('cp ../verilog/accumulator.sv ' + dir_temp + 'accumulator.sv')
+				os.system('cp exp.tcl ' + dir_temp + 'exp.tcl')
+
+		if do_synthesis:
+			NUM_CORES = 16
+			period = 1333
+			indexes = ''
+			for i in range(subset.get_total()):
+				indexes += str(i) + ' '
+			exps_addr = '../experiments' + '/MLBlock_2Dflex_' + str(self.nmac) 
+			print("parallel --bar --gnu -j%d --header : 'bash ./exp.sh %s %d {index} ' ::: index %s " % (NUM_CORES, exps_addr, period, indexes))
+			os.system("parallel --bar --gnu -j%d --header : 'bash ./exp.sh %s %d {index} ' ::: index %s " % (NUM_CORES, exps_addr, period, indexes))
+
+
+
+		print("\n -- Best utilization performance is :   %.5f by %s" % (util_best, str([bms.get_name() for bms in best_impconfigs_subset])))
 		return impconfigs 
 
 
@@ -385,9 +450,12 @@ class Arch(Space):
 		for unrolling in list_to_remove:
 			del self.unrollings[unrolling]
 
-	def util_rate(self, alg_p_dic, unrolling_p_dic):
+	def util_rate(self, alg_p_dic, unroll):
+		unroll_p_dic = unroll.gen_dic()
+
 		alg_arr = dic2nparr(alg_p_dic, 0)
-		unrolling_arr = dic2nparr(unrolling_p_dic, 0)
+		unrolling_arr = dic2nparr(unroll_p_dic, 0)
+		
 		alg_mac = arr2prod(alg_arr)
 		unrolling_mac = arr2prod(unrolling_arr)
 		unrolling_iter = arr2prod(np.ceil(alg_arr / unrolling_arr))
@@ -406,7 +474,7 @@ class Arch(Space):
 		for unrolling in self.unrollings:
 			self.unrollings[unrolling].reset_score()
 	
-	def gen_imp_confs(self, unrollings, filter_methode="covered"):
+	def gen_imp_confs(self, unrollings, filter_methode="covered", verbose=True):
 		impconfigs = []
 		counter = 0
 		for unrolling in unrollings:
@@ -419,8 +487,9 @@ class Arch(Space):
 				impconfigs.append(impconfig)
 				counter += 1
 
-		for impconfig in impconfigs:
-			impconfig.print()
+		if verbose:
+			for impconfig in impconfigs:
+				impconfig.print()
 
 		return impconfigs
 

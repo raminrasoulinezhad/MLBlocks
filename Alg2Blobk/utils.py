@@ -129,6 +129,43 @@ def pick_optimum_necessary_cols(table, costs):
 			else:
 				return cols_wf, costs_wf
 
+class SubSet():
+	def __init__(self, sub_length, max_index):
+		self.sets = self.gen(sub_length, max_index)
+		self.total = self.number_of_cases(sub_length, max_index)
+
+	def gen(self, sub_length, max_index):
+
+		if sub_length == max_index:
+			return [[i for i in range(max_index)]]
+		elif sub_length == 0:
+			return [[]]
+		else:
+			total = []
+			sets0 = self.gen(sub_length, max_index-1)
+			sets1 = self.gen(sub_length-1, max_index-1)
+			for s in sets0:
+				total.append(s)
+			for s in sets1:
+				s.append(max_index-1)
+				total.append(s)
+
+			return total
+
+	def get_subset(self, index):
+		return self.sets[index]
+
+	def number_of_cases(self, sub_length, max_index):
+		total = 1
+		for i in range(sub_length):
+			total *= (max_index - i)
+		for i in range(sub_length):
+			total //= (i+1)
+		return total
+
+	def get_total(self):
+		return self.total
+
 
 
 if __name__ == "__main__":
@@ -165,6 +202,12 @@ if __name__ == "__main__":
 	print("table: \n" + str(table))
 	print("selected cols: \t" + str(cols))			# expected [1 8 9] 
 	print("selected costs: \t" + str(cost))			# expected 6
+
+	subset_length = 2								# expexted any two element subset of 0-5 [range(6)]; like [0,2]
+	set_elements = 6
+	subset = SubSet(subset_length, set_elements)
+	for i in range(subset.get_total()):
+		print(subset.get_subset(i))
 
 	for w in [10, 15, 20]:
 		for h in [100, 1000, 10000]:

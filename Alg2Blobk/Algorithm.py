@@ -1,5 +1,6 @@
 import numpy as np
 from Space import Space
+from ImpConfig import ImpConfig
 
 class Algorithm(Space):
 	def __init__(self, name, vals_dic, space, case_gen_method="all_combinations", verbose=True):
@@ -18,6 +19,7 @@ class Algorithm(Space):
 		if verbose: 
 			print("Algorithm %-30s  %10d cases." % (self.name, self.total_cases))
 
+		self.utilization_rates = [{} for i in range(self.total_cases)]
 
 	def calculate_total_cases(self):
 		if self.case_gen_method == "all_combinations":
@@ -47,6 +49,9 @@ class Algorithm(Space):
 
 		return total_cases
 
+	def get_total_cases(self):
+		return self.total_cases
+
 	def case_gen(self, index):
 		case = {}
 		for p in self.param_dic:
@@ -59,3 +64,38 @@ class Algorithm(Space):
 				case[p] = self.param_dic[p].get_vals()[index]
 
 		return case
+
+	def set_rate(self, index, label, rate):
+		self.utilization_rates[index][label] = rate
+
+	def get_rate(self, index, label):
+		if label in self.utilization_rates[index]:
+			return self.utilization_rates[index][label]
+		else:
+			return 0.0
+
+	def print_rates(self):
+		for index in range(len(self.utilization_rates)):
+			print(self.utilization_rates[index])
+		
+	def evaluate(self, impconfigs):
+		unroll_name_list = []
+		for impconfig in impconfigs:
+			for case in impconfig.unrollings:
+				unroll_name_list.append(case)
+		
+		rate_bests = []
+		for index in range(self.total_cases):
+			rate_best  = 0
+			for label in unroll_name_list:
+				#print(unroll_name_list)
+				#print(index, label)
+				rate_temp = self.get_rate(index, str(label))
+				if rate_best < rate_temp:
+					rate_best = rate_temp
+			rate_bests.append(rate_best)
+
+		rate_mean = np.mean(rate_bests)
+		return rate_mean
+
+

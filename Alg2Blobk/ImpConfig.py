@@ -1,6 +1,6 @@
 class ImpConfig():
 	def __init__(self, name="", U_IW_W=1, U_IW_W_S=1, U_IW_W_G=1, U_IW_NW=1, U_WO=1, U_IO=1, U_IWO=1):
-		self.name = name
+		self.set_name(name)
 
 		self.U_IW_W	 = U_IW_W
 		self.U_IW_W_S = U_IW_W_S
@@ -41,6 +41,9 @@ class ImpConfig():
 
 	def set_name(self, name):
 		self.name = name
+
+	def get_name(self):
+		return self.name
 
 	def isequal(self, impconfig):
 		if (impconfig.U_IW_W_G == self.U_IW_W_G):

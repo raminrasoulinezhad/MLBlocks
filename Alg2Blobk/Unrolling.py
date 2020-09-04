@@ -86,3 +86,13 @@ class Unrolling(Space):
 			if found == True:
 				return False
 		return True
+
+	def find(self, unrolls):
+		for u in unrolls:
+			found = True
+			for p in self.param_dic:
+				if (self.param_dic[p].get_val() != unrolls[u].param_dic[p].get_val()):
+					found = False
+			if found == True:
+				return unrolls[u].get_name()
+		return None
