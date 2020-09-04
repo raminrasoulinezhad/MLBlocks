@@ -53,12 +53,14 @@ def gen_interconnections(file_name, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_
 
 	file = open(file_name, "w")
 
+	conf_index = -1
 	for config in configs:
 
 		if verbose:
 			config.print()
-		conf_index = get_config_index(config.name)
-		
+		#conf_index = get_config_index(config.name)
+		conf_index += 1
+
 		file.write("//////////////\n//%s\n" % config.name)
 
 		step_I  = PORT_I_SIZE   // (config.U_IW_NW * config.U_IO * config.U_IWO)
