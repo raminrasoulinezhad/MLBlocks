@@ -12,7 +12,7 @@ Load the RTL compiler environment
 	
 	cd ~/setup/setup_working_dir_130nm/
 	source .cshrc_hcmos9a_v1 
-	cd ~/workspace/MLBlocks/Alg2Blobk
+	cd ~/workspace/MLBlocks/Alg2Block
 
 Creat python3 environment (CentOS):
 
@@ -22,7 +22,7 @@ Creat python3 environment (CentOS):
 Activate python environment (CentOS): 
 	
 	scl enable rh-python36 bash
-	source venv36/bin/activate	
+	source ../venv36/bin/activate	
 
 ### install python3 on CentOS:
 	
