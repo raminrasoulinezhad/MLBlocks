@@ -8,6 +8,7 @@ from Space import Space
 from Unrolling import Unrolling
 from ImpConfig import ImpConfig 
 from MLBlock_2Dflex import gen_HDLs
+from tabulate import get_asic_results
 
 class Arch(Space):
 	def __init__(	self, 
@@ -348,6 +349,11 @@ class Arch(Space):
 		subset = SubSet(subset_length, set_elements)
 		print("\n Let's find the best %d-impconfig set" % (subset_length))
 
+		subset_util = []
+		subset_area = []
+		subset_clk = []
+		subset_power = []
+		
 		util_best = 0
 		for index in range(subset.get_total()):
 
@@ -360,6 +366,8 @@ class Arch(Space):
 				tcase += case_temp
 				trate += rate_temp * case_temp
 			average_rate = trate / tcase
+
+			subset_util.append(average_rate)
 			if verbose:
 				print("In average :   %.5f" % (average_rate))
 
@@ -377,7 +385,7 @@ class Arch(Space):
 			if do_synthesis:
 				dir_temp = '../experiments'
 				os.system('mkdir -p ' + dir_temp)
-				dir_temp += '/MLBlock_2Dflex_' + str(self.nmac)
+				dir_temp += '/MLBlock_2Dflex_' + str(self.nmac) + '_' + str(subset_length) + 'configs'
 				os.system('mkdir -p ' + dir_temp)
 				dir_temp += '/index_' +  str(index) + '/'     # 'impconfigs' + impconfigs_string + '/'
 				os.system('mkdir -p ' + dir_temp)
@@ -404,11 +412,21 @@ class Arch(Space):
 			indexes = ''
 			for i in range(subset.get_total()):
 				indexes += str(i) + ' '
-			exps_addr = '../experiments' + '/MLBlock_2Dflex_' + str(self.nmac) 
+			exps_addr = '../experiments' + '/MLBlock_2Dflex_' + str(self.nmac) + '_' + str(subset_length) + 'configs'
 			print("parallel --bar --gnu -j%d --header : 'bash ./exp.sh %s %d {index} ' ::: index %s " % (NUM_CORES, exps_addr, period, indexes))
 			os.system("parallel --bar --gnu -j%d --header : 'bash ./exp.sh %s %d {index} ' ::: index %s " % (NUM_CORES, exps_addr, period, indexes))
 
+		for index in range(subset.get_total()):
+			exps_addr = '../experiments' + '/MLBlock_2Dflex_' + str(self.nmac) + '_' + str(subset_length) + 'configs' 
+			exps_addr += '/index_' +  str(index) + '/'
+			area, clk, power = get_asic_results(exps_addr, period=1.333)
+			subset_area.append(area)
+			subset_clk.append(clk)
+			subset_power.append(power)
 
+		for index in range(len(subset_util)):
+			print ("subset %6d: util: %4f\tarea: %4f\tclk: %4f\tpower: %4f"%(subset_util[index], subset_area[index], subset_clk[index], subset_power[index]))
+		
 
 		print("\n -- Best utilization performance is :   %.5f by %s" % (util_best, str([bms.get_name() for bms in best_impconfigs_subset])))
 		return impconfigs 
