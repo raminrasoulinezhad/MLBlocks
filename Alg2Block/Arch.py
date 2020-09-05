@@ -23,10 +23,14 @@ class Arch(Space):
 								},
 					subprecisions=	{	
 									"I_D" : 2,
-									"W_D" : 3,
+									"W_D" : 1,
 									"RES_D" : 1,
-									"SHIFTER_TYPE" : "2Wx2V_by_WxV",	# "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
+									"SHIFTER_TYPE" : "BYPASS",	# "BYPASS", "2Wx2V_by_WxV", "2Wx2V_by_WxV_apx", "2Wx2V_by_WxV_apx_adv"
 								},
+					# subprecisions:
+					#	8x8 				--> I2,W1,Res1, BYPASS   		--double weight--> I2,W2,Res2, BYPASS
+					# 	8x8,8x16,16x8,16x16	--> I4,W2,Res1, 2Wx2V_by_WxV 	--double weight--> I4,W2,Res2, 2Wx2V_by_WxV
+					# 	multi weigth (M times) --> W and Res should be M times bigger 
 					nmac=12,
 					limits=	{	
 								"IO_I" : 36,
