@@ -399,7 +399,7 @@ class Arch(Space):
 				os.system('cp exp.tcl ' + dir_temp + 'exp.tcl')
 
 		if do_synthesis:
-			NUM_CORES = 16
+			NUM_CORES = 48
 			period = 1333
 			indexes = ''
 			for i in range(subset.get_total()):
