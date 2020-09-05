@@ -425,7 +425,7 @@ class Arch(Space):
 			subset_power.append(power)
 
 		for index in range(len(subset_util)):
-			print ("subset %6d: util: %4f\tarea: %4f\tclk: %4f\tpower: %4f"%(subset_util[index], subset_area[index], subset_clk[index], subset_power[index]))
+			print ("subset %6d: util: %4f\tarea: %4f\tclk: %4f\tpower: %4f"%(index, subset_util[index], subset_area[index], subset_clk[index], subset_power[index]))
 		
 
 		print("\n -- Best utilization performance is :   %.5f by %s" % (util_best, str([bms.get_name() for bms in best_impconfigs_subset])))
