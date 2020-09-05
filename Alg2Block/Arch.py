@@ -419,7 +419,7 @@ class Arch(Space):
 		for index in range(subset.get_total()):
 			exps_addr = '../experiments' + '/MLBlock_2Dflex_' + str(self.nmac) + '_' + str(subset_length) + 'configs' 
 			exps_addr += '/index_' +  str(index) + '/'
-			area, clk, power = get_asic_results(exps_addr, period=1.333)
+			area, clk, power = get_asic_results(exps_addr, period=1333)
 			subset_area.append(area)
 			subset_clk.append(clk)
 			subset_power.append(power)
