@@ -47,4 +47,4 @@ asic_all:
 	
 tabulate:
 	python3 tabulate.py --dir=MLBlock_sample_dir_1000  --clk=1000  --dsp_area=7958
-	python3 tabulate.py --dir=MLBlock_sample_dir_750   --clk=1333   --dsp_area=7208
+	python3 tabulate.py --dir=MLBlock_sample_dir_750   --clk=1333  --dsp_area=7208
