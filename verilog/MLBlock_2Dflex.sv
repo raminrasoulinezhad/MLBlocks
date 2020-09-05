@@ -69,8 +69,6 @@ module MLBlock_2Dflex (
 		end
 	end 
 
-	`include "MLBlock_2Dflex_interconnects.sv"
-
 	///////// internal signals
 	wire [I_W-1:0] I_in_temp [PORT_I_SIZE-1:0];
 	wire [I_W-1:0] I_configs [MAC_UNITS-1:0][N_OF_COFIGS-1:0];
@@ -90,6 +88,8 @@ module MLBlock_2Dflex (
 	wire [MAC_UNITS:0] config_in_mac_units;
 	assign config_in_mac_units[0] = (RES_D > 1) ? conf_acc_depth[RES_D_CNTL-1] : conf_a_mux[I_D_HALF-1];
 	assign config_out = config_in_mac_units[MAC_UNITS];
+	
+	`include "MLBlock_2Dflex_interconnects.sv"
 
 	genvar i,j,k;
 	generate 
