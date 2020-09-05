@@ -325,7 +325,6 @@ class Arch(Space):
 				alg_case_dic = alg.case_gen(index)
 				
 				for u in unrolls:
-					
 					u_copy = copy.deepcopy(unrolls[u])
 					u_copy.set_stride(alg_case_dic)
 
@@ -346,18 +345,11 @@ class Arch(Space):
 		print('\n -- number of impconfig is %d' % (len(impconfigs)))
 						
 		set_elements = len(impconfigs)
-		subset = SubSet(subset_length, set_elements)
+		subsetsearch = SubSetSearch(subset_length, set_elements)
 		print("\n Let's find the best %d-impconfig set" % (subset_length))
 
-		subset_util = []
-		subset_area = []
-		subset_clk = []
-		subset_power = []
-		
-		util_best = 0
-		for index in range(subset.get_total()):
-
-			impconfigs_subset = [impconfigs[i] for i in subset.get_subset(index)]
+		for index in range(subsetsearch.get_total()):
+			impconfigs_subset = subsetsearch.gen_config_subset(index, impconfigs)
 
 			trate, tcase = 0, 0
 			for alg in algs: 
@@ -367,16 +359,7 @@ class Arch(Space):
 				trate += rate_temp * case_temp
 			average_rate = trate / tcase
 
-			subset_util.append(average_rate)
-			if verbose:
-				print("In average :   %.5f" % (average_rate))
-
-			if util_best < average_rate:
-				util_best = average_rate
-				best_impconfigs_subset = impconfigs_subset
-
-			# generate verilog --> area 
-			# print("Area :   %.5f" % (average_rate))
+			subsetsearch.set_util(index, average_rate)
 
 			impconfigs_string = ''
 			for i in impconfigs_subset:
@@ -396,6 +379,7 @@ class Arch(Space):
 						self.precisions["O"], self.RES_D, 
 						self.SHIFTER_TYPE,
 						verbose=False)
+
 				os.system('cp ../verilog/MLBlock_2Dflex.sv ' + dir_temp + 'MLBlock_2Dflex.sv')
 				os.system('cp ../verilog/MAC_unit.sv ' + dir_temp + 'MAC_unit.sv')
 				os.system('cp ../verilog/stream_mem.sv ' + dir_temp + 'stream_mem.sv')
@@ -410,26 +394,25 @@ class Arch(Space):
 			NUM_CORES = 48
 			period = 1333
 			indexes = ''
-			for i in range(subset.get_total()):
+			for i in range(subsetsearch.get_total()):
 				indexes += str(i) + ' '
 			exps_addr = '../experiments' + '/MLBlock_2Dflex_' + str(self.nmac) + '_' + str(subset_length) + 'configs'
-			print("parallel --bar --gnu -j%d --header : 'bash ./exp.sh %s %d {index} ' ::: index %s " % (NUM_CORES, exps_addr, period, indexes))
 			os.system("parallel --bar --gnu -j%d --header : 'bash ./exp.sh %s %d {index} ' ::: index %s " % (NUM_CORES, exps_addr, period, indexes))
 
-		for index in range(subset.get_total()):
-			exps_addr = '../experiments' + '/MLBlock_2Dflex_' + str(self.nmac) + '_' + str(subset_length) + 'configs' 
-			exps_addr += '/index_' +  str(index) + '/'
-			area, clk, power = get_asic_results(exps_addr, period=1333)
-			subset_area.append(area)
-			subset_clk.append(clk)
-			subset_power.append(power)
+		for index in range(subsetsearch.get_total()):
+			exps_addr = '../experiments' + '/MLBlock_2Dflex_' + str(self.nmac) + '_' + str(subset_length) + 'configs/index_' +  str(index) + '/'
+			area, freq, power = get_asic_results(exps_addr, period=period)
+			subsetsearch.set_synthesis_results(index, area, freq, power)
 
-		for index in range(len(subset_util)):
-			print ("subset %6d: util: %4f\tarea: %4f\tclk: %4f\tpower: %4f"%(subset_util[index], subset_area[index], subset_clk[index], subset_power[index]))
+		if verbose:
+			for index in range(len(subset_util)):
+				subsetsearch.print_results(index)
 		
+		print('-- The best configuration results: ')
+		best_subset_impconfigs = self.best_impconfigs()
+		print("\n -- Best performance is using %s" % (str([bms.get_name() for bms in best_impconfigs_subset])))
 
-		print("\n -- Best utilization performance is :   %.5f by %s" % (util_best, str([bms.get_name() for bms in best_impconfigs_subset])))
-		return impconfigs 
+		return best_subset_impconfigs 
 
 
 	def remove_zero_scores(self):

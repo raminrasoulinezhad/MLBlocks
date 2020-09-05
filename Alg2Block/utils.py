@@ -129,10 +129,13 @@ def pick_optimum_necessary_cols(table, costs):
 			else:
 				return cols_wf, costs_wf
 
-class SubSet():
+class SubSetSearch():
 	def __init__(self, sub_length, max_index):
 		self.sets = self.gen(sub_length, max_index)
 		self.total = self.number_of_cases(sub_length, max_index)
+
+		self.metrics = [{} for i in range(self.total)]
+		self.config_sets = [None for i in range(self.total)]
 
 	def gen(self, sub_length, max_index):
 
@@ -166,7 +169,61 @@ class SubSet():
 	def get_total(self):
 		return self.total
 
+	def gen_config_subset(self, index, impconfigs):
+		config_set = [impconfigs[i] for i in self.get_subset(index)]
+		self.set_config_subset(index, config_set)
+		return config_set
 
+	def set_config_subset(self, index, config_set):
+		self.config_sets[index] = config_set
+
+	def get_config_subset(self, index):
+		return self.config_sets[index]
+
+
+	def set_util(self, index, util):
+		self.metrics[index]['util'] = util
+	def set_area(self, index, area):
+		self.metrics[index]['area'] = area 
+	def set_freq(self, index, freq):
+		self.metrics[index]['freq'] = freq
+	def set_power(self, index, power):
+		self.metrics[index]['power'] = power
+	def set_synthesis_results(self, index, area, freq, power):
+		self.set_power(index, power)
+		self.set_freq(index, freq)
+		self.set_area(index, area)
+	
+	def get_util(self, index):
+		return self.metrics[index]['util']
+	def get_area(self, index):
+		return self.metrics[index]['area']
+	def get_freq(self, index):
+		return self.metrics[index]['freq']
+	def get_power(self, index):
+		return self.metrics[index]['power']
+	
+	def print_results(self, index):
+		print ("subset %6d: util: %4f\tarea: %4f\tclk: %4f\tpower: %4f" % (
+					self.metrics[index]['util'], 
+					self.metrics[index]['area'], 
+					self.metrics[index]['clk'], 
+					self.metrics[index]['power']))
+	
+	def compute_objective(self, index):
+		return (self.metrics[index]['util'] * self.metrics[index]['clk']) / (self.metrics[index]['area'] * self.metrics[index]['power'] )
+
+	def best_impconfigs(self):
+		best_obj = -1
+		best_index = -1
+		for index in range(self.total):
+			obj = self.compute_objective(index)
+			if best_obj < obj:
+				best_obj = obj
+				best_index = index
+
+		self.print_results(best_index)
+		return self.get_config_subset(best_index)
 
 if __name__ == "__main__":
 	print(check_presence("I", "IOW")) 	# True expected
@@ -205,7 +262,7 @@ if __name__ == "__main__":
 
 	subset_length = 2								# expexted any two element subset of 0-5 [range(6)]; like [0,2]
 	set_elements = 6
-	subset = SubSet(subset_length, set_elements)
+	subset = SubSetSearch(subset_length, set_elements)
 	for i in range(subset.get_total()):
 		print(subset.get_subset(i))
 
