@@ -395,7 +395,13 @@ class Arch(Space):
 				dir_temp += '/index_' +  str(index) + '/'     # 'impconfigs' + impconfigs_string + '/'
 				os.system('mkdir -p ' + dir_temp)
 				
-				gen_HDLs(dir_temp, 'MLBlock_2Dflex', impconfigs_subset, self.nmac, 
+				if MLblock_version == 'v1':
+					version_extention = ''
+				else:
+					version_extention = '_' + MLblock_version
+ 
+				gen_HDLs(dir_temp, 'MLBlock_2Dflex', 
+						impconfigs_subset, self.nmac, 
 						self.precisions["I"], self.I_D, 
 						self.precisions["W"], self.W_D, 
 						self.precisions["O"], self.RES_D, 
@@ -403,15 +409,15 @@ class Arch(Space):
 						version=MLblock_version,
 						verbose=False)
 
-				os.system('cp ../verilog/MLBlock_2Dflex.sv ' + dir_temp + 'MLBlock_2Dflex.sv')
-				os.system('cp ../verilog/MAC_unit.sv ' + dir_temp + 'MAC_unit.sv')
+				os.system('cp ../verilog/MLBlock_2Dflex' + version_extention+'.sv ' + dir_temp + 'MLBlock_2Dflex'+version_extention+'.sv')
+				os.system('cp ../verilog/MAC_unit'+version_extention+'.sv ' + dir_temp + 'MAC_unit'+version_extention+'.sv')
 				os.system('cp ../verilog/stream_mem.sv ' + dir_temp + 'stream_mem.sv')
 				os.system('cp ../verilog/mult_flex.sv ' + dir_temp + 'mult_flex.sv')
 				os.system('cp ../verilog/state_machine.sv ' + dir_temp + 'state_machine.sv')
 				os.system('cp ../verilog/shifter.sv ' + dir_temp + 'shifter.sv')
-				os.system('cp ../verilog/stream_flex.sv ' + dir_temp + 'stream_flex.sv')
-				os.system('cp ../verilog/accumulator.sv ' + dir_temp + 'accumulator.sv')
-				os.system('cp exp.tcl ' + dir_temp + 'exp.tcl')
+				os.system('cp ../verilog/stream_flex'+version_extention+'.sv ' + dir_temp + 'stream_flex'+version_extention+'.sv')
+				os.system('cp ../verilog/accumulator'+version_extention+'.sv ' + dir_temp + 'accumulator'+version_extention+'.sv')
+				os.system('cp exp'+version_extention+'.tcl ' + dir_temp + 'exp.tcl')
 
 		if do_synthesis:	
 			NUM_CORES = 25
