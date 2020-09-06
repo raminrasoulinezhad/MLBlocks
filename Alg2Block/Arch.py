@@ -59,7 +59,7 @@ class Arch(Space):
 			for i in unrollings_dic:
 				self.unrollings[i] = Unrolling(i, unrollings_dic[i], space, stationary, precisions, limits)
 
-	def search_full(self, algs, randomness=False, verbose=True):
+	def search_full(self, algs, randomness=False, MLblock_version='v2', verbose=True):
 		self.unrollings = self.gen_possible_unrollings(self.space, verbose)
 		self.impconfigs = self.gen_imp_confs(self.unrollings, filter_methode="unique")
 
@@ -109,10 +109,11 @@ class Arch(Space):
 			self.precisions["W"], self.W_D, 
 			self.precisions["O"], self.RES_D, 
 			self.SHIFTER_TYPE,
+			version=MLblock_version,
 			verbose=False)
 
 
-	def search_heuristic(self, algs, prune_methode="old", verbose=True):
+	def search_heuristic(self, algs, prune_methode="old", MLblock_version='v2', verbose=True):
 		# generate all possible unrollings (considering IO, # of MACs limits)
 		self.unrollings = self.gen_possible_unrollings(self.space, verbose)
 
@@ -147,9 +148,10 @@ class Arch(Space):
 			self.precisions["W"], self.W_D, 
 			self.precisions["O"], self.RES_D, 
 			self.SHIFTER_TYPE,
+			version=MLblock_version,
 			verbose=False)
 
-	def search_heuristic_v2(self, algs, verbose=True):
+	def search_heuristic_v2(self, algs, MLblock_version='v2', verbose=True):
 
 		self.unrollings = self.gen_possible_unrollings(self.space, verbose)
 	
@@ -167,20 +169,22 @@ class Arch(Space):
 			self.precisions["W"], self.W_D, 
 			self.precisions["O"], self.RES_D, 
 			self.SHIFTER_TYPE,
+			version=MLblock_version,
 			verbose=False)
 
-	def search_area_in_loop (self, algs, subset_length=2, do_synthesis=False, verbose=True):
+	def search_area_in_loop (self, algs, subset_length=2, do_gen_hdl=True, do_synthesis=False, period=1333, MLblock_version='v2', verbose=True):
 
 		self.unrollings = self.gen_possible_unrollings(self.space, verbose=False)
 	
 		print("\nLet's find the unrolling and impconfig set")
-		self.impconfigs = self.pick_efficient_implementation_configs(self.unrollings, algs, subset_length=subset_length, do_synthesis=do_synthesis, verbose=False)
+		self.impconfigs = self.pick_efficient_implementation_configs(self.unrollings, algs, subset_length=subset_length, do_gen_hdl=do_gen_hdl, do_synthesis=do_synthesis, period=period, MLblock_version=MLblock_version, verbose=False)
 
 		#gen_HDLs(self.dir, "MLBlock_2Dflex", self.impconfigs, self.nmac, 
 		#	self.precisions["I"], self.I_D, 
 		#	self.precisions["W"], self.W_D, 
 		#	self.precisions["O"], self.RES_D, 
 		#	self.SHIFTER_TYPE,
+		#	version=MLblock_version,
 		#	verbose=False)
 
 	def gen_possible_unrollings(self, space, verbose=True):
@@ -281,25 +285,36 @@ class Arch(Space):
 				rate_best = -1
 				best_list = []
 				for unrolling in unrollings:
-					rate_temp = self.util_rate(alg_case_dic, unrollings[unrolling])
-					if rate_temp > rate_best:
-						rate_best = rate_temp
-						unrolling_best = unrolling
-						best_list = [unrolling]
-					elif rate_temp == rate_best:
-						best_list.append(unrolling)
+					
+					u_copy = copy.deepcopy(unrollings[unrolling])
+					u_copy.set_stride(alg_case_dic)
+					u_copy.set_IO_Comp_spaces()
+					if u_copy.OK():
+						rate_temp = self.util_rate(alg_case_dic, unrollings[unrolling])
+						if rate_temp > rate_best:
+							rate_best = rate_temp
+							unrolling_best = unrolling
+							best_list = [unrolling]
+						elif rate_temp == rate_best:
+							best_list.append(unrolling)
 				
 				print(" ------ best rate (%0.5f) is by %s" % (rate_best, best_list))
 				rate_total += rate_best				
 
 				u_copy = copy.deepcopy(unrollings[unrolling_best])
-				
 				u_copy.set_stride(alg_case_dic)
 				if u_copy.is_new(selected_unrolls):
 					temp_name = 'unrolling_selected_' + str(counter)
 					u_copy.set_name(temp_name)
 					selected_unrolls[temp_name] = u_copy
 					counter += 1
+
+					##if not u_copy.OK():
+					#print('-----------')
+					#u_copy.print_IO_Comp_spaces()
+					#u_copy.print_param_dic()
+					#print(u_copy.OK())
+					#print('-----------')					
 
 			rate_algs[alg.name] = rate_total/alg.total_cases
 			tcase += alg.total_cases
@@ -312,10 +327,9 @@ class Arch(Space):
 			print("Algorithm name: %-10s  %.5f" % (rate, rate_algs[rate]))
 		print("In average :   %.5f" % (average_rate))
 		
-		unrollings_pruned = selected_unrolls
-		return unrollings_pruned 
+		return selected_unrolls
 
-	def pick_efficient_implementation_configs (self, unrolls, algs, subset_length=2, do_synthesis=False, verbose=True):
+	def pick_efficient_implementation_configs (self, unrolls, algs, subset_length=2, do_gen_hdl=True, do_synthesis=False, period=1333, MLblock_version='v2', verbose=True):
 		rate_algs = {}
 		
 		selected_unrolls = {}
@@ -331,17 +345,21 @@ class Arch(Space):
 				for u in unrolls:
 					u_copy = copy.deepcopy(unrolls[u])
 					u_copy.set_stride(alg_case_dic)
+					u_copy.set_IO_Comp_spaces()
 
-					if u_copy.is_new(selected_unrolls):
-						temp_name = 'unrolling_selected_' + str(counter)
-						u_copy.set_name(temp_name)
-						selected_unrolls[temp_name] = u_copy
-						counter += 1
-					else:
-						temp_name = u_copy.find(selected_unrolls)
+					if u_copy.OK():				
+						if u_copy.is_new(selected_unrolls):
+							temp_name = 'unrolling_selected_' + str(counter)
+							u_copy.set_name(temp_name)
+							selected_unrolls[temp_name] = u_copy
+							#u_copy.print_param_dic()
+							counter += 1
+						else:
+							temp_name = u_copy.find(selected_unrolls)
 
-					rate = self.util_rate(alg_case_dic, u_copy)
-					alg.set_rate(index, temp_name, rate)
+						rate = self.util_rate(alg_case_dic, u_copy)
+						alg.set_rate(index, temp_name, rate)
+
 		
 		print('\n -- number of selected unrolling is %d' % (len(selected_unrolls)))
 
@@ -369,7 +387,7 @@ class Arch(Space):
 			for i in impconfigs_subset:
 				impconfigs_string += '_' + i.get_name()[8:] 
 			
-			if do_synthesis:
+			if do_gen_hdl:
 				dir_temp = '../experiments'
 				os.system('mkdir -p ' + dir_temp)
 				dir_temp += '/MLBlock_2Dflex_' + str(self.nmac) + '_' + str(subset_length) + 'configs'
@@ -382,6 +400,7 @@ class Arch(Space):
 						self.precisions["W"], self.W_D, 
 						self.precisions["O"], self.RES_D, 
 						self.SHIFTER_TYPE,
+						version=MLblock_version,
 						verbose=False)
 
 				os.system('cp ../verilog/MLBlock_2Dflex.sv ' + dir_temp + 'MLBlock_2Dflex.sv')
@@ -394,9 +413,8 @@ class Arch(Space):
 				os.system('cp ../verilog/accumulator.sv ' + dir_temp + 'accumulator.sv')
 				os.system('cp exp.tcl ' + dir_temp + 'exp.tcl')
 
-		if do_synthesis:
+		if do_synthesis:	
 			NUM_CORES = 25
-			period = 1333
 			indexes = ''
 			for i in range(subsetsearch.get_total()):
 				indexes += str(i) + ' '

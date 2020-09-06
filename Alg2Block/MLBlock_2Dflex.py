@@ -49,9 +49,14 @@ def get_IO_index(mac_index, config_base, step, mode="I"):
 	else:
 		raise Exception("get_IO_index does not support mode = %s" % (mode))
 
-def gen_interconnections(file_name, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, MAC_UNITS, verbose=True):
+def gen_interconnections(file_name, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, MAC_UNITS, version='v2', verbose=True):
 
 	file = open(file_name, "w")
+
+	S_max = 0
+	for config in configs:
+		if config.U_IW_W_S > S_max:
+			S_max = config.U_IW_W_S
 
 	conf_index = -1
 	for config in configs:
@@ -75,7 +80,15 @@ def gen_interconnections(file_name, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_
 			# assign I_configs[MAC_UNITS][N_OF_COFIGS] = I_in_temp[PORT_I_SIZE] or  I_cascade[MAC_UNITS]
 			if (mac_index % config.U_IW_W == 0):
 				I_index_mapped = get_IO_index(mac_index, config_base, step_I, mode="I")
-				file.write("assign I_configs[%d][%d] = I_in_temp[%d];\n" % (mac_index, conf_index, I_index_mapped))
+				if version == 'v1':
+					file.write("assign I_configs[%d][%d] = I_in_temp[%d];\n" % (mac_index, conf_index, I_index_mapped))
+				elif version == 'v2':
+					#file.write("assign I_configs[%d][%d] = 0;\n" % (mac_index, conf_index))
+					for s in range(S_max):
+						if s < min(config.U_IW_W_S, config.U_IW_W):
+							file.write("assign I_configs[%d][%d][%d] = I_in_temp[%d];\n" % (mac_index, conf_index, s, I_index_mapped-s))
+						else:
+							file.write("assign I_configs[%d][%d][%d] = 0;\n" % (mac_index, conf_index, s))
 			else:
 				file.write("assign I_configs[%d][%d] = I_cascade[%d];\n" % (mac_index, conf_index, mac_index-1) )
 
@@ -102,7 +115,7 @@ def gen_interconnections(file_name, configs, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_
 
 	file.close()
 
-def gen_params(file_name, MAC_UNITS, N_OF_COFIGS, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE):
+def gen_params(file_name, MAC_UNITS, N_OF_COFIGS, PORT_I_SIZE, PORT_W_SIZE, PORT_RES_SIZE, I_W, I_D, I_S, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE, version='v2'):
 
 	file = open(file_name, "w")
 	
@@ -118,27 +131,47 @@ def gen_params(file_name, MAC_UNITS, N_OF_COFIGS, PORT_I_SIZE, PORT_W_SIZE, PORT
 	file.write("\n")
 	file.write("parameter I_W = %d; \n" % (I_W))
 	file.write("parameter I_D = %d; \n" % (I_D))
-	file.write("localparam I_D_HALF = I_D / 2;\n")
+	if (version == 'v1'):
+		file.write("localparam I_D_HALF = I_D / 2;\n")
+	elif (version == 'v2'):
+		file.write("localparam I_D_LOG2 = $clog2(I_D);\n")
+		file.write("parameter I_S = %d; \n" % (I_S))
+		file.write("localparam I_S_LOG2 = (I_S == 1)? 1 : $clog2(I_S);\n")
+
 	file.write("\n")
 	file.write("parameter W_W = %d; \n" % (W_W))
 	file.write("parameter W_D = %d; \n" % (W_D))
 	file.write("\n")
 	file.write("parameter RES_W = %d; \n" % (RES_W))
 	file.write("parameter RES_D = %d; \n" % (RES_D))
-	file.write("localparam RES_D_CNTL = (RES_D > 1)? (RES_D-1): 1;\n")
+	
+	if (version == 'v1'):
+		file.write("localparam RES_D_CNTL = (RES_D > 1)? (RES_D-1): 1;\n")
+	elif (version == 'v2'):
+		file.write("localparam RES_D_LOG2 = (RES_D == 1)? 1 : $clog2(RES_D);\n")
+
 	file.write("\n")
 	file.write("parameter SHIFTER_TYPE = \"%s\";\t\t// \"BYPASS\", \"2Wx2V_by_WxV\", \"2Wx2V_by_WxV_apx\", \"2Wx2V_by_WxV_apx_adv\"\n" % (SHIFTER_TYPE))
 	file.write("\n")
 
 	file.close()
 
-def gen_HDLs(dir, model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE, verbose=True):
+def gen_HDLs(dir, model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES_D, SHIFTER_TYPE, version='v2', verbose=True):
+
+	if not version in ['v1', 'v2']:
+		raise Exception ('MLBlock has two versions (v1 and v2). However, the input version is wrong')
+
+	if version != 'v1':
+		model_name += '_' + version
 
 	N_OF_COFIGS = len(configs)
 	
 	PORT_I_SIZE = 1 
 	PORT_W_SIZE = 1
 	PORT_RES_SIZE = 1 
+	
+	S_greatest = 1
+	G_greatest = 1
 
 	for conf in configs:
 		PORT_I_SIZE_temp = conf.U_IW_NW * conf.U_IO * conf.U_IWO
@@ -149,12 +182,19 @@ def gen_HDLs(dir, model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES
 		if (PORT_RES_SIZE_temp > PORT_RES_SIZE):
 			PORT_RES_SIZE = PORT_RES_SIZE_temp
 
+		if version == 'v2':
+			if conf.U_IW_W_S > S_greatest:
+				S_greatest = conf.U_IW_W_S
+			if conf.U_IW_W_G > G_greatest:
+				G_greatest = conf.U_IW_W_G
+
 	gen_interconnections(	dir + model_name + "_interconnects.sv", 
 							configs, 
 							PORT_I_SIZE, 
 							PORT_W_SIZE, 
 							PORT_RES_SIZE, 
 							MAC_UNITS,
+							version=version,
 							verbose=verbose)
 
 	gen_params( dir + model_name + "_params.sv", 
@@ -164,12 +204,14 @@ def gen_HDLs(dir, model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES
 				PORT_W_SIZE, 
 				PORT_RES_SIZE, 
 				I_W, 
-				I_D, 
+				I_D * G_greatest,
+				S_greatest, 
 				W_W, 
 				W_D, 
 				RES_W, 
 				RES_D, 
-				SHIFTER_TYPE)
+				SHIFTER_TYPE,
+				version=version)
 
 
 

@@ -25,16 +25,26 @@ class Unrolling(Space):
 			self.IO_Comp_spaces[s] = {"size" : 1, "dic": {}}
 
 		for p in self.param_dic:
+			if self.param_dic[p].is_window_accompany():
+				self.stream_stride = self.param_dic[p].get_val('stride')
+			if self.param_dic[p].is_windowed():
+				self.stream_window = self.param_dic[p].get_val('unroll')
+
+		for p in self.param_dic:
 			for s in self.spaces_lists[0:3]:
 				if check_presence(s, self.param_dic[p].get_type()):
 					if not self.param_dic[p].is_windowed():
 						self.IO_Comp_spaces[s]["size"] *= self.param_dic[p].get_val('unroll')
+					else:
+						self.IO_Comp_spaces[s]["size"] *= min(self.stream_window, self.stream_stride)
 					self.IO_Comp_spaces[s]["dic"][p] = self.param_dic[p].get_val('unroll')
 
 			for s in self.spaces_lists[3:]:
 				if check_equality(s, self.param_dic[p].get_type()):
 					if not self.param_dic[p].is_windowed():
 						self.IO_Comp_spaces[s]["size"] *= self.param_dic[p].get_val('unroll')
+					else:
+						self.IO_Comp_spaces[s]["size"] *= min(self.stream_window, self.stream_stride)
 					self.IO_Comp_spaces[s]["dic"][p] = self.param_dic[p].get_val('unroll')
 
 	def print_IO_Comp_spaces(self):
