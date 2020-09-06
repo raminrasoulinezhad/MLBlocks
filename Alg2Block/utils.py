@@ -205,13 +205,14 @@ class SubSetSearch():
 	
 	def print_results(self, index):
 		print ("subset %6d: util: %4f\tarea: %4f\tclk: %4f\tpower: %4f" % (
+					index,
 					self.metrics[index]['util'], 
 					self.metrics[index]['area'], 
-					self.metrics[index]['clk'], 
+					self.metrics[index]['freq'], 
 					self.metrics[index]['power']))
 	
 	def compute_objective(self, index):
-		return (self.metrics[index]['util'] * self.metrics[index]['clk']) / (self.metrics[index]['area'] * self.metrics[index]['power'] )
+		return (self.metrics[index]['util'] * self.metrics[index]['freq']) / (self.metrics[index]['area'] * self.metrics[index]['power'] )
 
 	def best_impconfigs(self):
 		best_obj = -1

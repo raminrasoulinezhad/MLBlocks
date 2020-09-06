@@ -174,7 +174,11 @@ def gen_HDLs(dir, model_name, configs, MAC_UNITS, I_W, I_D, W_W, W_D, RES_W, RES
 	G_greatest = 1
 
 	for conf in configs:
-		PORT_I_SIZE_temp = conf.U_IW_NW * conf.U_IO * conf.U_IWO
+		
+		if version == 'v1':
+			PORT_I_SIZE_temp = conf.U_IW_NW * conf.U_IO * conf.U_IWO 
+		else:
+			PORT_I_SIZE_temp = conf.U_IW_NW * conf.U_IO * conf.U_IWO * conf.U_IW_W_S	
 		PORT_RES_SIZE_temp = conf.U_WO * conf.U_IO * conf.U_IWO
 
 		if (PORT_I_SIZE_temp > PORT_I_SIZE):
