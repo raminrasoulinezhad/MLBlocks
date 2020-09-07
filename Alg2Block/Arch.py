@@ -176,7 +176,8 @@ class Arch(Space):
 		model = ''
 		if MLblock_version != 'v1':
 			model = '_' + MLblock_version
-		os.system('cd ../asic && make clean && make asic_MLBlock_2Dflex' + model)
+		print ('lets do synthesis which takes time. Please, be patient :) ')
+		os.system('cd ../asic && make clean && make asic_MLBlock_2Dflex' + model + '  >/dev/null 2>&1')
 		area, freq, power = get_asic_results('../asic/', period=period)
 		print ('area: %f\tfreq: %f\tpower: %f' % (area, freq, power))
 
