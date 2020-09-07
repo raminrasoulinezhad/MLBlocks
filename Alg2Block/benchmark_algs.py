@@ -212,20 +212,6 @@ baidu_algs = [baidu_kernel_GEMM, baidu_kernel_BSConv, baidu_kernel_LSTM]
 utdsp_algs = [utdsp_kernels]
 blass_algs = [general_blass_kernels]
 
-
-#baidu_kernel_BSConv = Algorithm("baidu_kernel_BSConv", 
-#						{	"d":	None,
-#							"b":	[4		],
-#							"k":	[32		],
-#							"c":	[32		],
-#							"y":	[(112,2)],
-#							"x":	[(112,2)],
-#							"fy":	[3		],
-#							"fx":	[3		]
-#						}, my_space, case_gen_method="specific_samples")
-#baidu_algs = [baidu_kernel_BSConv] 
-
-
 print ("\n-- The benchmarks are loaded\n")
 
 if __name__ == "__main__":

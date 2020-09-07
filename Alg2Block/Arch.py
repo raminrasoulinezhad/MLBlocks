@@ -151,7 +151,7 @@ class Arch(Space):
 			version=MLblock_version,
 			verbose=False)
 
-	def search_heuristic_v2(self, algs, MLblock_version='v2', verbose=True):
+	def search_heuristic_v2(self, algs, MLblock_version='v2', period=1333, verbose=True):
 
 		self.unrollings = self.gen_possible_unrollings(self.space, verbose)
 	
@@ -159,8 +159,9 @@ class Arch(Space):
 		self.unrollings_pruned = self.rate_and_prune_unrollings(self.unrollings, algs)
 		print("unrollings are pruned")
 
-		self.print_unrollings(self.unrollings_pruned)
-		self.print_unrollings(self.unrollings_pruned, cat=["IW"])
+		if verbose:
+			self.print_unrollings(self.unrollings_pruned)
+			self.print_unrollings(self.unrollings_pruned, cat=["IW"])
 
 		self.impconfigs = self.gen_imp_confs(self.unrollings_pruned, filter_methode="covered")
 
@@ -171,6 +172,13 @@ class Arch(Space):
 			self.SHIFTER_TYPE,
 			version=MLblock_version,
 			verbose=False)
+
+		model = ''
+		if MLblock_version != 'v1':
+			model = '_' + MLblock_version
+		os.system('cd ../asic && make clean && make asic_MLBlock_2Dflex' + model)
+		area, freq, power = get_asic_results('../asic/', period=period)
+		print ('area: %f\tfreq: %f\tpower: %f' % (area, freq, power))
 
 	def search_area_in_loop (self, algs, subset_length=2, do_gen_hdl=True, do_synthesis=False, period=1333, MLblock_version='v2', objective='obj', verbose=True):
 
@@ -325,7 +333,7 @@ class Arch(Space):
 
 		for rate in rate_algs:
 			print("Algorithm name: %-10s  %.5f" % (rate, rate_algs[rate]))
-		print("In average :   %.5f" % (average_rate))
+		print("In average :   %.5f\n" % (average_rate))
 		
 		return selected_unrolls
 
