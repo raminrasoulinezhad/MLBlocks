@@ -40,7 +40,7 @@ set myFiles [list ../PIRDSP_verilogs/ALU.v ../PIRDSP_verilogs/ALU_SIMD.v ../PIRD
 # name of top level module
 set basename DSP;
 set myClk clk                    ;# clock name
-set myPeriod_ps 1000             ;# Clock period in ps
+set myPeriod_ps 1333             ;# Clock period in ps
 set myInDelay_ns 0.0             ;# delay from clock to inputs valid
 set myOutDelay_ns 0.0            ;# delay from clock to output valid
 set runname initialtest          ;# name appended to output files
