@@ -172,12 +172,12 @@ class Arch(Space):
 			version=MLblock_version,
 			verbose=False)
 
-	def search_area_in_loop (self, algs, subset_length=2, do_gen_hdl=True, do_synthesis=False, period=1333, MLblock_version='v2', verbose=True):
+	def search_area_in_loop (self, algs, subset_length=2, do_gen_hdl=True, do_synthesis=False, period=1333, MLblock_version='v2', objective='obj', verbose=True):
 
 		self.unrollings = self.gen_possible_unrollings(self.space, verbose=False)
 	
 		print("\nLet's find the unrolling and impconfig set")
-		self.impconfigs = self.pick_efficient_implementation_configs(self.unrollings, algs, subset_length=subset_length, do_gen_hdl=do_gen_hdl, do_synthesis=do_synthesis, period=period, MLblock_version=MLblock_version, verbose=False)
+		self.impconfigs = self.pick_efficient_implementation_configs(self.unrollings, algs, subset_length=subset_length, do_gen_hdl=do_gen_hdl, do_synthesis=do_synthesis, period=period, MLblock_version=MLblock_version, objective=objective, verbose=False)
 
 		#gen_HDLs(self.dir, "MLBlock_2Dflex", self.impconfigs, self.nmac, 
 		#	self.precisions["I"], self.I_D, 
@@ -329,7 +329,7 @@ class Arch(Space):
 		
 		return selected_unrolls
 
-	def pick_efficient_implementation_configs (self, unrolls, algs, subset_length=2, do_gen_hdl=True, do_synthesis=False, period=1333, MLblock_version='v2', verbose=True):
+	def pick_efficient_implementation_configs (self, unrolls, algs, subset_length=2, do_gen_hdl=True, do_synthesis=False, period=1333, MLblock_version='v2', objective='obj', verbose=True):
 		rate_algs = {}
 		
 		selected_unrolls = {}
@@ -437,8 +437,9 @@ class Arch(Space):
 				subsetsearch.print_results(index)
 		
 		print('-- The best configuration results: ')
-		best_subset_impconfigs = subsetsearch.best_impconfigs()
+		best_subset_impconfigs, best_index = subsetsearch.best_impconfigs(objective=objective)
 		print("\n -- Best performance is using %s" % (str([bms.get_name() for bms in best_subset_impconfigs])))
+		print("\n -- Best performance objective is %f" % (subsetsearch.compute_objective(best_index)))
 
 		return best_subset_impconfigs 
 

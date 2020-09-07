@@ -202,6 +202,9 @@ class SubSetSearch():
 		return self.metrics[index]['freq']
 	def get_power(self, index):
 		return self.metrics[index]['power']
+
+	def get_metric(self, index, objective):
+		return self.metrics[index][objective]
 	
 	def print_results(self, index):
 		print ("subset %6d: util: %4f\tarea: %4f\tclk: %4f\tpower: %4f" % (
@@ -212,19 +215,24 @@ class SubSetSearch():
 					self.metrics[index]['power']))
 	
 	def compute_objective(self, index):
-		return (self.metrics[index]['util'] * self.metrics[index]['freq']) / (self.metrics[index]['area'] * self.metrics[index]['power'] )
+		#return (self.metrics[index]['util'] * self.metrics[index]['freq']) / (self.metrics[index]['area'] * self.metrics[index]['power'] )
+		return (self.metrics[index]['util']) / (self.metrics[index]['area'])
 
-	def best_impconfigs(self):
+	def best_impconfigs(self, objective='obj'):
 		best_obj = -1
 		best_index = -1
 		for index in range(self.total):
-			obj = self.compute_objective(index)
+			if objective == 'obj':
+				obj = self.compute_objective(index)
+			else:
+				obj = self.get_metric(index, objective)
+
 			if best_obj < obj:
 				best_obj = obj
 				best_index = index
 
 		self.print_results(best_index)
-		return self.get_config_subset(best_index)
+		return self.get_config_subset(best_index), best_index
 
 if __name__ == "__main__":
 	print(check_presence("I", "IOW")) 	# True expected
