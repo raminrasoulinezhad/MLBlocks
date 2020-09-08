@@ -136,6 +136,7 @@ class SubSetSearch():
 
 		self.metrics = [{} for i in range(self.total)]
 		self.config_sets = [None for i in range(self.total)]
+		self.best_index = None
 
 	def gen(self, sub_length, max_index):
 
@@ -157,6 +158,9 @@ class SubSetSearch():
 
 	def get_subset(self, index):
 		return self.sets[index]
+
+	def get_size(self):
+		return self.total
 
 	def number_of_cases(self, sub_length, max_index):
 		total = 1
@@ -180,7 +184,8 @@ class SubSetSearch():
 	def get_config_subset(self, index):
 		return self.config_sets[index]
 
-
+	def set_obj(self, index, obj):
+		self.metrics[index]['obj'] = obj
 	def set_util(self, index, util):
 		self.metrics[index]['util'] = util
 	def set_area(self, index, area):
@@ -194,6 +199,8 @@ class SubSetSearch():
 		self.set_freq(index, freq)
 		self.set_area(index, area)
 	
+	def get_obj(self, index):
+		return self.metrics[index]['obj']
 	def get_util(self, index):
 		return self.metrics[index]['util']
 	def get_area(self, index):
@@ -216,7 +223,9 @@ class SubSetSearch():
 	
 	def compute_objective(self, index):
 		#return (self.metrics[index]['util'] * self.metrics[index]['freq']) / (self.metrics[index]['area'] * self.metrics[index]['power'] )
-		return (self.metrics[index]['util']) / (self.metrics[index]['area'])
+		obj = (self.metrics[index]['util']) / (self.metrics[index]['area'])
+		self.set_obj(index, obj)
+		return obj
 
 	def best_impconfigs(self, objective='obj'):
 		best_obj = -1
@@ -231,8 +240,32 @@ class SubSetSearch():
 				best_obj = obj
 				best_index = index
 
+		self.best_index = best_index
 		self.print_results(best_index)
 		return self.get_config_subset(best_index), best_index
+
+	def plot_list_gen(self, x, y, special_indexes=None):
+		x_list = []
+		y_list = []
+		color=[]
+		for index in range(self.total):
+			temp_x = self.get_metric(index, x)
+			temp_y = self.get_metric(index, y)
+			
+			if (temp_x > 0) and (temp_y > 0):
+				x_list.append(temp_x)
+				y_list.append(temp_y)
+				color.append('blue')
+
+		for index in special_indexes:				
+			temp_x = self.get_metric(index, x)
+			temp_y = self.get_metric(index, y)
+			x_list.append(self.get_metric(index, x))
+			y_list.append(self.get_metric(index, y))
+			color.append('red')
+
+		return x_list, y_list, color
+		
 
 if __name__ == "__main__":
 	print(check_presence("I", "IOW")) 	# True expected

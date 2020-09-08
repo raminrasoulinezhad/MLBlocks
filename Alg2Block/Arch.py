@@ -3,6 +3,7 @@ import copy
 import time
 import random
 from utils import * 
+import pickle
 
 from Space import Space
 from Unrolling import Unrolling
@@ -183,10 +184,10 @@ class Arch(Space):
 
 	def search_area_in_loop (self, algs, subset_length=2, do_gen_hdl=True, do_synthesis=False, period=1333, MLblock_version='v2', objective='obj', verbose=True):
 
-		self.unrollings = self.gen_possible_unrollings(self.space, verbose=False)
+		self.unrollings = self.gen_possible_unrollings(self.space, verbose=verbose)
 	
 		print("\nLet's find the unrolling and impconfig set")
-		self.impconfigs = self.pick_efficient_implementation_configs(self.unrollings, algs, subset_length=subset_length, do_gen_hdl=do_gen_hdl, do_synthesis=do_synthesis, period=period, MLblock_version=MLblock_version, objective=objective, verbose=False)
+		self.impconfigs = self.pick_efficient_implementation_configs(self.unrollings, algs, subset_length=subset_length, do_gen_hdl=do_gen_hdl, do_synthesis=do_synthesis, period=period, MLblock_version=MLblock_version, objective=objective, verbose=verbose)
 
 		#gen_HDLs(self.dir, "MLBlock_2Dflex", self.impconfigs, self.nmac, 
 		#	self.precisions["I"], self.I_D, 
@@ -316,14 +317,7 @@ class Arch(Space):
 					temp_name = 'unrolling_selected_' + str(counter)
 					u_copy.set_name(temp_name)
 					selected_unrolls[temp_name] = u_copy
-					counter += 1
-
-					##if not u_copy.OK():
-					#print('-----------')
-					#u_copy.print_IO_Comp_spaces()
-					#u_copy.print_param_dic()
-					#print(u_copy.OK())
-					#print('-----------')					
+					counter += 1				
 
 			rate_algs[alg.name] = rate_total/alg.total_cases
 			tcase += alg.total_cases
@@ -346,7 +340,6 @@ class Arch(Space):
 
 		for alg in algs: 
 			print( "\n -- evaluating alg: %s" % (alg.get_name()) )
-			rate_total = 0 
 			for index in range(alg.total_cases):
 
 				alg_case_dic = alg.case_gen(index)
@@ -361,15 +354,22 @@ class Arch(Space):
 							temp_name = 'unrolling_selected_' + str(counter)
 							u_copy.set_name(temp_name)
 							selected_unrolls[temp_name] = u_copy
-							#u_copy.print_param_dic()
 							counter += 1
 						else:
 							temp_name = u_copy.find(selected_unrolls)
 
-						rate = self.util_rate(alg_case_dic, u_copy)
-						alg.set_rate(index, temp_name, rate)
+						#rate = self.util_rate(alg_case_dic, u_copy)
+						#alg.set_rate(index, temp_name, rate)
 
-		
+		for alg in algs: 
+			print( "\n -- evaluating alg: %s" % (alg.get_name()) )
+			for index in range(alg.total_cases):
+				alg_case_dic = alg.case_gen(index)
+				for u in selected_unrolls:
+					temp_name = selected_unrolls[u].get_name()
+					rate = self.util_rate(alg_case_dic, selected_unrolls[u])
+					alg.set_rate(index, temp_name, rate)
+
 		print('\n -- number of selected unrolling is %d' % (len(selected_unrolls)))
 
 		impconfigs = self.gen_imp_confs(selected_unrolls, filter_methode="covered", verbose=False)
@@ -401,7 +401,7 @@ class Arch(Space):
 				os.system('mkdir -p ' + dir_temp)
 				dir_temp += '/MLBlock_2Dflex_' + str(self.nmac) + '_' + str(subset_length) + 'configs'
 				os.system('mkdir -p ' + dir_temp)
-				dir_temp += '/index_' +  str(index) + '/'     # 'impconfigs' + impconfigs_string + '/'
+				dir_temp += '/index_' +  str(index) + '/'    
 				os.system('mkdir -p ' + dir_temp)
 				
 				if MLblock_version == 'v1':
@@ -428,30 +428,34 @@ class Arch(Space):
 				os.system('cp ../verilog/accumulator'+version_extention+'.sv ' + dir_temp + 'accumulator'+version_extention+'.sv')
 				os.system('cp exp'+version_extention+'.tcl ' + dir_temp + 'exp.tcl')
 
+		exps_addr = '../experiments' + '/MLBlock_2Dflex_' + str(self.nmac) + '_' + str(subset_length) + 'configs'
+
 		if do_synthesis:	
 			NUM_CORES = 25
 			indexes = ''
 			for i in range(subsetsearch.get_total()):
 				indexes += str(i) + ' '
-			exps_addr = '../experiments' + '/MLBlock_2Dflex_' + str(self.nmac) + '_' + str(subset_length) + 'configs'
 			os.system("parallel --bar --gnu -j%d --header : 'bash ./exp.sh %s %d {index} ' ::: index %s " % (NUM_CORES, exps_addr, period, indexes))
 
 		for index in range(subsetsearch.get_total()):
-			exps_addr = '../experiments' + '/MLBlock_2Dflex_' + str(self.nmac) + '_' + str(subset_length) + 'configs/index_' +  str(index) + '/'
-			area, freq, power = get_asic_results(exps_addr, period=period)
+			area, freq, power = get_asic_results(exps_addr + '/index_' +  str(index) + '/', period=period)
 			subsetsearch.set_synthesis_results(index, area, freq, power)
 
 		if verbose:
-			for index in range(len(subset_util)):
+			for index in range(subsetsearch.get_size()):
 				subsetsearch.print_results(index)
 		
 		print('-- The best configuration results: ')
 		best_subset_impconfigs, best_index = subsetsearch.best_impconfigs(objective=objective)
+		pickle.dump(subsetsearch, open(exps_addr + "/subsetsearch.pkl", "wb"))
+		
 		print("\n -- Best performance is using %s" % (str([bms.get_name() for bms in best_subset_impconfigs])))
 		print("\n -- Best performance objective is %f" % (subsetsearch.compute_objective(best_index)))
 		print('-- Its configurations are: \n')
+		
 		for impconfig in best_subset_impconfigs:
-				impconfig.print()
+			impconfig.print()
+		
 		return best_subset_impconfigs 
 
 
@@ -494,6 +498,7 @@ class Arch(Space):
 	def util_rate(self, alg_p_dic, unroll):
 		unroll_p_dic = unroll.gen_dic()
 
+		# the effect of parameter count 
 		alg_arr = dic2nparr(alg_p_dic, 0)
 		unrolling_arr = dic2nparr(unroll_p_dic, 0)
 		
@@ -501,7 +506,20 @@ class Arch(Space):
 		unrolling_mac = arr2prod(unrolling_arr)
 		unrolling_iter = arr2prod(np.ceil(alg_arr / unrolling_arr))
 
-		return alg_mac / (unrolling_mac * unrolling_iter)
+		util = alg_mac / (unrolling_mac * unrolling_iter)
+		#return util 
+
+		# the effect of parameter stride
+		alg_arr = dic2nparr(alg_p_dic, 1)
+		unrolling_arr = dic2nparr(unroll_p_dic, 1)
+
+		for i in range(len(alg_arr)):
+			if (int(alg_arr[i] / unrolling_arr[i]) != (alg_arr[i] / unrolling_arr[i])):
+				util *= 0
+			else:
+				util *= (unrolling_arr[i] / alg_arr[i])
+
+		return util 
 
 	def print_unrollings(self, unrollings, cat=None):
 		for unrolling in unrollings:
