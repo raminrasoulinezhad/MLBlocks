@@ -449,7 +449,9 @@ class Arch(Space):
 		best_subset_impconfigs, best_index = subsetsearch.best_impconfigs(objective=objective)
 		print("\n -- Best performance is using %s" % (str([bms.get_name() for bms in best_subset_impconfigs])))
 		print("\n -- Best performance objective is %f" % (subsetsearch.compute_objective(best_index)))
-
+		print('-- Its configurations are: \n')
+		for impconfig in best_subset_impconfigs:
+				impconfig.print()
 		return best_subset_impconfigs 
 
 
