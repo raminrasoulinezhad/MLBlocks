@@ -1,0 +1,5 @@
+Benchmakrs,MLBlock_12,MLBlock_9,MLBlock_6,DSP48
+GEMM,1.75,1.57,1.67,1.00
+CNN,2.07,1.83,1.86,1.00
+LSTM,1.56,1.09,1.64,1.00
+All,1.84,1.61,1.73,1.00
