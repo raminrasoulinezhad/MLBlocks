@@ -20,3 +20,8 @@ venv36/
 
 experiments
 
+verilog/MLBlock_2Dflex_interconnects.sv
+verilog/MLBlock_2Dflex_v2_interconnects.sv
+verilog/MLBlock_2Dflex_params.sv
+verilog/MLBlock_2Dflex_v2_params.sv
+
