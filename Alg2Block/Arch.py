@@ -312,7 +312,7 @@ class Arch(Space):
 				rate_total += rate_best				
 
 
-				if heuristic_mode == 'real':
+				if heuristic_mode == 'new':
 		
 					already_is_covered = False
 
