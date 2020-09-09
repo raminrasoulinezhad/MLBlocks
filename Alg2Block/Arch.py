@@ -529,14 +529,15 @@ class Arch(Space):
 		#return util 
 
 		# the effect of parameter stride
-		alg_arr = dic2nparr(alg_p_dic, 1)
-		unrolling_arr = dic2nparr(unroll_p_dic, 1)
+		alg_arr_stride = dic2nparr(alg_p_dic, 1)
+		unrolling_arr_stride = dic2nparr(unroll_p_dic, 1)
 
-		for i in range(len(alg_arr)):
-			if (int(alg_arr[i] / unrolling_arr[i]) != (alg_arr[i] / unrolling_arr[i])):
-				util *= 0
-			else:
-				util *= (unrolling_arr[i] / alg_arr[i])
+		for i in range(len(alg_arr_stride)):
+			if unrolling_arr[i] > 1:
+				if (int(alg_arr_stride[i] / unrolling_arr_stride[i]) != (alg_arr_stride[i] / unrolling_arr_stride[i])):
+					util *= 0
+				else:
+					util *= (unrolling_arr_stride[i] / alg_arr_stride[i])
 
 		return util 
 
