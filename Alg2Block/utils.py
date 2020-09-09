@@ -136,7 +136,7 @@ class SubSetSearch():
 
 		self.metrics = [{} for i in range(self.total)]
 		self.config_sets = [None for i in range(self.total)]
-		self.best_index = None
+		self.index_best = None
 
 	def gen(self, sub_length, max_index):
 
@@ -224,25 +224,39 @@ class SubSetSearch():
 	def compute_objective(self, index):
 		#return (self.metrics[index]['util'] * self.metrics[index]['freq']) / (self.metrics[index]['area'] * self.metrics[index]['power'] )
 		obj = (self.metrics[index]['util']) / (self.metrics[index]['area'])
+		if obj < 0:
+			obj = 0
 		self.set_obj(index, obj)
 		return obj
 
 	def best_impconfigs(self, objective='obj'):
-		best_obj = -1
-		best_index = -1
+		obj_worst = 100000
+		obj_best = -1
+		index_worst = -1
+		index_best = -1
 		for index in range(self.total):
 			if objective == 'obj':
 				obj = self.compute_objective(index)
 			else:
 				obj = self.get_metric(index, objective)
 
-			if best_obj < obj:
-				best_obj = obj
-				best_index = index
+			if obj_best < obj:
+				obj_best = obj
+				index_best = index
 
-		self.best_index = best_index
-		self.print_results(best_index)
-		return self.get_config_subset(best_index), best_index
+			if obj_worst > obj:
+				obj_worst = obj
+				index_worst = index				
+
+		self.index_best = index_best
+		print('-- The best configuration set results: ')
+		self.print_results(index_best)
+		print("\n    objective: %f" % (obj_best))
+		print('-- The worst configuration set results: ')
+		self.print_results(index_worst)
+		print("\n    objective: %f" % (obj_worst))
+
+		return self.get_config_subset(index_best), index_best
 
 	def plot_list_gen(self, x, y, special_indexes=None):
 		x_list = []

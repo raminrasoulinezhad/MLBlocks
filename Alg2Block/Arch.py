@@ -152,12 +152,12 @@ class Arch(Space):
 			version=MLblock_version,
 			verbose=False)
 
-	def search_heuristic_v2(self, algs, MLblock_version='v2', period=1333, verbose=True):
+	def search_heuristic_v2(self, algs, MLblock_version='v2', heuristic_mode='old', period=1333, verbose=True):
 
 		self.unrollings = self.gen_possible_unrollings(self.space, verbose)
 	
 		print("let's prune the unrollings :) ")
-		self.unrollings_pruned = self.rate_and_prune_unrollings(self.unrollings, algs)
+		self.unrollings_pruned = self.rate_and_prune_unrollings(self.unrollings, algs, heuristic_mode=heuristic_mode)
 		print("unrollings are pruned")
 
 		if verbose:
@@ -277,7 +277,7 @@ class Arch(Space):
 			print("Algorithm name: %-10s  %.5f" % (rate, rate_algs[rate]))
 
 
-	def rate_and_prune_unrollings (self, unrollings, algs):
+	def rate_and_prune_unrollings (self, unrollings, algs, heuristic_mode='old'):
 		rate_algs = {}
 		
 		selected_unrolls = {}
@@ -311,13 +311,33 @@ class Arch(Space):
 				print(" ------ best rate (%0.5f) is by %s" % (rate_best, best_list))
 				rate_total += rate_best				
 
-				u_copy = copy.deepcopy(unrollings[unrolling_best])
-				u_copy.set_stride(alg_case_dic)
-				if u_copy.is_new(selected_unrolls):
-					temp_name = 'unrolling_selected_' + str(counter)
-					u_copy.set_name(temp_name)
-					selected_unrolls[temp_name] = u_copy
-					counter += 1				
+
+				if heuristic_mode == 'real':
+		
+					already_is_covered = False
+
+					for u in best_list:
+						u_copy = copy.deepcopy(unrollings[u])
+						u_copy.set_stride(alg_case_dic)
+						if u_copy.is_covered(selected_unrolls):
+							already_is_covered = True
+
+					if not already_is_covered:
+						u_copy = copy.deepcopy(unrollings[unrolling_best])	
+						u_copy.set_stride(alg_case_dic)	
+						temp_name = 'unrolling_selected_' + str(counter)
+						u_copy.set_name(temp_name)
+						selected_unrolls[temp_name] = u_copy
+						counter += 1				
+
+				else:
+					u_copy = copy.deepcopy(unrollings[unrolling_best])
+					u_copy.set_stride(alg_case_dic)
+					if u_copy.is_new(selected_unrolls):
+						temp_name = 'unrolling_selected_' + str(counter)
+						u_copy.set_name(temp_name)
+						selected_unrolls[temp_name] = u_copy
+						counter += 1				
 
 			rate_algs[alg.name] = rate_total/alg.total_cases
 			tcase += alg.total_cases
@@ -445,12 +465,11 @@ class Arch(Space):
 			for index in range(subsetsearch.get_size()):
 				subsetsearch.print_results(index)
 		
-		print('-- The best configuration results: ')
-		best_subset_impconfigs, best_index = subsetsearch.best_impconfigs(objective=objective)
+		best_subset_impconfigs, index_best = subsetsearch.best_impconfigs(objective=objective)
+		os.system('mkdir -p ' + exps_addr)
 		pickle.dump(subsetsearch, open(exps_addr + "/subsetsearch.pkl", "wb"))
 		
 		print("\n -- Best performance is using %s" % (str([bms.get_name() for bms in best_subset_impconfigs])))
-		print("\n -- Best performance objective is %f" % (subsetsearch.compute_objective(best_index)))
 		print('-- Its configurations are: \n')
 		
 		for impconfig in best_subset_impconfigs:

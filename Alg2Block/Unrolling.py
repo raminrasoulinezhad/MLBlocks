@@ -1,4 +1,5 @@
 from Space import Space
+from ImpConfig import ImpConfig
 from utils import * 
 
 class Unrolling(Space):
@@ -96,6 +97,18 @@ class Unrolling(Space):
 			if found == True:
 				return False
 		return True
+
+
+	def is_covered(self, unrolls):
+		impconfig_self = ImpConfig()
+		impconfig_self.conf_to_impconf(self)		
+		
+		for u in unrolls:
+			impconfig_u = ImpConfig()
+			impconfig_u.conf_to_impconf(unrolls[u])	
+			if impconfig_u.isequal(impconfig_self):
+				return True
+		return False
 
 	def find(self, unrolls):
 		for u in unrolls:
