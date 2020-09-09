@@ -45,5 +45,6 @@ ggplot(data,aes(a,value)) +
 	panel.grid.major.y = element_line(colour = "black"),
 	panel.grid.minor.y = element_line(colour = "black"))+
 	#scale_fill_pander()
-	scale_fill_brewer(palette = "Spectral")
+	#scale_fill_brewer(palette = "Spectral")
+	scale_fill_brewer(palette = "Set1")
 
