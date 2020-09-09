@@ -3,7 +3,7 @@ library(ggthemes)
 library(reshape2)
 library(lemon)
 
-data <- read.csv("script_table_III.csv",header=T,sep=",",stringsAsFactors=F)
+data <- read.csv("script_table_III.csv",header=T,sep=",",stringsAsFactors=F, check.names=FALSE)
 data <- melt(data,id.vars=c("Benchmakrs"))
 
 

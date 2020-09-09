@@ -3,21 +3,21 @@ library(ggthemes)
 library(reshape2)
 library(lemon)
 
-data <- read.csv("script_table_II.csv",header=T,sep=",",stringsAsFactors=F, check.names=FALSE)
+data <- read.csv("script_table_III_2.csv",header=T,sep=",",stringsAsFactors=F, check.names=FALSE)
 data <- melt(data,id.vars=c("Benchmakrs"))
 
 
 data
-data$a <- factor(data$Benchmakrs, levels = c("GEMM","CNN","LSTM","All"))
+data$a <- factor(data$Benchmakrs, levels = c("GEMM8","CNN8","LSTM8","All8","GEMM16","CNN16","LSTM16","All16"))
 data
-pdf("script_table_II.pdf",width=15,height=7)
+pdf("script_table_III_2.pdf",width=15,height=7)
 #ggplot(data,aes(variable,value)) +
 ggplot(data,aes(a,value)) +
     #geom_bar(aes(fill = a), position = "dodge", stat = "identity", width=0.7) +
     geom_bar(aes(fill=variable), position = "dodge", stat = "identity", width=0.6) +
     # coord_capped_cart(bottom='both', left='both') +
 	xlab("Benchmakrs") +
-	ylab("(Utilization x MACs)/Area (normalized)") +
+	ylab("(Utilization x MACs)/(Area x cycles)") +
 	theme(axis.title=element_text(),axis.title.y=theme_bw()$axis.title.y) +
 	scale_fill_pander("") +
 	theme_minimal() +
