@@ -85,3 +85,11 @@ To support 8x8, 8x16, 16x8, and 16x16:
 	W_D		= W_D * K
 	Res_D 	= Res_D * K
 
+### Utilization rate:
+
+	util = V^{count} / \hat{V}^{count}
+	if (V^{s} is multiple of \hat{V}^{s})
+		util *= \hat{V}^{s} / V^{s}
+	else:
+	 	util = 0
+
