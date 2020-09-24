@@ -53,3 +53,35 @@ To define the configurations use a dictionary of configurations (key: name, valu
 		},
 	}			
 
+### Buffer sizes:
+
+To support 8x8:
+
+	I_D		= 2
+	W_D		= 1
+	Res_D 	= 1
+
+To support 8x8 and 8x16:
+
+	I_D		= 2
+	W_D		= 2
+	Res_D 	= 1
+
+To support 8x8 and 16x8:
+
+	I_D		= 4
+	W_D		= 1
+	Res_D 	= 1
+
+To support 8x8, 8x16, 16x8, and 16x16:
+
+	I_D		= 4
+	W_D		= 2
+	Res_D 	= 1
+
+** To support multiple weight buffer (such as K weight): **
+
+	I_D		= I_D
+	W_D		= W_D * K
+	Res_D 	= Res_D * K
+
