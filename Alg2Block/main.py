@@ -17,6 +17,8 @@ arch_12.search_heuristic_v2(baidu_algs, MLblock_version='v2', verbose=False)
 x = input()
 arch_9.search_heuristic_v2(baidu_algs, MLblock_version='v2', verbose=False)
 x = input()
+arch_8.search_heuristic_v2(baidu_algs, MLblock_version='v2', verbose=False)
+x = input()
 arch_6.search_heuristic_v2(baidu_algs, MLblock_version='v2', verbose=False)
 
 #arch_12.search_area_in_loop(baidu_algs, subset_length=2, do_gen_hdl=False, do_synthesis=False, period=1333, MLblock_version='v2', objective='util')
