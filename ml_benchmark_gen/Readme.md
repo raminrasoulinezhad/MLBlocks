@@ -14,6 +14,24 @@
 3- install the `verilog_ml_benchmark_generator` package
 	
 	cd verilog_ml_benchmark_generator
+	git checkout 694fc9ced131cb44ebd3b8b0175599f6ab42882
+
+you need to modify three points: 
+P1: Makefile, line 36, modify, 
+	
+	find . -name '*.egg' -exec rm -fr {} +
+
+<!-- P2: verilog_ml_benchmark_generator/constraint_evaluation.py, line 64, add
+
+	print('Cycles\ttotal: ', total_cycles, '\tproduct: ', product_cycles, '\tpreload: ', preload_cycles, '\tpipe: ', pipeline_count)
+-->
+
+P3: verilog_ml_benchmark_generator/generate_modules.py, line 1043 (1036), add
+	
+	raise Exception ('ramin: I am done!')
+
+then install the package
+
 	make install
 	cd ..
 

@@ -8,7 +8,7 @@
 #						--eb_count 120 > ./results/temp/out.out
 #
 
-DSP=1080 # 360, 1368, 9024, 12288
+DSP=9024 # 360, 1368, 9024, 12288
 
 
 rm -f results/outputs/scores.out
@@ -19,26 +19,26 @@ echo "" > results/outputs/scores.out
 echo "" > results/outputs/mlbs_orders.out
 echo "" > results/outputs/layers_orders.out
 
-for FILE_MLB in ./results/layers/*; do 
+for FILE_MLB in ./layers/*; do 
 	echo $FILE_MLB; 
 	OUTPUT_NAME="${FILE_MLB#*layers/}"
 	OUTPUT_NAME="${OUTPUT_NAME%.*}"
 	echo $OUTPUT_NAME >> results/outputs/layers_orders.out
 done
 
-for FILE_MLB in ./results/mlbs/*; do 
+for FILE_MLB in ./mlbs/*; do 
 	echo $FILE_MLB; 
 	OUTPUT_NAME="${FILE_MLB#*mlbs/}"
 	OUTPUT_NAME="${OUTPUT_NAME%.*}"
 	echo $OUTPUT_NAME >> results/outputs/mlbs_orders.out
 done
 
-for FILE_LAYER in ./results/layers/*; do 
+for FILE_LAYER in ./layers/*; do 
 
 	FILE_LAYER_NAME="${FILE_LAYER#*layers/}"
 	FILE_LAYER_NAME="${FILE_LAYER_NAME%.*}"
 
-	for FILE_MLB in ./results/mlbs/*; do 
+	for FILE_MLB in ./mlbs/*; do 
 
 		FILE_MLB_NAME="${FILE_MLB#*mlbs/}"
 		FILE_MLB_NAME="${FILE_MLB_NAME%.*}"
@@ -47,9 +47,9 @@ for FILE_LAYER in ./results/layers/*; do
 			echo " results for $FILE_LAYER_NAME and $FILE_MLB_NAME is ready."
 		else 
 			verilog_ml_benchmark_generator generate-accelerator-verilog \
-						--act_buffer_definition ./tests/input_spec_intel_8.yaml \
-						--weight_buffer_definition ./tests/input_spec_intel_8.yaml \
-						--emif_definition ./tests/emif_spec_intel.yaml \
+						--act_buffer_definition ./verilog_ml_benchmark_generator/tests/input_spec_intel_8.yaml \
+						--weight_buffer_definition ./verilog_ml_benchmark_generator/tests/input_spec_intel_8.yaml \
+						--emif_definition ./verilog_ml_benchmark_generator/tests/emif_spec_intel.yaml \
 						--eb_definition $FILE_MLB \
 						--include_sv_sim_models False \
 						--layer_definition $FILE_LAYER \
@@ -61,7 +61,7 @@ for FILE_LAYER in ./results/layers/*; do
 
 	wait
 
-	for FILE_MLB in ./results/mlbs/*; do 
+	for FILE_MLB in ./mlbs/*; do 
 
 		FILE_MLB_NAME="${FILE_MLB#*mlbs/}"
 		FILE_MLB_NAME="${FILE_MLB_NAME%.*}"
