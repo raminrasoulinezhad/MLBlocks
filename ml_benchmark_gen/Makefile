@@ -13,6 +13,11 @@ run_script_t:
 	chmod +x ./script_t.sh
 	./script_t.sh
 
+run_script_u:
+	chmod +x ./script_u.sh
+	chmod +x ./exp.sh
+	./script_u.sh
+
 plot:
 	python3 plot.py
 

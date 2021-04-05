@@ -49,6 +49,10 @@ or the transposed one:
 
 	make run_script_t
 
+or if you have a good mahcine with high number of cpu cores
+
+	make run_script_u
+
 5- plt the result
 
 	python3 plot.py
