@@ -34,13 +34,20 @@ then install the package
 
 	make install
 	cd ..
-	mkdir results
-	mkdir results/outputs
-	mkdir results/temp
 
 4- run the experiment script
 
-	./script.sh
+first prepare the required directories:
+
+	make clean
+
+then run the script:
+
+	make run_script
+
+or the transposed one:
+
+	make run_script_t
 
 5- plt the result
 
