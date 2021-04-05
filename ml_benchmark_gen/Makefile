@@ -5,21 +5,12 @@ clean:
 	rm -rf results/outputs/*
 	rm -rf results/temp/*
 
+dsp ?= 9024
+n_cores ?= 1
 run_script:
 	chmod +x ./script.sh
-	./script.sh
-
-run_script_t:
-	chmod +x ./script_t.sh
-	./script_t.sh
-
-run_script_u:
-	chmod +x ./script_u.sh
 	chmod +x ./exp.sh
-	./script_u.sh
+	./script.sh ${dsp} ${n_cores}
 
 plot:
 	python3 plot.py
-
-plot_t:
-	python3 plot.py --transpose
