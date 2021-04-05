@@ -109,5 +109,37 @@ if __name__ == "__main__":
 	# https://pandas.pydata.org/pandas-docs/stable/user_guide/visualization.html
 	df2 = pd.DataFrame(plot_array, columns=["mlb12", "mlb9", "mlb8", "mlb6", "DSP48"], index=layers)
 	df2.plot.bar();
-	plt.savefig(args.dir + '/plot.png');
+	plt.savefig(args.dir + '/plot_detailed.png');
+	#plt.show()
+
+	conv_layers = mm_layers = rnn_layers = 0
+	for layer in layers:
+		if re.match(r"conv_t_[0-9]+", layer):
+			conv_layers += 1
+		elif re.match(r"mm_t_[0-9]+", layer):
+			mm_layers += 1
+		elif re.match(r"rnn_t_[0-9]+", layer):
+			rnn_layers += 1
+
+	print (conv_layers, mm_layers, rnn_layers)
+	
+	end = 0
+	benchmark_convs	= 	(plot_array[end : end + conv_layers	, :]).mean(axis=0)
+	end += conv_layers 
+	benchmark_mms	=	(plot_array[end	: end + mm_layers	, :]).mean(axis=0)
+	end += mm_layers
+	benchmark_rnns 	=	(plot_array[end	: end + rnn_layers	, :]).mean(axis=0)
+	benchmark_all	= 	(plot_array).mean(axis=0)
+
+	plot_array_2 = np.ones((4,5))
+	for i in range(5):
+		plot_array_2[0,i] = benchmark_convs[i]
+		plot_array_2[1,i] = benchmark_mms[i]
+		plot_array_2[2,i] = benchmark_rnns[i]
+		plot_array_2[3,i] = benchmark_all[i]
+	print(plot_array_2)
+
+	df2 = pd.DataFrame(plot_array_2, columns=["mlb12", "mlb9", "mlb8", "mlb6", "DSP48"], index=["Convs", "GEMM", "RNNs", "Average"])
+	df2.plot.bar();
+	plt.savefig(args.dir + '/plot_compressed.png');
 	plt.show()
