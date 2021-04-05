@@ -34,7 +34,9 @@ then install the package
 
 	make install
 	cd ..
-
+	mkdir results
+	mkdir results/outputs
+	mkdir results/temp
 
 4- run the experiment script
 
