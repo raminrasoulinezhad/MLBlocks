@@ -11,6 +11,8 @@ def get_args():
 	parser.add_argument('--area-ratio-effect', type=str, default='LP_config', 
 							choices=['LP_config', 'LHP_config', 'None'], 
 							help=' choose between these options: LP_config, LHP_config, None')
+	parser.add_argument('--transpose', default=False, action='store_true',
+							help='if scores are transposed - when using script_t.py')
 	return parser.parse_args()
 
 
@@ -54,7 +56,11 @@ if __name__ == "__main__":
 			scores.append(int(x[:-5]))
 
 	scores = np.array(scores) 
-	scores = scores.reshape((num_of_layers, num_of_configs))
+	if not args.transpose:
+		scores = scores.reshape((num_of_layers, num_of_configs))	
+	else:
+		scores = scores.reshape((num_of_configs, num_of_layers))
+		scores = np.transpose(scores)
 
 	end = 0
 	mlb12 = 	(scores[: , 		:	mlb12_configs			]).min(axis=1)
