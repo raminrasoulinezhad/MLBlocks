@@ -11,10 +11,10 @@ data_widths:
 loop_dimensions:
     RX: 1
     RY: 1
-    C: 1024
-    E: 128
-    PX: 3072
-    PY: 1
+    C: 64
+    E: 64
+    PX: 112
+    PY: 112
     B: 1
     G: 1
 activation_function: RELU

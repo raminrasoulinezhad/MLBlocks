@@ -12,9 +12,9 @@ loop_dimensions:
     RX: 1
     RY: 1
     C: 5120
-    E: 32
+    E: 2560
     PX: 2560
     PY: 1
-    B: 1
+    B: 32
     G: 1
 activation_function: RELU

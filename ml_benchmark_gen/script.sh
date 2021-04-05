@@ -8,7 +8,7 @@
 #						--eb_count 120 > ./results/temp/out.out
 #
 
-DSP=9024 # 360, 1368, 9024, 12288
+DSP=2256 # 360, 1368, 9024, 12288
 
 
 rm -f results/outputs/scores.out

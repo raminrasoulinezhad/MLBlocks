@@ -18,3 +18,4 @@ loop_dimensions:
     B: 1
     G: 1
 activation_function: RELU
+    

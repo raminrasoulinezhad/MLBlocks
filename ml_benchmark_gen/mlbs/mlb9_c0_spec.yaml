@@ -6,10 +6,10 @@ MAC_info:
         I: 8
         O: 32
 access_patterns:
-    AP1: 3
-    AP2: 1
-    AP3: 1
-    AP4: 3
+    AP1: 1
+    AP2: 3
+    AP3: 3
+    AP4: 1
     AP5: 1
 output_accumulator: True
 ports:

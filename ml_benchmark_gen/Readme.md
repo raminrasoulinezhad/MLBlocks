@@ -223,3 +223,70 @@ You could also try running the examples in examples.sh, which compile using ODIN
 Use this to prevent memory leakage error (source: https://stackoverflow.com/questions/51060801/how-to-suppress-leaksanitizer-report-when-running-under-fsanitize-address):
 
 	export ASAN_OPTIONS=detect_leaks=0
+
+
+### Bechmark
+
+CONV layers:
+
+Input Size                                          # of Filters    Padding Stride (h, w)   
+W = 700,H = 161,C = 1,      N = 32  R = 5, S = 20   32              0,0     2, 2 
+W = 54, H = 54, C = 64,     N = 8   R = 3, S = 3    64              1,1     1, 1    
+W = 224,H = 224,C = 3,      N = 16  R = 3, S = 3    64              1,1     1, 1 
+W = 7,  H = 7,  C = 512,    N = 16  R = 3, S = 3    512             1,1     1, 1 
+W = 28, H = 28, C = 192,    N = 16  R = 5, S = 5    32              2,2     1, 1 
+
+W = 341,H = 79, C = 32,     N = 4   R = 5, S = 10   32              0,0     2, 2  
+W = 224,H = 224,C = 3,      N = 1   R = 7, S = 7    64              3,3     2, 2 
+W = 56, H = 56, C = 256,    N = 1   R = 1, S = 1    128             0,0     2, 2 
+W = 7,  H = 7,  C = 512,    N = 2   R = 1, S = 1    2048            0,0     1, 1 
+
+
+W = 112,H = 112,C = 64, 	N = 1 	R = 1, S = 1 	64 				0, 0 	1, 1
+W = 56, H = 56, C = 256, 	N = 1 	R = 1, S = 1 	128 			0, 0 	2, 2
+W = 7, 	H = 7, 	C = 512, 	N = 1 	R = 1, S = 1 	2048 			0, 0 	1, 1
+
+
+GEMM:
+
+Kernel 					A (T) 	B (T) 	
+M=1760, N=128, 	K=1760 	N 		N 		
+M=7860, N=64, 	K=2560 	N 		N 		
+M=2560, N=64, 	K=2560 	N 		N 		
+M=5124, N=9124, K=2560 	T 		N 		
+M=3072, N=128, 	K=1024 	T 		N 		
+
+M=5124, N=700, 	K=2048 	
+M=35, 	N=700, 	K=2048 	
+M=3072, N=3000, K=1024 	
+M=512, 	N=6000, K=2816 	
+
+M=7680, N=1, 	K=2560
+M=7680, N=2, 	K=2560
+M=7680, N=1500, K=2560
+M=10752,N=1, 	K=3584
+
+M=5124, N=700, 	K=2048
+M=35, 	N=700, 	K=2048
+M=3072, N=1500, K=1024
+
+M=7680, N=1, 	K=2560
+M=7680, N=1500, K=2560
+M=7680, N=1, 	K=2560
+
+RNNs:
+
+Hidden 	Batch  	TimeSteps 	Type 		
+1760 	16 		50 			Vanilla 	
+2560 	32 		50 			Vanilla 	
+1024 	128 	25 			LSTM 		
+2816 	32 		1500 		GRU 		
+
+1536 	4 		50 			LSTM
+256 	4 		150 		LSTM
+2816 	1 		1500 		GRU 
+2560 	2 		375 		GRU 
+
+Vanila RNN:  B [ h x 2h] x [2h x h]
+LSTM:        B [4h x 2h] x [2h x h]
+GRU:         B [3h x 2h] x [2h x h]

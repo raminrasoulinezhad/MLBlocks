@@ -1,6 +1,6 @@
 stride:
-    x: 1
-    y: 1
+    x: 2
+    y: 2
 dilation:
     x: 1
     y: 1
@@ -9,12 +9,12 @@ data_widths:
     I: 8
     O: 32
 loop_dimensions:
-    RX: 1
-    RY: 1
-    C: 1024
-    E: 128
-    PX: 3072
-    PY: 1
+    RX: 7
+    RY: 7
+    C: 3
+    E: 64
+    PX: 230
+    PY: 230
     B: 1
     G: 1
 activation_function: RELU

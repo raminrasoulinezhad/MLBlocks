@@ -1,15 +1,15 @@
 block_name: "ml_block"
 MAC_info:
-    num_units: 9
+    num_units: 6
     data_widths:
         W: 8
         I: 8
         O: 32
 access_patterns:
-    AP1: 1
-    AP2: 3
-    AP3: 3
-    AP4: 1
+    AP1: 2
+    AP2: 1
+    AP3: 1
+    AP4: 3
     AP5: 1
 output_accumulator: True
 ports:
