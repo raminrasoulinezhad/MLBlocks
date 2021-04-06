@@ -1,5 +1,5 @@
 verilog_ml_benchmark_generator/
 venv/
 /results/*
-!/results/outputs*
+!/results/DSP*
 
