@@ -43,15 +43,7 @@ first prepare the required directories:
 
 then run the script:
 
-	make run_script
-
-or the transposed one:
-
-	make run_script_t
-
-or if you have a good mahcine with high number of cpu cores
-
-	make run_script_u
+	make run_script dsp=360 n_cores=12
 
 5- plt the result
 
