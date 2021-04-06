@@ -6,8 +6,8 @@
 
 2- creat an appropriate virtual python3 environment:
 
-	pip install --upgrade pip
-	virtualenv -p /usr/bin/python3.7 venv
+	sudo pip install --upgrade pip
+	virtualenv -p /usr/bin/python3 venv
 	source venv/bin/activate
 	pip install  click python_constraint numpy pymtl3 jsonschema pytest PyYAML prettytable 	pandas matplotlib
 

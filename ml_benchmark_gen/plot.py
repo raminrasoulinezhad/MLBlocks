@@ -52,6 +52,7 @@ if __name__ == "__main__":
 	for x in f:
 		if x != '\n':
 			scores.append(int(x[:-5]))
+	scores = np.array(scores)
 	scores = scores.reshape((num_of_layers, num_of_configs))	
 
 	end = 0
