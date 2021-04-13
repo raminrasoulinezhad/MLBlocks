@@ -103,7 +103,7 @@ if __name__ == "__main__":
 	df2 = pd.DataFrame(plot_array, columns=["mlb12", "mlb9", "mlb8", "mlb6", "DSP48"], index=layers)
 	df2.plot.bar();
 	plt.savefig(args.dir + '/plot_detailed.png');
-	#plt.show()
+	np.savetxt(args.dir + '/plot_detailed.csv', plot_array, delimiter=",")
 
 	conv_layers = mm_layers = rnn_layers = 0
 	for layer in layers:
@@ -135,5 +135,6 @@ if __name__ == "__main__":
 	df2 = pd.DataFrame(plot_array_2, columns=["mlb12", "mlb9", "mlb8", "mlb6", "DSP48"], index=["Convs", "GEMM", "RNNs", "Average"])
 	df2.plot.bar();
 	plt.savefig(args.dir + '/plot_compressed.png');
-	plt.show()
+	np.savetxt(args.dir + '/plot_compressed.csv', plot_array_2, delimiter=",")
+	#plt.show()
 	
