@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
 	df2 = pd.DataFrame(plot_table, columns=["mlb12", "mlb9", "mlb8", "mlb6"], index=DSP_dirs)
 	df2.plot.bar();
-	#plt.savefig(args.dir + '/plot_detailed.png');
-	#np.savetxt(args.dir + "plot_detailed.csv", plot_array, delimiter=",")
+	plt.savefig(args.dir + '/plot_speedup_per_NumOfDSPs.png');
+	np.savetxt(args.dir + '/plot_speedup_per_NumOfDSPs.csv', plot_table, delimiter=",")
 	plt.show()
 	
