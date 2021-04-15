@@ -12,5 +12,9 @@ run_script:
 	chmod +x ./exp.sh
 	./script.sh ${dsp} ${n_cores}
 
-plot:
-	python3 plot.py
+exp_dir?=./results/DSP120/
+plot_speedup_per_benchmarks:
+	python3 plot_speedup_per_benchmarks.py --dir=${exp_dir}
+
+plot_speedup_per_NumOfDSPs:
+	python3 plot_speedup_per_NumOfDSPs.py
