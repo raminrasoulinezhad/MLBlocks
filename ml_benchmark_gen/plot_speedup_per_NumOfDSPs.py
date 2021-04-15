@@ -40,11 +40,10 @@ if __name__ == "__main__":
 
 	print(plot_table)
 	
-
 	df = pd.DataFrame(plot_table, columns=["mlb12", "mlb9", "mlb8", "mlb6"], index=DSP_names)
 	df.plot.bar();
 	plt.savefig(args.dir + '/plot_speedup_per_NumOfDSPs.png');
 	#np.savetxt(args.dir + '/plot_speedup_per_NumOfDSPs.csv', plot_table, delimiter=",")
-	df.to_csv(args.dir + '/plot_speedup_per_NumOfDSPs.csv', index=True, header=True, sep=',')
+	df.to_csv(args.dir + '/plot_speedup_per_NumOfDSPs.csv', index=True, header=True, sep=',', index_label='NumOfDSPs')
 	plt.show()
 	
