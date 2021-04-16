@@ -1,0 +1,11 @@
+	[34m
+===> Step 1: Find an appropriate mapping vector for given layer specification
+===============================================================================[0m
+	Solving for optimal mapping vector. This may take several minutes.[0m
+	Workload definition: {'RX': 20, 'RY': 5, 'C': 1, 'E': 32, 'PX': 700, 'PY': 161, 'B': 32, 'G': 1}[0m
+	Found best 1 solutions out of 362 possibilities, with estimated cycle count 5511410[0m
+	Solution: 
+		Intra-PE unrolling factors: {'RX': 2, 'RY': 1, 'E': 1, 'C': 1, 'B': 1, 'PX': 3, 'PY': 1}
+		Inter-PE unrolling factors: {'RX': 10, 'RY': 5, 'E': 1, 'C': 1, 'B': 1, 'PX': 1, 'PY': 7}
+		Temporal tiling factors: {'RX': 1, 'RY': 1, 'E': 32, 'C': 1, 'B': 32, 'PX': 234, 'PY': 23}[0m
+{'activation_function': 'RELU', 'stride': {'x': 2, 'y': 2}, 'dilation': {'x': 1, 'y': 1}, 'data_widths': {'W': 8, 'I': 8, 'O': 32}, 'temporal_projection': {'RY': 1, 'C': 1, 'E': 32, 'PX': 234, 'PY': 23, 'B': 32, 'G': 1}, 'outer_projection': {'RY': 5, 'C': 1, 'RX': 10, 'E': 1, 'PX': 1, 'PY': 1, 'B': 7, 'G': 1}, 'inner_projection': {'RY': 1, 'C': 1, 'RX': 2, 'E': 1, 'PX': 1, 'PY': 1, 'B': 3, 'G': 1, 'PRELOAD': [{'dtype': 'W', 'bus_count': 1}]}}

@@ -42,13 +42,29 @@ for FILE_LAYER in ./layers/*; do
 		FILE_MLB_NAME="${FILE_MLB#*mlbs/}"
 		FILE_MLB_NAME="${FILE_MLB_NAME%.*}"
 
-		sed -n 's/.*with estimated cycle count *//p' ./results/temp/out$FILE_LAYER_NAME$FILE_MLB_NAME.out >> results/outputs/scores.out
+		if [ -s "./results/temp/out$FILE_LAYER_NAME$FILE_MLB_NAME.out" ] 
+		then
+			echo "./results/temp/out$FILE_LAYER_NAME$FILE_MLB_NAME.out has some data."
+			cycles=$(sed -n 's/.*with estimated cycle count *//p' ./results/temp/out$FILE_LAYER_NAME$FILE_MLB_NAME.out)
+			digits=${#cycles}
+			if [ $digits -eq 0 ]
+			then  
+				echo "549755813887[0m" >> results/outputs/scores.out
+				# (2 ^ 39) - 1 + three extra character
+			else
+				sed -n 's/.*with estimated cycle count *//p' ./results/temp/out$FILE_LAYER_NAME$FILE_MLB_NAME.out >> results/outputs/scores.out	
+			fi
+		else
+			echo "./results/temp/out$FILE_LAYER_NAME$FILE_MLB_NAME.out is empty."
+			sed -n 's/.*with estimated cycle count *//p' ./results/temp/out$FILE_LAYER_NAME$FILE_MLB_NAME.out >> results/outputs/scores.out
+		fi
+		
 	done
 
 	echo ''  >> results/outputs/scores.out
 done
 
-mv results/outputs results/DSP$DSP 
-python3  plot_speedup_per_benchmarks.py  --dir=./results/DSP$DSP
-
+python3  plot_speedup_per_benchmarks.py
+cp -r results/outputs results/DSP$DSP 
+cp -r results/temp results/tempDSP$DSP 
 
