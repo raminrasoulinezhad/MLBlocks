@@ -12,6 +12,7 @@ make run_script dsp=3072  n_cores=35
 make clean
 make run_script dsp=6144  n_cores=35
 make clean
-#make run_script dsp=12288 n_cores=35
-#make clean
-
+make run_script dsp=12288 n_cores=35
+make clean
+python3 plot_speedup_per_NumOfDSPs.py
+Rscript plot_speedup_per_NumOfDSPs.R
