@@ -60,6 +60,15 @@ To run them, there is a requirements.txt file.
 	source venv/bin/activate
 	pip install  click python_constraint numpy pymtl3 jsonschema pytest PyYAML prettytable		
 
+**requirements for using R**
+
+Let's install the required libraries
+
+	sudo R
+	install.packages(c("ggplot2", "ggthemes", "reshape2", "lemon"))
+	update.packages()
+	q()
+
 <!---
 	 Worked
 	# worked with previous versions
