@@ -1,5 +1,0 @@
-	[34m
-===> Step 1: Find an appropriate mapping vector for given layer specification
-===============================================================================[0m
-	Solving for optimal mapping vector. This may take several minutes.[0m
-	Workload definition: {'RX': 20, 'RY': 5, 'C': 1, 'E': 32, 'PX': 700, 'PY': 161, 'B': 32, 'G': 1}[0m

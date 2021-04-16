@@ -241,6 +241,14 @@ Use this to prevent memory leakage error (source: https://stackoverflow.com/ques
 
 ### Bechmark
 
+
+| Board / FPGA part |DSPs |
+|-------------------|-----|
+| U96 (ZU3EG)       |  360|
+| XCVU13P           |12288|
+| ALVEO (U280)      | 9024|
+
+
 CONV layers:
 
 Input Size                                          # of Filters    Padding Stride (h, w)   
