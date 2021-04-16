@@ -47,3 +47,8 @@ for FILE_LAYER in ./layers/*; do
 
 	echo ''  >> results/outputs/scores.out
 done
+
+mv results/outputs results/DSP$DSP 
+python3  plot_speedup_per_benchmarks.py  --dir=./results/DSP$DSP
+
+
