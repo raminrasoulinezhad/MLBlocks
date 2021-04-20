@@ -50,6 +50,17 @@ then run the script:
 	python3 plot.py
 
 
+## Ploting
+
+	./script_plot.sh
+
+
+sourse for size of the DSP columns: https://www.xilinx.com/support/documentation/user_guides/ug579-ultrascale-dsp.pdf. page 12:
+
+clock regions has 24 DSPs. a DSP columns would be 96, 120, 264 DSPs. We assume 96 case for VU13P with 12288 DSPs. So 128 Columns of 96 DSPs.
+
+
+
 ## Introduction and requirements:
 This manual starts with commands using python3 rather than the executable files.
 
