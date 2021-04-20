@@ -45,5 +45,5 @@ if __name__ == "__main__":
 	plt.savefig(args.dir + '/plot_speedup_per_NumOfDSPs.png');
 	#np.savetxt(args.dir + '/plot_speedup_per_NumOfDSPs.csv', plot_table, delimiter=",")
 	df.to_csv(args.dir + '/plot_speedup_per_NumOfDSPs.csv', index=True, header=True, sep=',', index_label='NumOfDSPs')
-	plt.show()
-	
+	#plt.show()
+
