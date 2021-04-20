@@ -20,8 +20,8 @@ ggplot(data,aes(a,value)) +
     #geom_bar(aes(fill = a), position = "dodge", stat = "identity", width=0.7) +
     geom_bar(aes(fill=variable), position = "dodge", stat = "identity", width=0.6) +
     # coord_capped_cart(bottom='both', left='both') +
-	xlab("Number of DSPs") +
-	ylab("Normalized Performance speed-up") +
+	xlab("Number of EBs") +
+	ylab("Normalized Performance speedup") +
 	theme(axis.title=element_text(),axis.title.y=theme_bw()$axis.title.y) +
 	scale_fill_pander("") +
 	theme_minimal() +

@@ -20,8 +20,8 @@ ggplot(data, aes(x=NumOfDSPs, y=value, group=variable)) +
     #geom_bar(aes(fill=variable), position = "dodge", stat = "identity", width=0.6) +
     geom_line(aes(linetype=variable, color=variable), size=2) +
     #geom_point(aes(shape=variable, color=variable)) +
-	xlab("Number of DSPs") +
-	ylab("Normalized Performance speed-up") +
+	xlab("Number of EBs") +
+	ylab("Normalized Performance speedup") +
 	theme(axis.title=element_text(),axis.title.y=theme_bw()$axis.title.y) +
 	scale_fill_pander("") +
 	theme_minimal() +
