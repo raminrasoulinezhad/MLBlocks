@@ -52,6 +52,8 @@ then run the script:
 
 ## Ploting
 
+	./script_plot_all_v2.sh
+	./script_plot_all.sh
 	./script_plot.sh
 
 
