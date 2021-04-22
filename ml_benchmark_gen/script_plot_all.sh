@@ -1,3 +1,6 @@
+# Approach 1: area_ratio_mode=None
+# Approach 2: area_ratio_mode=LP
+
 make clean
 for dsp in {96..9216..96}
 do 
@@ -12,3 +15,4 @@ done
 
 python3 plot_speedup_per_NumOfDSPs.py
 Rscript plot_speedup_per_NumOfDSPs.R
+Rscript plot_speedup_per_NumOfDSPs_line.R
