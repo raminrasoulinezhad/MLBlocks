@@ -51,5 +51,5 @@ ggplot(data, aes(x=NumOfDSPs, y=value, group=variable)) +
 	)+
 	#scale_fill_pander()
 	#scale_fill_brewer(palette = "Spectral")
-	scale_fill_brewer(palette = "Set1") + 
-	coord_cartesian(ylim = c(2.5, 10))
+	scale_fill_brewer(palette = "Set1")# + 
+	#coord_cartesian(ylim = c(2.5, 10))
