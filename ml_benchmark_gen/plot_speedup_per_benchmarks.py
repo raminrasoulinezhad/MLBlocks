@@ -9,7 +9,7 @@ def get_args():
 	parser.add_argument('--dir', type=str, default='./results/outputs', 
 							help='Directory of the cycle estimation results')
 	parser.add_argument('--area-ratio-effect', type=str, default='LP_config', 
-							choices=['LP_config', 'LHP_config', 'None'], 
+							choices=['LP_config', 'LHP_config', 'LP_config_total', 'LHP_config_total', 'None'], 
 							help=' choose between these options: LP_config, LHP_config, None')
 	return parser.parse_args()
 
@@ -81,6 +81,16 @@ if __name__ == "__main__":
 		mlb9_area_ratio = 	1.20
 		mlb8_area_ratio = 	0.96
 		mlb6_area_ratio = 	0.80
+	elif args.area_ratio_effect == 'LP_config_total':
+		mlb12_area_ratio = 	(1-(1-0.85)*0.05)
+		mlb9_area_ratio = 	(1-(1-0.66)*0.05)
+		mlb8_area_ratio = 	(1-(1-0.56)*0.05)
+		mlb6_area_ratio = 	(1-(1-0.46)*0.05)
+	elif args.area_ratio_effect == 'LHP_config_total':
+		mlb12_area_ratio = 	(1-(1-1.44)*0.05)
+		mlb9_area_ratio = 	(1-(1-1.20)*0.05)
+		mlb8_area_ratio = 	(1-(1-0.96)*0.05)
+		mlb6_area_ratio = 	(1-(1-0.80)*0.05)
 
 
 	speed_up_mlb12 = (xilinx / mlb12) * (1/mlb12_area_ratio)
