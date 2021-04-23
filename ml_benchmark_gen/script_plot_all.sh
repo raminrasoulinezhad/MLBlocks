@@ -20,7 +20,7 @@ DSP_step=96
 
 make clean
 for (( dsp=${DSP_start}; dsp<=${DSP_end}; dsp+=${DSP_step} )); do
-    make run_script 	dsp=${dsp}   	n_cores=${n_cores}		area_ratio_mode={area_ratio_mode}
+    make run_script 	dsp=${dsp}   	n_cores=${n_cores}		area_ratio_mode=${area_ratio_mode}
 	make clean
 done
 
