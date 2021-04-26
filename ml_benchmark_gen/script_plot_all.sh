@@ -11,7 +11,7 @@
 #		area_ratio_effect=None
 
 n_cores=8
-area_ratio_mode=None 	
+area_ratio_mode=None  
 area_ratio_effect=None 
 
 DSP_start=96
