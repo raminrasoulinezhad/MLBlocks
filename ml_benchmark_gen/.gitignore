@@ -1,4 +1,5 @@
 verilog_ml_benchmark_generator/
 venv/
-/results/temp/
-/results/outputs/
+results/
+#/results/temp/
+#/results/outputs/

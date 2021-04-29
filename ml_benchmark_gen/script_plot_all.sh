@@ -14,20 +14,43 @@ n_cores=8
 area_ratio_mode=None  
 area_ratio_effect=None 
 
+enable_exp=1
+enable_dotout=1
+enable_csv=1
+enable_plot_all=1
+
 DSP_start=96
-DSP_end=5664
+DSP_end=9216
 DSP_step=96
 
-make clean
-for (( dsp=${DSP_start}; dsp<=${DSP_end}; dsp+=${DSP_step} )); do
-    make run_script 	dsp=${dsp}   	n_cores=${n_cores}		area_ratio_mode=${area_ratio_mode}
-	make clean
-done
+if [ $enable_exp -eq 1 ] ; then
+	for (( dsp=${DSP_start}; dsp<=${DSP_end}; dsp+=${DSP_step} )); do
+	    make clean
+	    make run_script dsp=${dsp} \
+	    				n_cores=${n_cores}	\
+	    				area_ratio_mode=${area_ratio_mode} 
+	done
+fi
 
-for (( dsp=${DSP_start}; dsp<=${DSP_end}; dsp+=${DSP_step} )); do
-    make plot_speedup_per_benchmarks 	exp_dir=./results/DSP${dsp} 	area_ratio_effect=${area_ratio_effect}
-done
+if [ $enable_dotout -eq 1 ] ; then
+	for (( dsp=${DSP_start}; dsp<=${DSP_end}; dsp+=${DSP_step} )); do
+		./script.sh ${dsp} \
+					${n_cores} \
+					${area_ratio_mode} \
+					0 \
+					./results/DSP${dsp} \
+					./results/tempDSP${dsp}
+	done
+fi
 
-python3 plot_speedup_per_NumOfDSPs.py
-Rscript plot_speedup_per_NumOfDSPs.R
-Rscript plot_speedup_per_NumOfDSPs_line.R
+if [ $enable_csv -eq 1 ] ; then
+	for (( dsp=${DSP_start}; dsp<=${DSP_end}; dsp+=${DSP_step} )); do
+	    make plot_speedup_per_benchmarks 	exp_dir=./results/DSP${dsp} 	area_ratio_effect=${area_ratio_effect}
+	done
+fi
+
+if [ $enable_plot_all -eq 1 ] ; then
+	python3 plot_speedup_per_NumOfDSPs.py
+	Rscript plot_speedup_per_NumOfDSPs.R
+	Rscript plot_speedup_per_NumOfDSPs_line.R
+fi
