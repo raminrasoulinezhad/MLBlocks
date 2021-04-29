@@ -1,5 +1,6 @@
-DSP=$1 # 360, 1368, 9024, 12288
+DSP=$1 
 NUM_CORES=$2
+AREA_RATIO_MODE=$3
 
 rm -f results/outputs/scores.out
 rm -f results/outputs/mlbs_orders.out
@@ -27,10 +28,11 @@ FILE_LAYERS=./layers/*
 FILE_MLBS=./mlbs/*
 
 parallel --bar --gnu -j${NUM_CORES} --header : \
-    './exp.sh {layer_file}  {mlb_file}  {DSP}' \
+    './exp.sh {layer_file}  {mlb_file}  {DSP}  {AREA_RATIO_MODE} ' \
 	::: layer_file $FILE_LAYERS \
 	::: mlb_file $FILE_MLBS \
-	::: DSP $DSP
+	::: DSP $DSP \
+	::: AREA_RATIO_MODE $AREA_RATIO_MODE
 
 for FILE_LAYER in ./layers/*; do 
 
@@ -64,7 +66,5 @@ for FILE_LAYER in ./layers/*; do
 	echo ''  >> results/outputs/scores.out
 done
 
-python3  plot_speedup_per_benchmarks.py
 cp -r results/outputs results/DSP$DSP 
 cp -r results/temp results/tempDSP$DSP 
-
