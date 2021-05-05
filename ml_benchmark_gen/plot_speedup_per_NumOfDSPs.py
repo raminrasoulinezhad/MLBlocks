@@ -22,6 +22,7 @@ if __name__ == "__main__":
 			DSP_dirs.append(DSP_dir[3:])
 
 	DSP_dirs = [int(DSP_dir) for DSP_dir in DSP_dirs]
+	#DSP_dirs = [(96*(i+1)) for i in range(55)]
 	DSP_dirs = sorted(DSP_dirs)
 	DSP_names = DSP_dirs
 	DSP_dirs = ['%s' % (args.dir + '/DSP' + str(DSP_dir)) for DSP_dir in DSP_dirs]			
