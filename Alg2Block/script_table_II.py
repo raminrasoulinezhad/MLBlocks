@@ -18,9 +18,15 @@ os.system('cd ../asic && make clean && make asic_dsp  >/dev/null 2>&1')
 area, freq, power = get_asic_results('../asic/', period=1333)
 print ('area: %f\tfreq: %f\tpower: %f' % (area, freq, power))
 
+# make sure out directory is created
+os.system('mkdir -p ../out')
+
 # heuristic approach
 arch_12.search_heuristic_v2(baidu_algs, MLblock_version='v2', heuristic_mode='new', period=1333, verbose=False)
+os.system('cp -r ../verilog ../out/arch12')
 arch_9.search_heuristic_v2 (baidu_algs, MLblock_version='v2', heuristic_mode='new', period=1333, verbose=False)
+os.system('cp -r ../verilog ../out/arch9')
 arch_8.search_heuristic_v2 (baidu_algs, MLblock_version='v2', heuristic_mode='new', period=1333, verbose=False)
+os.system('cp -r ../verilog ../out/arch8')
 arch_6.search_heuristic_v2 (baidu_algs, MLblock_version='v2', heuristic_mode='new', period=1333, verbose=False)
-
+os.system('cp -r ../verilog ../out/arch6')
