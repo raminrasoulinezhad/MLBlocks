@@ -1,0 +1,139 @@
+block_name: "ml_block"
+MAC_info:
+    num_units: 6
+    data_widths:
+        W: 8
+        I: 8
+        O: 16
+access_patterns:
+    AP1: 3
+    AP2: 1
+    AP3: 1
+    AP4: 2
+    AP5: 1
+output_accumulator: True
+ports:
+    -   name: data_in_AD
+        width: 16
+        direction: "in"
+        type: "W"
+    -   name: AD_cascade_out
+        width: 16
+        direction: "out"
+        type: "W"
+    -   name: CEAD
+        width: 1
+        direction: "in"
+        type: "W_EN"
+    -   name: data_in_B
+        width: 8
+        direction: "in"
+        type: "I"
+    -   name: B_cascade_out
+        width: 8
+        direction: "out"
+        type: "I"
+    -   name: CEB
+        width: 1
+        direction: "in"
+        type: "I_EN"
+    -   name: P_cout
+        width: 32
+        direction: "out"
+        type: "O"
+    -   name: P_cin
+        width: 32
+        direction: "in"
+        type: "O"
+    -   name: opmode0
+        width: 1
+        direction: "in"
+        type: "ACC_EN"
+    -   name: opmode1
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: opmode2
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: opmode3
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: opmode4
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: opmode5
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: opmode6
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: opmode7
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: opmode8
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: alumode0
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: alumode1
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: alumode2
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: alumode3
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: inmode0
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: inmode1
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: inmode2
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: inmode3
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: inmode4
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: carryinsel0
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: carryinsel1
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: CECONFIG
+        width: 1
+        direction: "in"
+        type: "C"
+    -   name: clk
+        width: 1
+        direction: "in"
+        type: "CLK"
+    -   name: reset
+        width: 1
+        direction: "in"
+        type: "RESET"

@@ -23,5 +23,10 @@ area_ratio_effect?=None
 plot_speedup_per_benchmarks:
 	python3 plot_speedup_per_benchmarks.py --dir=${exp_dir} --area-ratio-effect=${area_ratio_effect}
 
+exp_dir?=./results/DSP120/
+area_ratio_effect?=None 
+plot_speedup_per_benchmarks_compare:
+	python3 plot_speedup_per_benchmarks_compare.py --dir=${exp_dir} --area-ratio-effect=${area_ratio_effect}
+
 plot_speedup_per_NumOfDSPs:
 	python3 plot_speedup_per_NumOfDSPs.py

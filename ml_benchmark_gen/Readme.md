@@ -50,17 +50,31 @@ then run the script:
 	python3 plot.py
 
 
-## Ploting
+## Ploting (Used in the paper)
 
-	./script_plot_all_v2.sh
+before ploting you need to provide `mlb` (MLBlock and other Block) models in `mlbs` directory as well as benchmark algorithms in `layers` directory. There are many prepared layers and mlb models which you should pick and copy them inside the `mlbs` and `layers` directories. 
+
+	rm -r ./layers
+	rm -r ./mlbs
+	cp -r layers_DeepBench layers
+	cp -r mlbs_DSP48E2_MLBocks mlbs
 	./script_plot_all.sh
 	./script_plot.sh
-
 
 sourse for size of the DSP columns: https://www.xilinx.com/support/documentation/user_guides/ug579-ultrascale-dsp.pdf. page 12:
 
 clock regions has 24 DSPs. a DSP columns would be 96, 120, 264 DSPs. We assume 96 case for VU13P with 12288 DSPs. So 128 Columns of 96 DSPs.
 
+
+**Recently added:**
+To *compare* MLBlocks with other works on enhancing DSP48E2 like DSP58 and PIRDSP:
+
+	rm -r ./layers
+	rm -r ./mlbs
+	cp -r layers_ResNet18/* layers
+	cp -r layers_VGG16/* layers
+	cp -r mlbs_DSP48E2_MLBocks mlbs
+	./script_plot_all_compare.sh
 
 
 ## Introduction and requirements:

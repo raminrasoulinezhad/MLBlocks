@@ -1,0 +1,20 @@
+stride:
+    x: 1
+    y: 1
+dilation:
+    x: 1
+    y: 1
+data_widths:
+    W: 8
+    I: 8
+    O: 32
+loop_dimensions:
+    RX: 3
+    RY: 3
+    C: 512
+    E: 512
+    PX: 14
+    PY: 14
+    B: 2
+    G: 1
+activation_function: RELU
