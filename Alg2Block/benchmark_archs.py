@@ -169,6 +169,78 @@ arch_6_16x16 = Arch("all",
 					}
 			)
 
+arch_intel_27 = Arch("all", 
+			None, 
+			my_space,
+			stationary="W",
+			precisions={	
+							"I" : 8,
+							"W" : 8,
+							"O" : 32,
+						},
+			nmac=27,
+			limits= {	
+						"IO_I" : 2*3*18,
+						"IO_W" : None,
+						"IO_O" : 74,
+						"IO" : None, 	
+					}
+			)
+
+arch_intel_24 = Arch("all", 
+			None, 
+			my_space,
+			stationary="W",
+			precisions={	
+							"I" : 8,
+							"W" : 8,
+							"O" : 32,
+						},
+			nmac=24,
+			limits= {	
+						"IO_I" : 2*3*18,
+						"IO_W" : None,
+						"IO_O" : 74,
+						"IO" : None, 	
+					}
+			)
+
+arch_intel_20 = Arch("all", 
+			None, 
+			my_space,
+			stationary="W",
+			precisions={	
+							"I" : 8,
+							"W" : 8,
+							"O" : 32,
+						},
+			nmac=20,
+			limits= {	
+						"IO_I" : 2*3*18,
+						"IO_W" : None,
+						"IO_O" : 74,
+						"IO" : None, 	
+					}
+			)
+
+arch_intel_18 = Arch("all", 
+			None, 
+			my_space,
+			stationary="W",
+			precisions={	
+							"I" : 8,
+							"W" : 8,
+							"O" : 32,
+						},
+			nmac=18,
+			limits= {	
+						"IO_I" : 2*3*18,
+						"IO_W" : None,
+						"IO_O" : 74,
+						"IO" : None, 	
+					}
+			)
+
 print ("\n-- Arch. descriptions are loaded\n")
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ data <- melt(data,id.vars=c("Benchmakrs"))
 
 
 data
-data$a <- factor(data$Benchmakrs, levels = c("GEMM8","CNN8","LSTM8","All8","GEMM16","CNN16","LSTM16","All16"))
+data$a <- factor(data$Benchmakrs, levels = c("GEMM8","CNN8","RNN8","All8","GEMM16","CNN16","RNN16","All16"))
 data
 pdf("script_table_III_2.pdf",width=15,height=7)
 #ggplot(data,aes(variable,value)) +

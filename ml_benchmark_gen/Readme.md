@@ -339,3 +339,11 @@ Hidden 	Batch  	TimeSteps 	Type
 Vanila RNN:  B [ h x 2h] x [2h x h]
 LSTM:        B [4h x 2h] x [2h x h]
 GRU:         B [3h x 2h] x [2h x h]
+
+**VGG16 and ResNet18**
+resources:
+
+* https://towardsdatascience.com/the-w3h-of-alexnet-vggnet-resnet-and-inception-7baaaecccc96
+* https://arxiv.org/abs/1409.1556
+* https://neurohive.io/en/popular-networks/vgg16/
+* 
