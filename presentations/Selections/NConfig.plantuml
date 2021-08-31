@@ -1,0 +1,39 @@
+@startuml
+
+title Start
+
+start
+
+:     Generate all possible 
+projections using Benchmark 
+cases and design constraints;
+
+while (Any new subset of N projections?)  is (Yes)
+  
+   fork
+    :Generate Verilog model for the
+    corresponding MLBlock instance;
+    :Run the synthesis;
+    :Extract the post-synthesis 
+                area report;
+  fork again
+    :Calculate the average 
+     utilization rate for the 
+       projection subset;
+  end fork 
+  
+  if (Does it deliver the best utilization per area?) then (yes)
+    :Save the subset as the best solution;
+  else (no)
+    
+  endif
+
+endwhile (No)
+
+:Generate MLBlock Verilog model using 
+    the best subset of N projections;
+
+stop
+
+@enduml
+
