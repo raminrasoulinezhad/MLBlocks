@@ -3,8 +3,10 @@ vivado/*
 benchmarks/*
 
 analyzer/*
-!analyzer/*.py
-!analyzer/*.md
+#!analyzer/*.py
+#!analyzer/*.md
+
+docs/*
 
 asic/*
 !asic/*.tcl
@@ -26,4 +28,11 @@ verilog/MLBlock_2Dflex_interconnects.sv
 verilog/MLBlock_2Dflex_v2_interconnects.sv
 verilog/MLBlock_2Dflex_params.sv
 verilog/MLBlock_2Dflex_v2_params.sv
+ 
+TRETS/*
+!TRETS/Figures/*
+
+src/*
+
+presentations/*
 
