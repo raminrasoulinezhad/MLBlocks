@@ -1,0 +1,45 @@
+## vsclib013.lib
+## gscl45nm
+
+# read design
+#read_verilog -sv ./arch12/MLBlock_2Dflex_v2.sv
+read_verilog -sv ./arch12/accumulator.sv
+read_verilog -sv ./arch12/accumulator_v2.sv
+read_verilog -sv ./arch12/adder.sv
+read_verilog -sv ./arch12/MAC_unit.sv
+read_verilog -sv ./arch12/MAC_unit_v2.sv
+read_verilog -sv ./arch12/MLBlock_1Dsuperflex.sv
+read_verilog -sv ./arch12/MLBlock_sample.sv
+read_verilog -sv ./arch12/MLBlock.sv
+read_verilog -sv ./arch12/mult_flex.sv
+read_verilog -sv ./arch12/mux.sv
+read_verilog -sv ./arch12/out_unit.sv
+read_verilog -sv ./arch12/pe.sv
+read_verilog -sv ./arch12/shifter.sv
+read_verilog -sv ./arch12/state_machine.sv
+read_verilog -sv ./arch12/stream_flex.sv
+read_verilog -sv ./arch12/stream_flex_v2.sv
+read_verilog -sv ./arch12/stream_mem.sv
+
+
+hierarchy -top MLBlock_2Dflex_v2
+
+# the high-level stuff
+proc; fsm; opt; memory; opt
+
+# mapping to internal cell library
+techmap; opt
+
+# mapping flip-flops to mycells.lib
+dfflibmap -liberty gscl45nm.lib
+
+# mapping logic to mycells.lib
+abc -liberty gscl45nm.lib
+
+# save result
+tee -o pir.stat stat -liberty gscl45nm.lib
+
+
+
+# cleanup
+clean

@@ -1,6 +1,6 @@
-.PHONY: clear pir dotproduct
+.PHONY: clear pir dotproduct arch12
 
-all: clean pir dotproduct
+all: clean pir dotproduct arch12
 
 # ASIC 
 #### yosys quant.ys
@@ -12,6 +12,9 @@ pir:
 
 dotproduct: 
 	yosys dotproduct.ys | tee dotproduct.log
+
+arch12:
+	yosys arch12.ys | tee arch12.log
 
 # Clean
 clean: 

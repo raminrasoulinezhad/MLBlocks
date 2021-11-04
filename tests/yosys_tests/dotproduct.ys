@@ -2,7 +2,7 @@
 ## gscl45nm
 
 # read design
-read -sv dotproduct.v
+read_verilog dotproduct.v
 hierarchy -top dotproduct
 
 # the high-level stuff

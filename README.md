@@ -1,6 +1,8 @@
 # MLBlocks - Rethinking Embedded Blocks for Machine Learning Applications
 
-This repository is related to MLBlocks architecture published at The International Conference on Field-Programmable Technology (FPT’21), Auckland, New Zealand. We sincerely appriciate your patience, as we are still working on the tutorial and documents. 
+![MLBlock generation overview](TRETS/Figures/ToolFlows_p10_cropped.jpg)
+
+This repository is related to MLBlocks architecture published at [The International Conference on Field-Programmable Technology (FPT’21), Auckland, New Zealand](https://parallel.auckland.ac.nz/fpt21/). We sincerely appriciate your patience, as we are still working on the tutorial and documents. 
 
 You can find the main paper [here](https://dx.doi.org/10.1145/3491234):
 
@@ -19,5 +21,28 @@ You can find the main paper [here](https://dx.doi.org/10.1145/3491234):
     }
 
 
-![MLBlock generation overview](TRETS/Figures/ToolFlows_p10_cropped.jpg)
+# Directories:
 
+
+```
+MLBlocks
+│   
+├───Alg2Block
+│   └─── Python-based block generator
+├───verilog
+│   └─── MLBlock parameterized architectural Verilog models
+├───ml_benchmark_gen
+│   └─── Python-based full implementation code generator
+├───PIRDSP_verilogs
+│   └─── PIR-DSP parameterized Verilog models
+├───out
+│   └─── output reports/models by Alg2Block scripts 
+├───TRETS/Figures
+│   └───Selected pictures from the manuscript
+├───tests
+│   └───FPGA tests (Vivado project scripts)
+├───asic
+│   └───ASIC tests (RTL Encounter scripts)
+├───.gitignore
+└───README.md
+```

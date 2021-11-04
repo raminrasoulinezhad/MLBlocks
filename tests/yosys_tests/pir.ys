@@ -2,21 +2,21 @@
 ## gscl45nm
 
 # read design
-read -sv ../../PIRDSP_verilogs/DSP.v
-read -sv ../../PIRDSP_verilogs/Dual_A_Register_block.v
-read -sv ../../PIRDSP_verilogs/Dual_B_Register_block.v
-read -sv ../../PIRDSP_verilogs/C_Register_block.v
-read -sv ../../PIRDSP_verilogs/D_Register_block.v
-read -sv ../../PIRDSP_verilogs/XYZW_manager.v
-read -sv ../../PIRDSP_verilogs/carry_in_manager.v
-read -sv ../../PIRDSP_verilogs/operation_manager.v
-read -sv ../../PIRDSP_verilogs/inmode_manager.v
-read -sv ../../PIRDSP_verilogs/Multiplier_xilinx.v
-read -sv ../../PIRDSP_verilogs/multiplier_output_manager.v
-read -sv ../../PIRDSP_verilogs/ALU.v
-read -sv ../../PIRDSP_verilogs/pattern_detection.v
-read -sv ../../PIRDSP_verilogs/wide_xor_block.v
-read -sv ../../PIRDSP_verilogs/output_manager.v
+read_verilog -sv ../../PIRDSP_verilogs/DSP.v
+read_verilog -sv ../../PIRDSP_verilogs/Dual_A_Register_block.v
+read_verilog -sv ../../PIRDSP_verilogs/Dual_B_Register_block.v
+read_verilog -sv ../../PIRDSP_verilogs/C_Register_block.v
+read_verilog -sv ../../PIRDSP_verilogs/D_Register_block.v
+read_verilog -sv ../../PIRDSP_verilogs/XYZW_manager.v
+read_verilog -sv ../../PIRDSP_verilogs/carry_in_manager.v
+read_verilog -sv ../../PIRDSP_verilogs/operation_manager.v
+read_verilog -sv ../../PIRDSP_verilogs/inmode_manager.v
+read_verilog -sv ../../PIRDSP_verilogs/Multiplier_xilinx.v
+read_verilog -sv ../../PIRDSP_verilogs/multiplier_output_manager.v
+read_verilog -sv ../../PIRDSP_verilogs/ALU.v
+read_verilog -sv ../../PIRDSP_verilogs/pattern_detection.v
+read_verilog -sv ../../PIRDSP_verilogs/wide_xor_block.v
+read_verilog -sv ../../PIRDSP_verilogs/output_manager.v
 
 hierarchy -top DSP
 
