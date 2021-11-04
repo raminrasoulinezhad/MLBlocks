@@ -16,6 +16,10 @@ asic/*
 !asic/Makefile
 
 PIRDSP_verilogs/test
+PIRDSP_verilogs/GeneratedModels/
+PIRDSP_verilogs/MACModels/
+PIRDSP_verilogs/Outperform models/
+PIRDSP_verilogs/Zips/
 
 __pycache__/
 *.pyc
@@ -35,4 +39,5 @@ TRETS/*
 src/*
 
 presentations/*
+
 
