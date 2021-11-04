@@ -25,8 +25,7 @@ You can find the main paper [here](https://dx.doi.org/10.1145/3491234):
 
 
 ```
-MLBlocks
-│   
+MLBlocks 
 ├───Alg2Block
 │   └─── Python-based block generator
 ├───verilog
@@ -46,3 +45,12 @@ MLBlocks
 ├───.gitignore
 └───README.md
 ```
+
+# re-generate the results of the paper
+
+In the paper, we have two types of experiments. 
+
+    1. MLBlock generation flow which is implemented using a python-based tool, called Alg2Block. 
+    2. Full implementation level exploration, using ml_benchmark_gen, a tool presented [here](). 
+
+To reproduce the reported results, please follow the provided README.md files in the `Alg2Block` and `ml_benchmark_gen` directories, respectively. 

@@ -1,24 +1,88 @@
-# MLBlocks - a generalization for desiging FPGA compute units to accelerate nested loop-based computations 
+# Alg2Block - MLBlock generation tool 
 
-### Benchmark to MLBlock: 
-This framework explore the benchmark algorithm and finds a set of valid configurations which are able to impleemnt the benchmarks with the best tiling possible. This is a Heuristic approach which is based on pruning the non-beneficiary configuration among the valid configurations.
+MLBlock architecture is a generalization for FPGA coarse-grained compute units to accelerate nested loop-based computations. Alg2Block is our suggested framework, which 1) analysis the input `benchmark` algorithms, 2) finds a set of valid `unrollings` and 3) computation `configurations` which an ideal block shall provide. Then, 4) using Heuristic `Selection` processes prune the configurations, and finally, 5) generates the block Verilog models. 
 
-How:
+## requirements 
 
-	python3 main.py
+    pip3 install mip numpy
+
+## How to use it:
+
+### Code architecture:
+
+```
+Main Models:
+├───Mains:
+│	├──Algorithm.py
+│	│   └─── Models the input algorithm by `Algorithm` class 
+│	├───Arch.py
+│	│   └─── Models the MLBlock architecture, and selections by `Arch` class 
+│	├───Unrolling.py
+│	│   └─── Models the MLBlock unrollings by `Unrolling` class
+│	├───ImpConfig.py
+│	│   └─── Models the MLBlock configurations by `ImpConfig` class
+│	├───ImpConfig.py
+│	│   └─── Models the MLBlock configurations by `ImpConfig` class
+│	└───MLBlock_2Dflex.py
+│	    └─── Generates Verilog models (interconnections and parameters)
+│	
+└───Minors:
+	├───Param.py
+	│   └─── Models a iteration variable
+	├───Space.py
+	│   └─── Models a nested loops variable
+	└───utils.py
+	    └─── usefull functions
+
+Experiments:
+├───Benchmarks (Define various study cases): 
+│	├──benchmark_algs.py
+│	│   └─── Defines input algorithm study cases. 
+│	├──benchmark_archs.py
+│	│   └─── Defines MLBlock architecture constraints
+│	└──benchmark_space.py
+│	    └─── Defines input algorithm nested loop space (dimentionality). 
+│
+│
+├───Main Scripts (Generate results utilizing the right architecture, benchmark, and selection process): 
+│	├──script_table_I.py
+│	│   └─── To generate Figure 
+│	├──script_table_II.py
+│	│   └─── To generate Figure 
+│	├──script_table_III.py
+│	│   └─── To generate Figure 
+│	├──script_scatter_plot.py
+│	│   └─── To generate Figure 
+│	├──script_table_intel.py
+│	│   └─── To generate Figure 
+│	└──main.py
+│	    └─── To test the framwork
+|
+└───ASIC Scripts (custom API using RTL Encounter): 
+	├──exp.sh*
+	├──exp.tcl
+	├──exp_v2.tcl
+	├──tabulate.py
+	└──Makefile
+```
+
+### Result re-production: 
+
+To re-generate the results of the paper, please use the following commands: 
+
+	python3 script_table_I.py 			
+	python3 script_table_II.py
+	python3 script_table_III.py
+	python3 script_scatter_plot.py
 
 Results: 
 	
 	../verilog/MLBlock_2Dflex_interconnects.sv
 	../verilog/MLBlock_2Dflex_params.sv
 
+Using the other files in `../verilog` directory you can synthesis the MLBlock architecture. 
 
-### best MLBlock pareto:
 
-
-# requirements 
-
-    pip3 install mip numpy
 
 
 
@@ -93,3 +157,4 @@ To support 8x8, 8x16, 16x8, and 16x16:
 	else:
 	 	util = 0
 
+### best MLBlock pareto:
