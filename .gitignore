@@ -1,5 +1,7 @@
 vivado/*
 
+benchmarks/*
+
 analyzer/*
 !analyzer/*.py
 !analyzer/*.md
