@@ -1,7 +1,7 @@
 from Arch import Arch
 from benchmark_space import *
 
-arch_12 = Arch("all", 
+arch_12 = Arch("all_arch_12", 
 			None, 
 			my_space,
 			stationary="W",
@@ -19,7 +19,7 @@ arch_12 = Arch("all",
 					}
 			)
 
-arch_9 = Arch("all", 
+arch_9 = Arch("all_arch_9", 
 			None, 
 			my_space,
 			stationary="W",
@@ -36,7 +36,7 @@ arch_9 = Arch("all",
 						"IO" : None, 	
 					}
 			)
-arch_8 = Arch("all",
+arch_8 = Arch("all_arch_8",
                         None,
                         my_space,
                         stationary="W",
@@ -54,7 +54,7 @@ arch_8 = Arch("all",
                                         }
                         )
 
-arch_6 = Arch("all", 
+arch_6 = Arch("all_arch_6", 
 			None, 
 			my_space,
 			stationary="W",
@@ -73,7 +73,7 @@ arch_6 = Arch("all",
 			)
 
 
-arch_12_16x16 = Arch("all", 
+arch_12_16x16 = Arch("all_arch_12_16x16", 
 			None, 
 			my_space,
 			stationary="W",
@@ -97,7 +97,7 @@ arch_12_16x16 = Arch("all",
 					}
 			)
 
-arch_9_16x16 = Arch("all", 
+arch_9_16x16 = Arch("all_arch_9_16x16", 
 			None, 
 			my_space,
 			stationary="W",
@@ -121,7 +121,7 @@ arch_9_16x16 = Arch("all",
 					}
 			)
 
-arch_8_16x16 = Arch("all",
+arch_8_16x16 = Arch("all_arch_8_16x16",
                         None,
                         my_space,
                         stationary="W",
@@ -145,7 +145,7 @@ arch_8_16x16 = Arch("all",
                                         }
                         )
 
-arch_6_16x16 = Arch("all", 
+arch_6_16x16 = Arch("all_arch_6_16x16", 
 			None, 
 			my_space,
 			stationary="W",
@@ -169,7 +169,7 @@ arch_6_16x16 = Arch("all",
 					}
 			)
 
-arch_intel_27 = Arch("all", 
+arch_intel_27 = Arch("all_arch_intel_27", 
 			None, 
 			my_space,
 			stationary="W",
@@ -187,7 +187,7 @@ arch_intel_27 = Arch("all",
 					}
 			)
 
-arch_intel_24 = Arch("all", 
+arch_intel_24 = Arch("all_arch_intel_24", 
 			None, 
 			my_space,
 			stationary="W",
@@ -205,7 +205,7 @@ arch_intel_24 = Arch("all",
 					}
 			)
 
-arch_intel_20 = Arch("all", 
+arch_intel_20 = Arch("all_arch_intel_20", 
 			None, 
 			my_space,
 			stationary="W",
@@ -223,7 +223,7 @@ arch_intel_20 = Arch("all",
 					}
 			)
 
-arch_intel_18 = Arch("all", 
+arch_intel_18 = Arch("all_arch_intel_18", 
 			None, 
 			my_space,
 			stationary="W",

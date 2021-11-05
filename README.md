@@ -27,11 +27,11 @@ You can find the main paper [here](https://dx.doi.org/10.1145/3491234):
 ```
 MLBlocks 
 ├───Alg2Block
-│   └─── Python-based block generator
+│   └─── Python-based block generator - Outputs: Tables 2, 3, and 5; Figures 11, 12, and 13.
 ├───verilog
 │   └─── MLBlock parameterized architectural Verilog models
 ├───ml_benchmark_gen
-│   └─── Python-based full implementation code generator
+│   └─── Python-based full implementation code generator - Outputs: Figures 14, 15, 16, and 17.
 ├───PIRDSP_verilogs
 │   └─── PIR-DSP parameterized Verilog models
 ├───out
@@ -39,9 +39,9 @@ MLBlocks
 ├───TRETS/Figures
 │   └───Selected pictures from the manuscript
 ├───tests
-│   └───FPGA tests (Vivado project scripts)
+│   └───FPGA tests (Vivado project scripts) - Output: Table 4 in the manuscript. 
 ├───asic
-│   └───ASIC tests (RTL Encounter scripts)
+│   └───ASIC tests (RTL Encounter scripts) - 
 ├───.gitignore
 └───README.md
 ```
