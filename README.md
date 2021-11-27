@@ -1,5 +1,7 @@
 # MLBlocks - Rethinking Embedded Blocks for Machine Learning Applications
 
+[![DOI](https://zenodo.org/badge/253426748.svg)](https://zenodo.org/badge/latestdoi/253426748)
+
 ![MLBlock generation overview](TRETS/Figures/ToolFlows_p10_cropped.jpg)
 
 This repository is related to MLBlocks architecture published at [The International Conference on Field-Programmable Technology (FPT’21), Auckland, New Zealand](https://parallel.auckland.ac.nz/fpt21/). We sincerely appriciate your patience, as we are still working on the tutorial and documents. 
